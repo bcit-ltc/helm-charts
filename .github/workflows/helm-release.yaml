@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'mychart/**'
-      - 'anotherchart/**'
+    # paths:
+    #   - 'mychart/**'
+    #   - 'anotherchart/**'
 
 jobs:
   release:
@@ -32,7 +32,7 @@ jobs:
           git checkout gh-pages
           mkdir -p temp && mv *.tgz temp/
           cp -r temp/* .
-          helm repo index . --url https://<user>.github.io/<repo> --merge index.yaml
+          helm repo index . --url https://bcit-ltc.github.io/cp-helm-chart --merge index.yaml
 
       - name: Push to gh-pages
         run: |
