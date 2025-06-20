@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
       - name: {{ .Release.Name }}
-        image: nginx:latest
+        image: {{ .Values.image.name }}:{{ .Values.image.tag | default "latest" }}
         ports:
         - containerPort: 80
