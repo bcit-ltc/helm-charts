@@ -1,0 +1,35 @@
+name: Chart updater testing
+
+on:
+  push:
+    branches:
+      - "*"
+
+permissions:
+  contents: write # to be able to publish a GitHub release
+  issues: write # to be able to comment on released issues
+  pull-requests: write # to be able to comment on released pull requests
+  packages: write # Required for pushing images  
+
+jobs:
+  chart-updater:
+    name: Chart Updater
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Print all ENVS
+        run: printenv
+      - name: Run Dagger for chart-updater
+        uses: dagger/dagger-for-github@8.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          module: github.com/BCIT-LTC/daggerverse/chart-updater@22-add-chart-updater-module
+          call: update_chart --json_string='{"app_name":"app1","app_version":"1.17.0"}' --username=${{ github.actor }} --github_token=env://GITHUB_TOKEN  --branch=${{ github.ref_name }} --chart_yaml_url='https://raw.githubusercontent.com/bcit-ltc/helm-charts/refs/heads/main/charts/app1/Chart.yaml' --repository_url=${{
+            github.repository }} --values_file='values.yaml'
+          cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+          version: "latest"
+          
+
+        
