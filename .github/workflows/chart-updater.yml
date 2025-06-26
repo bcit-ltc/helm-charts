@@ -26,7 +26,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           module: github.com/BCIT-LTC/daggerverse/chart-updater@22-add-chart-updater-module
-          call: updatechart --json_string='{"app_name":"app1","app_version":"1.17.0"}' --github_token=env://GITHUB_TOKEN  --branch=${{ github.ref_name }} --chart_yaml_url='https://raw.githubusercontent.com/bcit-ltc/helm-charts/main/charts/app1/Chart.yaml' --repository_url='https://github.com/${{ github.repository }}' --chart_path='charts/app2' --values_file='values.yaml'
+          call: updatechart --json_string='{"app_name":"app2","app_version":"1.18.0"}' --github_token=env://GITHUB_TOKEN  --branch=${{ github.ref_name }} --chart_yaml_url='https://raw.githubusercontent.com/bcit-ltc/helm-charts/main/charts/app1/Chart.yaml' --repository_url='https://github.com/${{ github.repository }}' --chart_path='charts/app2' --values_file='values.yaml'
           cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           version: "latest"
           
