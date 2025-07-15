@@ -64,6 +64,16 @@ entries:
   app2:
   - apiVersion: v2
     appVersion: 1.20.0
+    created: "2025-07-15T16:50:05.987816144Z"
+    description: A Helm chart for Kubernetes
+    digest: 6f80482e3f41c8372002e395d068bee3de9551f2ffbb86397a5b7fe987dff216
+    name: app2
+    type: application
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/app2-0.1.15/app2-0.1.15.tgz
+    version: 0.1.15
+  - apiVersion: v2
+    appVersion: 1.20.0
     created: "2025-06-27T16:39:11.847487069Z"
     description: A Helm chart for Kubernetes
     digest: f357bab29222e53f6822147cc574686ac773e06dead6ef40bea34f7a41dc19e9
@@ -122,6 +132,24 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/app2-0.1.0/app2-0.1.0.tgz
     version: 0.1.0
+  infrastructure-documentation:
+  - apiVersion: v2
+    appVersion: 1.0.24
+    created: "2025-07-15T16:50:06.205879437Z"
+    description: Information about the architecture and makeup of the LTC's server
+      infrastructure.
+    digest: a997e6b052f3af9ab8c7463bdbc244a0e0fb8167a1b66a7755e5a461af225a2e
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: infrastructure-documentation
+    sources:
+    - https://github.com/bcit-ltc/
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/infrastructure-documentation-1.0.1/infrastructure-documentation-1.0.1.tgz
+    version: 1.0.1
   mychart:
   - apiVersion: v2
     appVersion: 1.16.0
@@ -133,4 +161,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/mychart-0.1.0/mychart-0.1.0.tgz
     version: 0.1.0
-generated: "2025-06-27T16:39:11.847524559Z"
+generated: "2025-07-15T16:50:06.20592404Z"
