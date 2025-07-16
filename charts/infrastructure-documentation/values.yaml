@@ -68,7 +68,7 @@ ingress:
   annotations: {}
   # |
   # kubernetes.io/tls-acme: "true"
-  host: "" # Optional, defaults to app.name
+  host: "infrastructure-documentation.ltc.bcit.ca"
   tlsSecret: "" # Defaults to app.name-star-ltc-bcit-ca; prefixed with app.name.
   # extraPaths:     # Optional
   #   - path: /api
