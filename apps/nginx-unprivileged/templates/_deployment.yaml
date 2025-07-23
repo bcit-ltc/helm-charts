@@ -1,0 +1,43 @@
+{{- define "nginx-unprivileged.deployment.tpl" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  template:
+    spec:
+      containers:
+        - name: nginx
+          image: nginxinc/nginx-unprivileged:1.24-alpine
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          securityContext:
+            capabilities:
+              drop:
+                - NET_RAW
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "250Mi"
+            requests:
+              cpu: "100m"
+              memory: "100Mi"
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: nginx-config
+        - emptyDir: {}
+          name: tmp
+{{- end -}}
+{{- define "nginx-unprivileged.deployment" -}}
+{{- include "nginx-unprivileged.util.merge" (append . "nginx-unprivileged.deployment.tpl") -}}
+{{- end -}}
