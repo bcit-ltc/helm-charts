@@ -43,7 +43,7 @@ serviceAccount:
   automount: true
   annotations: {}
   # If not set and create is true, a name is generated using the app.name template
-  name: serviceaccount
+  name: course-workload-estimator-serviceaccount
 # podAnnotations:
 #   prometheus.io/scrape: "true"
 
