@@ -43,7 +43,7 @@ serviceAccount:
   automount: true
   annotations: {}
   # If not set and create is true, a name is generated using the app.name template
-  name: ""
+  name: serviceaccount
 # podAnnotations:
 #   prometheus.io/scrape: "true"
 
