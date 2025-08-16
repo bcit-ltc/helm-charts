@@ -88,3 +88,21 @@ Sets the deployment update strategy
   {{- end }}
 {{- end -}}
 
+{{/*
+Configure ingress
+*/}}
+{{- define "app.ingress" -}}
+  {{- if .Values.ingress.create }}
+  ingress:
+    enabled: true
+    annotations: {{- toYaml .Values.ingress.annotations | nindent 4 }}
+    hosts:
+      - host: {{ .Values.ingress.host | quote }}
+        paths:
+          - /
+    tls:
+      - secretName: {{ .Values.ingress.tlsSecret | quote }}
+        hosts:
+          - {{ .Values.ingress.host | quote }}
+  {{- end }}
+{{- end -}}

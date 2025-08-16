@@ -2,7 +2,7 @@
 
 Information about the architecture and makeup of the LTC's server infrastructure.
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![AppVersion: 1.0.7](https://img.shields.io/badge/AppVersion-1.0.7-informational?style=flat-square)
+![Version: 1.0.32](https://img.shields.io/badge/Version-1.0.32-informational?style=flat-square) ![AppVersion: 1.0.32](https://img.shields.io/badge/AppVersion-1.0.32-informational?style=flat-square)
 
 Information about the architecture and makeup of the LTC's server infrastructure.
 
@@ -51,11 +51,13 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | container.port | int | `8080` |  |
 | defaultDomain | string | `"ltc.bcit.ca"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.repository | string | `"ghcr.io/bcit-ltc/infrastructure-documentation"` |  |
-| image.tag | string | `"1.0.7"` |  |
+| image.registry | string | `"ghcr.io"` |  |
+| image.repository | string | `"bcit-ltc/infrastructure-documentation"` |  |
+| image.tag | string | `"1.0.31"` |  |
 | imagePullSecrets | list | `[]` |  |
 | ingress.annotations | object | `{}` |  |
-| ingress.host | string | `""` |  |
+| ingress.create | bool | `false` |  |
+| ingress.host | string | `"infrastructure-documentation.ltc.bcit.ca"` |  |
 | ingress.tlsSecret | string | `""` |  |
 | name | string | `"infrastructure-documentation"` |  |
 | podSecurityContext | object | `{}` |  |

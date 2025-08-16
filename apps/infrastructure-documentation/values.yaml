@@ -7,8 +7,9 @@
 name: "infrastructure-documentation"
 # Sets the repo and tag of the deployment.
 image:
-  repository: "ghcr.io/bcit-ltc/infrastructure-documentation"
-  tag: "1.0.32"
+  registry: "ghcr.io"
+  repository: "bcit-ltc/infrastructure-documentation"
+  tag: "1.0.31"
   pullPolicy: IfNotPresent
 # This is for the secrets for pulling an image from a private repository.
 # See: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -65,6 +66,7 @@ serviceAccount:
 #   initialDelaySeconds: 15
 #   periodSeconds: 20
 ingress:
+  create: false
   annotations: {}
   # |
   # kubernetes.io/tls-acme: "true"
