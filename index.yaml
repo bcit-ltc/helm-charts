@@ -151,6 +151,23 @@ entries:
     version: 1.0.3
   infrastructure-documentation:
   - apiVersion: v2
+    appVersion: 1.1.0
+    created: "2025-08-20T03:50:19.60312362Z"
+    description: Information about the architecture and makeup of the LTC's server
+      infrastructure.
+    digest: 21770725a65fadb74f05d076f5ba430f4a3c6bbe24dace0b670764784d1d618f
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: infrastructure-documentation
+    sources:
+    - https://github.com/bcit-ltc/
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/infrastructure-documentation-1.0.3/infrastructure-documentation-1.0.3.tgz
+    version: 1.0.3
+  - apiVersion: v2
     appVersion: 1.0.32
     created: "2025-08-20T03:30:43.520400214Z"
     description: Information about the architecture and makeup of the LTC's server
@@ -230,4 +247,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/sugar-test-1.0.1/sugar-test-1.0.1.tgz
     version: 1.0.1
-generated: "2025-08-20T03:30:43.785928428Z"
+generated: "2025-08-20T03:50:19.603163544Z"
