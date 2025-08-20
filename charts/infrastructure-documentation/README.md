@@ -6,6 +6,14 @@ Information about the architecture and makeup of the LTC's server infrastructure
 
 Information about the architecture and makeup of the LTC's server infrastructure.
 
+## Quickstart
+
+<!-- ```bash
+helm install infrastructure-documentation ./nginx-unprivileged-app   --set image.tag=1.27-alpine   --set ingress.enabled=true   --set defaultDomain=ltc.bcit.ca
+``` -->
+
+<!-- Then visit: `http://infrastructure-documentation.ltc.bcit.ca` (or use port-forward from the NOTES). -->
+
 ## Maintainers
 
 | Name | Email | Url |
