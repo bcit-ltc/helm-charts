@@ -2,7 +2,7 @@
 
 Information about the architecture and makeup of the LTC's server infrastructure.
 
-![Version: 1.0.32](https://img.shields.io/badge/Version-1.0.32-informational?style=flat-square) ![AppVersion: 1.0.32](https://img.shields.io/badge/AppVersion-1.0.32-informational?style=flat-square)
+![Version: 1.0.3](https://img.shields.io/badge/Version-1.0.3-informational?style=flat-square) ![AppVersion: 1.1.0](https://img.shields.io/badge/AppVersion-1.1.0-informational?style=flat-square)
 
 Information about the architecture and makeup of the LTC's server infrastructure.
 
@@ -53,7 +53,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"bcit-ltc/infrastructure-documentation"` |  |
-| image.tag | string | `"1.0.31"` |  |
+| image.tag | string | `"1.1.0"` |  |
 | imagePullSecrets | list | `[]` |  |
 | ingress.annotations | object | `{}` |  |
 | ingress.create | bool | `false` |  |
@@ -69,7 +69,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | resources.memRequest | string | `"64Mi"` |  |
 | revisionHistoryLimit | int | `2` |  |
 | securityContext | object | `{}` |  |
-| service.port | int | `80` |  |
+| service.port | int | `8080` |  |
 | service.type | string | `"ClusterIP"` |  |
 | serviceAccount.annotations | object | `{}` |  |
 | serviceAccount.automount | bool | `true` |  |
