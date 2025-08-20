@@ -132,7 +132,41 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/app2-0.1.0/app2-0.1.0.tgz
     version: 0.1.0
+  course-workload-estimator:
+  - apiVersion: v2
+    appVersion: 1.0.3
+    created: "2025-08-20T03:30:43.398850413Z"
+    description: Sugar-suite for CI testing purposes only.
+    digest: 77fca3e29736e69fade1cd1df157156e1851e9d3ec05090d3ce091bd46685a2d
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: course-workload-estimator
+    sources:
+    - https://github.com/bcit-ltc/
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/course-workload-estimator-1.0.3/course-workload-estimator-1.0.3.tgz
+    version: 1.0.3
   infrastructure-documentation:
+  - apiVersion: v2
+    appVersion: 1.0.32
+    created: "2025-08-20T03:30:43.520400214Z"
+    description: Information about the architecture and makeup of the LTC's server
+      infrastructure.
+    digest: fd90cbacfd4a2e993c1a40d70014c742e7a0176d12b02c90ae04dd34421579eb
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: infrastructure-documentation
+    sources:
+    - https://github.com/bcit-ltc/
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/infrastructure-documentation-1.0.2/infrastructure-documentation-1.0.2.tgz
+    version: 1.0.2
   - apiVersion: v2
     appVersion: 1.0.24
     created: "2025-07-15T16:50:06.205879437Z"
@@ -161,4 +195,39 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/mychart-0.1.0/mychart-0.1.0.tgz
     version: 0.1.0
-generated: "2025-07-15T16:50:06.20592404Z"
+  nginx-unprivileged:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-08-20T03:30:43.64081409Z"
+    description: Simple chart for BCIT-LTC's app deployment.
+    digest: 2eca9e570920b9eebcd01ff9d2ac3691fee76d1e7d21046d1b3438040a01a867
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: nginx-unprivileged
+    sources:
+    - https://github.com/bcit-ltc/
+    type: library
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/nginx-unprivileged-0.1.0/nginx-unprivileged-0.1.0.tgz
+    version: 0.1.0
+  sugar-test:
+  - apiVersion: v2
+    appVersion: 1.0.1
+    created: "2025-08-20T03:30:43.785871942Z"
+    description: Sugar-suite for CI testing purposes only.
+    digest: a51863976a68017bf5f310c57d744d84766dafccc3faedd8fb3e0b8fc827b5fa
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: sugar-test
+    sources:
+    - https://github.com/bcit-ltc/
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/sugar-test-1.0.1/sugar-test-1.0.1.tgz
+    version: 1.0.1
+generated: "2025-08-20T03:30:43.785928428Z"
