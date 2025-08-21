@@ -1,0 +1,60 @@
+name: Publish app Helm charts to GHCR (from GitHub Release)
+
+on:
+  release:
+    types: [published]   # fires when helm/chart-releaser-action publishes a release
+
+permissions:
+  contents: read
+  packages: write        # needed to push to ghcr.io with GITHUB_TOKEN
+
+jobs:
+  push-oci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (optional)
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: GHCR package registry login
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        # helm registry login doesn't support --password-stdin; pass -p directly
+        run: |
+          helm registry login ghcr.io \
+            -u "${{ github.actor }}" \
+            -p "${GH_TOKEN}"
+
+      - name: Download chart assets from this Release
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+
+        # Download *.tgz created by chart-releaser
+        run: |
+          mkdir -p dist
+          gh release download "$TAG" \
+            --repo "${{ github.repository }}" \
+            --pattern '*.tgz' \
+            --dir dist
+
+      - name: Push chart oci package to GHCR
+        run: |
+          shopt -s nullglob
+          for pkg in dist/*.tgz; do
+            echo "Pushing $pkg to GHCR…"
+            helm push "$pkg" oci://ghcr.io/${{ github.repository_owner }}/oci
+          done
+
+      - name: Show pushed package name(s)
+
+        # OCI ref is inferred from chart name + version inside the package
+        # Example: oci://ghcr.io/bcit-ltc/oci/<chart>:<version>
+        run: |
+          for pkg in dist/*.tgz; do
+            echo "Published: $pkg → ghcr.io/${{ github.repository_owner }}/oci"
+          done
