@@ -20,3 +20,5 @@ To install the `course-workload-estimator` chart:
 To uninstall the chart:
 
     helm uninstall course-workload-estimator
+
+Chart OCI images are also available at [https://ghcr.io/bcit-ltc/oci/{appName}](https://ghcr.io/bcit-ltc/oci/{appName}).
