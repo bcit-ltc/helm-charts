@@ -261,6 +261,16 @@ entries:
     version: 0.1.0
   nginx-unprivileged:
   - apiVersion: v2
+    appVersion: 0.2.1
+    created: "2025-08-21T23:28:17.975714325Z"
+    description: Minimal, standardized chart for running nginx-unprivileged
+    digest: a7f8b04d095d345320a3e6071bb6493e7dafec838d94c95731eca81c0e67e402
+    name: nginx-unprivileged
+    type: application
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/nginx-unprivileged-0.2.1/nginx-unprivileged-0.2.1.tgz
+    version: 0.2.1
+  - apiVersion: v2
     appVersion: 1.16.0
     created: "2025-08-20T03:30:43.64081409Z"
     description: Simple chart for BCIT-LTC's app deployment.
@@ -294,4 +304,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/sugar-test-1.0.1/sugar-test-1.0.1.tgz
     version: 1.0.1
-generated: "2025-08-21T23:17:17.6547628Z"
+generated: "2025-08-21T23:28:17.975757325Z"
