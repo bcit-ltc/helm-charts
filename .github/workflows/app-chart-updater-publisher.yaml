@@ -17,6 +17,8 @@ jobs:
   release:
     name: Run chart-releaser
     runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.release_tag.outputs.tag }}   # ← publish will read this
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,47 +30,65 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+      # Mark the time right before chart-releaser runs
+      - name: Mark start time
+        id: t0
+        run: echo "ts=$(date -u +%FT%TZ)" >> "$GITHUB_OUTPUT"
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-  publish:
-    name: Publish OCI charts to GHCR (if a release exists)
-    needs: release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Resolve tag (manual input or latest release)
-        id: tag
+      # Detect a release created during THIS run (createdAt >= t0)
+      - name: Detect newly created release tag
+        id: release_tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euo pipefail
-          if [[ -n "${{ inputs.tag || '' }}" ]]; then
-            TAG="${{ inputs.tag }}"
-          else
-            TAG="$(gh release list --limit 1 --repo "${{ github.repository }}" --json tagName --jq '.[0].tagName' || true)"
-          fi
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          TS='${{ steps.t0.outputs.ts }}'
+          TAG=$(gh release list --limit 50 --repo "${{ github.repository }}" \
+            --json tagName,createdAt \
+            --jq "[.[] | select(.createdAt >= \"${TS}\")][0].tagName" || true)
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           if [[ -z "$TAG" ]]; then
-            echo "No release tag found; skipping publish."
+            echo "No new release created in this run."
+          else
+            echo "New release tag detected: $TAG"
           fi
 
+  publish:
+    name: Publish OCI charts to GHCR (if a new release exists)
+    needs: release
+    # Skip the entire job unless a tag is provided manually OR a new one was created
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.tag != '') || needs.release.outputs.new_tag != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve tag (manual input or detected new tag)
+        id: tag
+        run: |
+          if [[ -n "${{ github.event_name == 'workflow_dispatch' && inputs.tag || '' }}" ]]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${{ needs.release.outputs.new_tag }}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Publishing tag: ${TAG}"
+
       - name: Install Helm
-        if: ${{ steps.tag.outputs.tag != '' }}
         uses: azure/setup-helm@v4
         with:
           version: v3.14.4
 
-      - name: Login to GHCR
-        if: ${{ steps.tag.outputs.tag != '' }}
+      - name: Login to GHCR (password-stdin)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          helm registry login ghcr.io -u "${{ github.actor }}" -p "${GH_TOKEN}"
+          echo "${GH_TOKEN}" | helm registry login ghcr.io \
+            -u "${{ github.actor }}" \
+            --password-stdin
 
       - name: Check release has *.tgz assets
-        if: ${{ steps.tag.outputs.tag != '' }}
         id: have_assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -82,7 +102,7 @@ jobs:
           fi
 
       - name: Download chart assets for the tag
-        if: ${{ steps.tag.outputs.tag != '' && steps.have_assets.outputs.count != '0' }}
+        if: ${{ steps.have_assets.outputs.count != '0' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -93,7 +113,7 @@ jobs:
             --dir dist
 
       - name: Push chart oci package(s) to GHCR
-        if: ${{ steps.tag.outputs.tag != '' && steps.have_assets.outputs.count != '0' }}
+        if: ${{ steps.have_assets.outputs.count != '0' }}
         run: |
           shopt -s nullglob
           for pkg in dist/*.tgz; do
@@ -102,9 +122,8 @@ jobs:
           done
 
       - name: Show pushed package name(s)
-        if: ${{ steps.tag.outputs.tag != '' && steps.have_assets.outputs.count != '0' }}
+        if: ${{ steps.have_assets.outputs.count != '0' }}
         run: |
           for pkg in dist/*.tgz; do
             echo "Published: $pkg → ghcr.io/${{ github.repository_owner }}/oci"
           done
-
