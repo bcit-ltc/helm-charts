@@ -11,8 +11,7 @@ on:
 
 permissions:
   contents: read
-  packages: write       # needed to push to ghcr.io with GITHUB_TOKEN
-  id-token: write
+  packages: write
 
 jobs:
   push-oci:
