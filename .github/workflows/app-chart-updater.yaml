@@ -25,3 +25,12 @@ jobs:
         uses: helm/chart-releaser-action@v1.6.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Trigger "app-chart-publisher" workflow
+        if: ${{ success() }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run "Publish app Helm charts to GHCR (from GitHub Release)" \
+            --ref ${{ github.ref_name }} \
+            -f tag=${{ github.ref_name }}

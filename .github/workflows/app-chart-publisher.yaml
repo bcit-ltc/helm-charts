@@ -2,11 +2,17 @@ name: Publish app Helm charts to GHCR (from GitHub Release)
 
 on:
   release:
-    types: [published]   # fires when helm/chart-releaser-action publishes a release
+    types: [published]    # fires when helm/chart-releaser-action publishes a release
+  workflow_dispatch:
+    inputs:
+      tag:
+        required: true
+        description: Release tag to publish from
 
 permissions:
   contents: read
-  packages: write        # needed to push to ghcr.io with GITHUB_TOKEN
+  packages: write       # needed to push to ghcr.io with GITHUB_TOKEN
+  id-token: write
 
 jobs:
   push-oci:
@@ -20,24 +26,28 @@ jobs:
         with:
           version: v3.14.4
 
-      - name: GHCR package registry login
+      - name: Login to GHCR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
         # helm registry login doesn't support --password-stdin; pass -p directly
         run: |
-          helm registry login ghcr.io \
-            -u "${{ github.actor }}" \
-            -p "${GH_TOKEN}"
+          helm registry login ghcr.io -u "${{ github.actor }}" -p "${GH_TOKEN}"
 
-      - name: Download chart assets from this Release
+      - name: Resolve tag (release or manual)
+        id: tag
         env:
-          TAG: ${{ github.event.release.tag_name }}
+          REL_TAG: ${{ github.event.release.tag_name }}
+          IN_TAG:  ${{ inputs.tag }}
+        run: |
+          echo "tag=${IN_TAG:-$REL_TAG}" >> "$GITHUB_OUTPUT"
 
-        # Download *.tgz created by chart-releaser
+      - name: Download chart assets for the tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # gh CLI needs this
         run: |
           mkdir -p dist
-          gh release download "$TAG" \
+          gh release download "${{ steps.tag.outputs.tag }}" \
             --repo "${{ github.repository }}" \
             --pattern '*.tgz' \
             --dir dist
@@ -58,3 +68,4 @@ jobs:
           for pkg in dist/*.tgz; do
             echo "Published: $pkg → ghcr.io/${{ github.repository_owner }}/oci"
           done
+
