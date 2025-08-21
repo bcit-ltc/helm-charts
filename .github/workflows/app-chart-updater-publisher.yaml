@@ -18,7 +18,7 @@ jobs:
     name: Run chart-releaser
     runs-on: ubuntu-latest
     outputs:
-      new_tag: ${{ steps.release_tag.outputs.tag }}   # ← publish will read this
+      new_tag: ${{ steps.release_tag.outputs.tag }}   # publish reads this
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,41 +30,35 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      # Mark the time right before chart-releaser runs
-      - name: Mark start time
-        id: t0
-        run: echo "ts=$(date -u +%FT%TZ)" >> "$GITHUB_OUTPUT"
-
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      # Detect a release created during THIS run (createdAt >= t0)
-      - name: Detect newly created release tag
+      # Robust: derive the tag from what was actually packaged (e.g., app-0.2.0)
+      - name: Detect packaged chart tag
         id: release_tag
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TS='${{ steps.t0.outputs.ts }}'
-          TAG=$(gh release list --limit 50 --repo "${{ github.repository }}" \
-            --json tagName,createdAt \
-            --jq "[.[] | select(.createdAt >= \"${TS}\")][0].tagName" || true)
-          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-          if [[ -z "$TAG" ]]; then
-            echo "No new release created in this run."
+          shopt -s nullglob
+          FILES=(.cr-release-packages/*.tgz)
+          if (( ${#FILES[@]} )); then
+            BASE=$(basename "${FILES[0]}")
+            TAG="${BASE%.tgz}"
+            echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+            echo "Packaged tag: $TAG"
           else
-            echo "New release tag detected: $TAG"
+            echo "tag=" >> "$GITHUB_OUTPUT"
+            echo "No packaged charts in this run."
           fi
 
   publish:
-    name: Publish OCI charts to GHCR (if a new release exists)
+    name: Publish OCI charts to GHCR (if a release exists)
     needs: release
-    # Skip the entire job unless a tag is provided manually OR a new one was created
+    # Skip the entire job unless a manual tag is provided OR something was packaged
     if: ${{ (github.event_name == 'workflow_dispatch' && inputs.tag != '') || needs.release.outputs.new_tag != '' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Resolve tag (manual input or detected new tag)
+      - name: Resolve tag (manual input or packaged)
         id: tag
         run: |
           if [[ -n "${{ github.event_name == 'workflow_dispatch' && inputs.tag || '' }}" ]]; then
