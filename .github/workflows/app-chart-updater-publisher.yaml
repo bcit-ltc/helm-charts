@@ -38,36 +38,38 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     steps:
-      - name: Install Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: v3.14.4
-
-      - name: Login to GHCR
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          helm registry login ghcr.io -u "${{ github.actor }}" -p "${GH_TOKEN}"
-
       - name: Resolve tag (manual input or latest release)
         id: tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          if [[ -n "${{ inputs.tag }}" ]]; then
+          if [[ -n "${{ inputs.tag || '' }}" ]]; then
             TAG="${{ inputs.tag }}"
           else
             TAG="$(gh release list --limit 1 --repo "${{ github.repository }}" --json tagName --jq '.[0].tagName' || true)"
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           if [[ -z "$TAG" ]]; then
-            echo "No release tag found; nothing to publish."
+            echo "No release tag found; skipping publish."
           fi
 
-      - name: Check release exists and has *.tgz assets
-        id: have_assets
+      - name: Install Helm
         if: ${{ steps.tag.outputs.tag != '' }}
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Login to GHCR
+        if: ${{ steps.tag.outputs.tag != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          helm registry login ghcr.io -u "${{ github.actor }}" -p "${GH_TOKEN}"
+
+      - name: Check release has *.tgz assets
+        if: ${{ steps.tag.outputs.tag != '' }}
+        id: have_assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -76,7 +78,7 @@ jobs:
             --json assets --jq '.assets | map(select(.name | test("\\.tgz$"))) | length' || echo 0)
           echo "count=$COUNT" >> "$GITHUB_OUTPUT"
           if [[ "$COUNT" -eq 0 ]]; then
-            echo "Release has no .tgz assets; nothing to publish."
+            echo "Release has no .tgz assets; skipping."
           fi
 
       - name: Download chart assets for the tag
@@ -105,3 +107,4 @@ jobs:
           for pkg in dist/*.tgz; do
             echo "Published: $pkg → ghcr.io/${{ github.repository_owner }}/oci"
           done
+
