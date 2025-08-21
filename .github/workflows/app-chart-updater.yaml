@@ -29,11 +29,28 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
+      # Check if the last commit generated a release
+      - name: Detect latest release tag (if any)
+        id: rel
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG=$(gh release list --limit 1 --repo "${{ github.repository }}" --json tagName --jq '.[0].tagName' || true)
+          if [[ -z "$TAG" ]]; then
+            echo "tag=" >> "$GITHUB_OUTPUT"
+            echo "No release found; skipping publisher dispatch."
+          else
+            echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+            echo "Found release tag: $TAG"
+          fi
+
+      # If the last commit generated a release, trigger the publisher workflow
       - name: Trigger "app-chart-publisher" workflow
-        if: ${{ success() }}
+        if: ${{ steps.rel.outputs.tag != '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh workflow run "Publish app Helm charts to GHCR (from GitHub Release)" \
             --ref ${{ github.ref_name }} \
-            -f tag=${{ github.ref_name }}
+            -f tag=${{ steps.rel.outputs.tag }}
