@@ -1,8 +1,6 @@
 name: Publish app Helm charts to GHCR (from GitHub Release)
 
 on:
-  release:
-    types: [published]    # fires when helm/chart-releaser-action publishes a release
   workflow_dispatch:
     inputs:
       tag:
