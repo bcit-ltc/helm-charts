@@ -1,4 +1,4 @@
-# app-helm
+# app
 
 Simple chart library for BCIT-LTC applications.
 
