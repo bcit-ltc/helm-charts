@@ -1,0 +1,107 @@
+name: Update, release, and publish Helm charts
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Optional: release tag to publish (skip detection)'
+        required: false
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    name: Run chart-releaser
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.6.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+  publish:
+    name: Publish OCI charts to GHCR (if a release exists)
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.4
+
+      - name: Login to GHCR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          helm registry login ghcr.io -u "${{ github.actor }}" -p "${GH_TOKEN}"
+
+      - name: Resolve tag (manual input or latest release)
+        id: tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${{ inputs.tag }}" ]]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="$(gh release list --limit 1 --repo "${{ github.repository }}" --json tagName --jq '.[0].tagName' || true)"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if [[ -z "$TAG" ]]; then
+            echo "No release tag found; nothing to publish."
+          fi
+
+      - name: Check release exists and has *.tgz assets
+        id: have_assets
+        if: ${{ steps.tag.outputs.tag != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          COUNT=$(gh release view "${{ steps.tag.outputs.tag }}" --repo "${{ github.repository }}" \
+            --json assets --jq '.assets | map(select(.name | test("\\.tgz$"))) | length' || echo 0)
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+          if [[ "$COUNT" -eq 0 ]]; then
+            echo "Release has no .tgz assets; nothing to publish."
+          fi
+
+      - name: Download chart assets for the tag
+        if: ${{ steps.tag.outputs.tag != '' && steps.have_assets.outputs.count != '0' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p dist
+          gh release download "${{ steps.tag.outputs.tag }}" \
+            --repo "${{ github.repository }}" \
+            --pattern '*.tgz' \
+            --dir dist
+
+      - name: Push chart oci package(s) to GHCR
+        if: ${{ steps.tag.outputs.tag != '' && steps.have_assets.outputs.count != '0' }}
+        run: |
+          shopt -s nullglob
+          for pkg in dist/*.tgz; do
+            echo "Pushing $pkg to GHCR…"
+            helm push "$pkg" oci://ghcr.io/${{ github.repository_owner }}/oci
+          done
+
+      - name: Show pushed package name(s)
+        if: ${{ steps.tag.outputs.tag != '' && steps.have_assets.outputs.count != '0' }}
+        run: |
+          for pkg in dist/*.tgz; do
+            echo "Published: $pkg → ghcr.io/${{ github.repository_owner }}/oci"
+          done
