@@ -114,17 +114,17 @@ extraEnvFrom: []
 extraVolumeMounts:
   - name: tmp
     mountPath: /tmp
-  - name: nginx-config
-    mountPath: /etc/nginx/conf.d
+  # - name: nginx-config
+  #   mountPath: /etc/nginx/conf.d
 # - name: mypath
 #   mountPath: "/app/mypath"
 #   readOnly: true
 extraVolumes:
   - name: tmp
     emptyDir: {}
-  - name: nginx-config
-    configMap:
-      name: nginx-config
+  # - name: nginx-config
+  #   configMap:
+  #     name: nginx-config
 # - name: mysecret
 #   secret:
 #     secretName: mysecret
