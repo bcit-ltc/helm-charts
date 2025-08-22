@@ -9,7 +9,7 @@ name: "infrastructure-documentation"
 image:
   registry: "ghcr.io"
   repository: "bcit-ltc/infrastructure-documentation"
-  tag: "1.1.2" # {"$imagepolicy": "infrastructure-documentation:infrastructure-documentation-image-policy:tag"}
+  tag: "1.1.3" # {"$imagepolicy": "infrastructure-documentation:infrastructure-documentation-image-policy:tag"}
   pullPolicy: IfNotPresent
 # This is for the secrets for pulling an image from a private repository.
 # See: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
