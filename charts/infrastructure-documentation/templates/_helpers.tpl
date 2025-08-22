@@ -13,8 +13,8 @@
 {{- define "app.labels" -}}
 {{- /* Build a label-safe chart version and chart label value */ -}}
 {{- $chartVersionLabel := .Chart.Version
-    | replace "+" "_"                             /* '+' not allowed in labels */
-    | regexReplaceAll "[^A-Za-z0-9_.-]" "_"       /* keep only label-safe chars */
+    | replace "+" "_"
+    | regexReplaceAll "[^A-Za-z0-9_.-]" "_"
     | trunc 63
     | trimSuffix "-"
     | trimSuffix "_"
