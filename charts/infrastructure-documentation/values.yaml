@@ -9,34 +9,29 @@ name: "infrastructure-documentation"
 image:
   registry: "ghcr.io"
   repository: "bcit-ltc/infrastructure-documentation"
-  tag: "1.1.0" # {"$imagepolicy": "infrastructure-documentation:infrastructure-documentation-image-policy:tag"}
+  tag: "testit" # {"$imagepolicy": "infrastructure-documentation:infrastructure-documentation-image-policy:tag"}
   pullPolicy: IfNotPresent
 # This is for the secrets for pulling an image from a private repository.
 # See: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
-
 # Workload configuration
 replicaCount: 1
 revisionHistoryLimit: 3
 progressDeadlineSeconds: 600
-
 # Pod metadata
 podAnnotations: {}
 podLabels: {}
-
 # ServiceAccount
 serviceAccount:
   create: true
-  name: ""  # if empty use release name
+  name: "" # if empty use release name
   # Automatically mount a ServiceAccount's API credentials?
-  automount: true  
-
+  automount: true
 # Security contexts (safe defaults for nginx-unprivileged)
 podSecurityContext:
   runAsNonRoot: true
   seccompProfile:
     type: RuntimeDefault
-
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
@@ -44,60 +39,53 @@ securityContext:
   readOnlyRootFilesystem: true
   runAsUser: 101
   runAsGroup: 101
-
 # Container port and probes
 container:
   port: 8080
-
 readinessProbe:
   httpGet:
     path: /
     port: 8080
   initialDelaySeconds: 3
   periodSeconds: 10
-
 livenessProbe:
   httpGet:
     path: /
     port: 8080
   initialDelaySeconds: 10
   periodSeconds: 10
-
 startupProbe:
   httpGet:
     path: /
     port: 8080
   failureThreshold: 30
   periodSeconds: 2
-
 # Resources (set sensible defaults per app)
 resources: {}
-  # For more information on configuring resources, see the K8s documentation:
-  # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  # cpuRequest: "100m"
-  # cpuLimit: "100m"
-  # memRequest: "64Mi"
-  # memLimit: "128Mi"
+# For more information on configuring resources, see the K8s documentation:
+# https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+# cpuRequest: "100m"
+# cpuLimit: "100m"
+# memRequest: "64Mi"
+# memLimit: "128Mi"
 # Scheduling
 nodeSelector: {}
 tolerations: []
 affinity: {}
-
 # Service
 service:
   type: ClusterIP
   port: 8080
   annotations: {}
-
 # Ingress
 defaultDomain: ltc.bcit.ca
 ingress:
   enabled: true
-  ingressClassName: ""        # e.g. "nginx" | "traefik"
-  host: ""                    # if empty -> <name>.<defaultDomain>
+  ingressClassName: "" # e.g. "nginx" | "traefik"
+  host: "" # if empty -> <name>.<defaultDomain>
   annotations: {}
-  tlsSecret: "star-ltc-bcit-ca"  # Defaults to star-ltc-bcit-ca.
-  extraPaths: []              # advanced users: extra path rules (rendered raw)
+  tlsSecret: "star-ltc-bcit-ca" # Defaults to star-ltc-bcit-ca.
+  extraPaths: [] # advanced users: extra path rules (rendered raw)
   # extraPaths:     # Optional
   #   - path: /api
   #     backend:
@@ -107,24 +95,23 @@ ingress:
   #           number: 3000
 # ConfigMap support
 useDefaultNginxConfig: true
-
 # Extensibility
 extraEnv: []
 extraEnvFrom: []
 extraVolumeMounts:
   - name: tmp
     mountPath: /tmp
-  # - name: nginx-config
-  #   mountPath: /etc/nginx/conf.d
+    # - name: nginx-config
+    #   mountPath: /etc/nginx/conf.d
 # - name: mypath
 #   mountPath: "/app/mypath"
 #   readOnly: true
 extraVolumes:
   - name: tmp
     emptyDir: {}
-  # - name: nginx-config
-  #   configMap:
-  #     name: nginx-config
+    # - name: nginx-config
+    #   configMap:
+    #     name: nginx-config
 # - name: mysecret
 #   secret:
 #     secretName: mysecret
@@ -135,11 +122,9 @@ autoscaling:
   minReplicas: 2
   maxReplicas: 5
   targetCPUUtilizationPercentage: 80
-
 pdb:
   enabled: false
   minAvailable: 1
-
 networkPolicy:
   enabled: false
   # When enabled, allow ingress on service.port within the namespace.
