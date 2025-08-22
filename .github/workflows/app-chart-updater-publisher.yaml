@@ -34,7 +34,6 @@ jobs:
         uses: helm/chart-releaser-action@v1.6.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          SKIP_EXISTING: true
 
       # Robust: derive the tag from what was actually packaged (e.g., app-0.2.0)
       - name: Detect packaged chart tag
