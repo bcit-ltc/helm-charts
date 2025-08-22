@@ -11,11 +11,38 @@
 {{- end -}}
 
 {{- define "app.labels" -}}
-helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | quote }}
+{{- /* Build a label-safe chart version and chart label value */ -}}
+{{- $chartVersionLabel := .Chart.Version
+    | replace "+" "_"                             /* '+' not allowed in labels */
+    | regexReplaceAll "[^A-Za-z0-9_.-]" "_"       /* keep only label-safe chars */
+    | trunc 63
+    | trimSuffix "-"
+    | trimSuffix "_"
+    | trimSuffix "."
+-}}
+{{- $helmChartLabel := (printf "%s-%s" .Chart.Name $chartVersionLabel)
+    | trunc 63
+    | trimSuffix "-"
+    | trimSuffix "_"
+    | trimSuffix "."
+-}}
+helm.sh/chart: {{ $helmChartLabel | quote }}
+
 app.kubernetes.io/name: {{ include "app.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+
+{{- /* app.kubernetes.io/version should also be label-safe; fall back to Chart.Version if AppVersion empty */ -}}
+{{- $rawAppVer := default .Chart.Version .Chart.AppVersion -}}
+{{- $appVersionLabel := $rawAppVer
+    | replace "+" "_" 
+    | regexReplaceAll "[^A-Za-z0-9_.-]" "_"
+    | trunc 63
+    | trimSuffix "-"
+    | trimSuffix "_"
+    | trimSuffix "."
+-}}
+app.kubernetes.io/version: {{ $appVersionLabel | quote }}
 {{- end -}}
 
 {{- define "app.selectorLabels" -}}
