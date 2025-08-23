@@ -11,49 +11,42 @@
 {{- end -}}
 
 {{- define "app.labels" -}}
-{{- /* Build a label-safe chart version and chart label value */ -}}
+{{- /* build label-safe chart version */ -}}
 {{- $chartVersionLabel := .Chart.Version
     | replace "+" "_"
     | regexReplaceAll "[^A-Za-z0-9_.-]" "_"
-    | trunc 63
-    | trimSuffix "-"
-    | trimSuffix "_"
-    | trimSuffix "."
+    | trunc 63 | trimSuffix "-" | trimSuffix "_" | trimSuffix "."
 -}}
-{{- $helmChartLabel := (printf "%s-%s" .Chart.Name $chartVersionLabel)
-    | trunc 63
-    | trimSuffix "-"
-    | trimSuffix "_"
-    | trimSuffix "."
+{{- $helmChartLabel := printf "%s-%s" .Chart.Name $chartVersionLabel
+    | trunc 63 | trimSuffix "-" | trimSuffix "_" | trimSuffix "."
 -}}
-helm.sh/chart: {{ $helmChartLabel | quote }}
-
-app.kubernetes.io/name: {{ include "app.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-
-{{- /* app.kubernetes.io/version should also be label-safe; fall back to Chart.Version if AppVersion empty */ -}}
+{{- /* app.kubernetes.io/version: prefer AppVersion, fall back to Chart.Version */ -}}
 {{- $rawAppVer := default .Chart.Version .Chart.AppVersion -}}
 {{- $appVersionLabel := $rawAppVer
-    | replace "+" "_" 
+    | replace "+" "_"
     | regexReplaceAll "[^A-Za-z0-9_.-]" "_"
-    | trunc 63
-    | trimSuffix "-"
-    | trimSuffix "_"
-    | trimSuffix "."
+    | trunc 63 | trimSuffix "-" | trimSuffix "_" | trimSuffix "."
 -}}
-app.kubernetes.io/version: {{ $appVersionLabel | quote }}
+
+{{- $labels := dict
+  "app.kubernetes.io/name"  (include "app.name" .)
+  "app.kubernetes.io/managed-by" .Release.Service
+  "app.kubernetes.io/version" $appVersionLabel
+-}}
+{{- toYaml $labels -}}
 {{- end -}}
 
 {{- define "app.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "app.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{- define "app.image" -}}
 {{- $registry := .Values.image.registry | default "" -}}
-{{- if $registry -}}{{- printf "%s/%s:%s" $registry .Values.image.repository .Values.image.tag -}}
-{{- else -}}{{- printf "%s:%s" .Values.image.repository .Values.image.tag -}}{{- end -}}
+{{- if $registry -}}
+{{- printf "%s/%s:%s" $registry .Values.image.repository .Values.image.tag -}}
+{{- else -}}
+{{- printf "%s:%s" .Values.image.repository .Values.image.tag -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "app.serviceAccountName" -}}
