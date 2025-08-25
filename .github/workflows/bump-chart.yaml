@@ -1,0 +1,72 @@
+name: Bump chart/app versions
+on:
+  workflow_call:
+    inputs:
+      chart_name:
+        description: Chart directory name under charts/
+        required: true
+        type: string
+      version:
+        description: New version for Chart.version, Chart.appVersion, values.image.tag
+        required: true
+        type: string
+    secrets:
+      # optional: if you want to allow a different token, but not needed
+      push_token:
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.chart_name }}
+  cancel-in-progress: true
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: mikefarah/yq@v4.44.3
+
+      - name: Update files
+        id: upd
+        shell: bash
+        env:
+          CHART_DIR: charts/${{ inputs.chart_name }}
+          APP_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          VALUES="$CHART_DIR/values.yaml"
+          CHART="$CHART_DIR/Chart.yaml"
+
+          if [[ ! -f "$VALUES" || ! -f "$CHART" ]]; then
+            echo "Chart files not found at $CHART_DIR. Exiting."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          yq -i '.image.tag = strenv(APP_VERSION)' "$VALUES"
+          yq -i '.version = strenv(APP_VERSION) | .appVersion = strenv(APP_VERSION)' "$CHART"
+
+          if git status --porcelain | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit & push
+        if: steps.upd.outputs.changed == 'true'
+        env:
+          CHART_NAME: ${{ inputs.chart_name }}
+          APP_VERSION: ${{ inputs.version }}
+          TOKEN: ${{ secrets.push_token || github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name  "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git add -A
+          git commit -m "chore(${CHART_NAME}): bump chart/app to ${APP_VERSION}"
+          git -c http.extraheader="AUTHORIZATION: bearer ${TOKEN}" push

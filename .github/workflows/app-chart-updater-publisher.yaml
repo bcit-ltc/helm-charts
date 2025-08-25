@@ -9,6 +9,11 @@ on:
         description: 'Optional: release tag to publish (skip detection)'
         required: false
 
+# Prevent runs from colliding
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
   packages: write
@@ -35,7 +40,7 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      # Robust: derive the tag from what was actually packaged (e.g., app-0.2.0)
+      # Derive the tag from what was actually packaged (e.g., app-0.2.0)
       - name: Detect packaged chart tag
         id: release_tag
         run: |
@@ -54,8 +59,9 @@ jobs:
   publish:
     name: Publish OCI charts to GHCR (if a release exists)
     needs: release
+
     # Skip the entire job unless a manual tag is provided OR something was packaged
-    # if: ${{ (github.event_name == 'workflow_dispatch' && inputs.tag != '') || needs.release.outputs.new_tag != '' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.tag != '') || needs.release.outputs.new_tag != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Resolve tag (manual input or packaged)
