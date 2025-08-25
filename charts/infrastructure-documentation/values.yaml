@@ -9,7 +9,7 @@ name: "infrastructure-documentation"
 image:
   registry: "ghcr.io"
   repository: "bcit-ltc/infrastructure-documentation"
-  tag: "1.0.5" # {"$imagepolicy": "infrastructure-documentation:infrastructure-documentation-image-policy:tag"}
+  tag: "1.0.6-rc.2f579d0.20250825054304" # {"$imagepolicy": "infrastructure-documentation:infrastructure-documentation-image-policy:tag"}
   pullPolicy: IfNotPresent
 # This is for the secrets for pulling an image from a private repository.
 # See: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -128,7 +128,6 @@ pdb:
 networkPolicy:
   enabled: false
   # When enabled, allow ingress on service.port within the namespace.
-
 #####
 ##### For later development #####
 #####
