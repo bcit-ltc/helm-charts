@@ -25,15 +25,13 @@ jobs:
     outputs:
       new_tag: ${{ steps.release_tag.outputs.tag }}   # publish reads this
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
 
       - name: Configure Git
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
@@ -129,11 +127,4 @@ jobs:
               echo "Pushing $pkg to ${ref}…"
               helm push "$pkg" "${ref}"
             fi
-          done
-
-      - name: Show pushed package name(s)
-        if: ${{ steps.have_assets.outputs.count != '0' }}
-        run: |
-          for pkg in dist/*.tgz; do
-            echo "Published: $pkg → ghcr.io/${{ github.repository_owner }}/oci"
           done
