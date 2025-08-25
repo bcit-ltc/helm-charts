@@ -33,8 +33,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.6.0
+      - uses: helm/chart-releaser-action@v1.6.0
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -62,8 +61,7 @@ jobs:
       matrix:
         tag: ${{ fromJson(needs.release.outputs.tags_json) }}
     steps:
-      - name: Setup Helm
-        uses: azure/setup-helm@v4
+      - uses: azure/setup-helm@v4
         with: { version: v3.14.4 }
 
       - name: Login to GHCR (password-stdin)
@@ -93,7 +91,7 @@ jobs:
           for pkg in dist/*.tgz; do
             name="$(helm show chart "$pkg" | awk -F': ' '/^name:/{print $2; exit}')"
             version="$(helm show chart "$pkg" | awk -F': ' '/^version:/{print $2; exit}')"
-            ref="oci://ghcr.io/${OWNER}/oci/${name}"
+            ref="oci://ghcr.io/${OWNER}/oci"
             if helm show chart "${ref}" --version "${version}" >/dev/null 2>&1; then
               echo "Already exists: ${ref}:${version} — skipping push."
             else

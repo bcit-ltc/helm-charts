@@ -33,7 +33,7 @@ jobs:
           [[ "${{ inputs.chart_name }}" =~ ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$ ]] || { echo "Invalid chart_name" >&2; exit 1; }
 
       - name: Update files
-        id: upd
+        id: update
         env:
           CHART_DIR: charts/${{ inputs.chart_name }}
           APP_VERSION: ${{ inputs.version }}
@@ -46,7 +46,7 @@ jobs:
           git status --porcelain | grep -q . && echo "changed=true" >> "$GITHUB_OUTPUT" || echo "changed=false" >> "$GITHUB_OUTPUT"
 
       - name: Commit & push
-        if: steps.upd.outputs.changed == 'true'
+        if: steps.update.outputs.changed == 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
