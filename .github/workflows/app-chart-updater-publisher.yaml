@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   workflow_run:
-    workflows: [ "Remote bump & publish" ]  # fires when remote-bump finishes
+    workflows: [ "Remotely-triggered chart bump & commit" ]  # fires when remote-bump finishes
     branches:   [ main ]
     types: [ completed ]
 
