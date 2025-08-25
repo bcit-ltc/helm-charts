@@ -1,4 +1,4 @@
-name: Update, release, and publish Helm charts
+name: Update chart index and publish Helm charts
 
 on:
   push:
@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   # Package changed charts and create GitHub Releases with .tgz assets
-  release:
+  chart-index-updater:
     name: Run chart-releaser
     runs-on: ubuntu-latest
     outputs:
@@ -52,14 +52,14 @@ jobs:
           echo "Packaged tags: $tags"
 
   # Publish all packaged charts from this run (matrix over tags)
-  publish_matrix:
+  publish-charts:
     name: Publish OCI charts to GHCR (packaged in this run)
-    needs: release
-    if: ${{ needs.release.outputs.tags_json != '' && needs.release.outputs.tags_json != '[]' }}
+    needs: chart-index-updater
+    if: ${{ needs.chart-index-updater.outputs.tags_json != '' && needs.chart-index-updater.outputs.tags_json != '[]' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tag: ${{ fromJson(needs.release.outputs.tags_json) }}
+        tag: ${{ fromJson(needs.chart-index-updater.outputs.tags_json) }}
     steps:
       - uses: azure/setup-helm@v4
         with: { version: v3.14.4 }
