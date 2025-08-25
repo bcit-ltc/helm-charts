@@ -17,6 +17,24 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/course-workload-estimator-1.0.3/course-workload-estimator-1.0.3.tgz
     version: 1.0.3
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-08-25T16:32:32.965693345Z"
+    description: A time calculator for instructors to estimate how many hours of work
+      students might be expected to spend on a course.
+    digest: 3d715bf1446d79de008c3fc21638bbee21d4f8f334586843f981781253088416
+    home: https://course-workload-estimator.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: course-workload-estimator
+    sources:
+    - https://github.com/bcit-ltc/
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/course-workload-estimator-1.0.0/course-workload-estimator-1.0.0.tgz
+    version: 1.0.0
   infrastructure-documentation:
   - apiVersion: v2
     appVersion: 1.1.0
@@ -226,4 +244,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/nginx-unprivileged-0.1.0/nginx-unprivileged-0.1.0.tgz
     version: 0.1.0
-generated: "2025-08-25T07:20:08.549978837Z"
+generated: "2025-08-25T16:32:32.965751714Z"
