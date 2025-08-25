@@ -1,12 +1,10 @@
-{{- $serviceName := printf "%s-%s" (include "app.name" .) ("service") -}}
-{{- $servicePort := .Values.service.port -}}
-{{- $host := printf "%s.%s" (default (include "app.name" .) .Values.ingress.host) .Values.defaultDomain -}}
-{{- $secretName := printf "%s-%s" (include "app.name" .) (.Values.ingress.tlsSecret | default "star-ltc-bcit-ca") | trimSuffix "-" | default (include "app.name" .) -}}
-
+{{- if .Values.ingress.enabled }}
+{{- $svcPort := .Values.service.port -}}
+{{- $host := .Values.ingress.host | default (printf "%s.%s" (include "app.fullname" .) .Values.defaultDomain) -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "app.name" . }}-ingress
+  name: {{ include "app.fullname" . }}
   labels:
     {{- include "app.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -14,13 +12,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- with .Values.ingress.className }}
-  ingressClassName: {{ . }}
+  {{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName | quote }}
   {{- end }}
-  tls:
-    - hosts:
-        - {{ $host | quote }}
-      secretName: {{ $secretName | quote }}
   rules:
     - host: {{ $host | quote }}
       http:
@@ -29,17 +23,15 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ $serviceName }}
+                name: {{ include "app.fullname" . }}
                 port:
-                  number: {{ $servicePort }}
+                  number: {{ $svcPort }}
           {{- with .Values.ingress.extraPaths }}
-          {{- range . }}
-          - path: {{ .path | quote }}
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ .backend.service.name | default $serviceName }}
-                port:
-                  number: {{ .backend.service.port.number | default $servicePort }}
+          {{- toYaml . | nindent 10 }}
           {{- end }}
-          {{- end }}
+  {{- if .Values.ingress.tlsSecret }}
+  tls:
+    - hosts: [{{ $host | quote }}]
+      secretName: {{ .Values.ingress.tlsSecret | quote }}
+  {{- end }}
+{{- end }}
