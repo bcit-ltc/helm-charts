@@ -19,6 +19,24 @@ entries:
     version: 1.0.3
   infrastructure-documentation:
   - apiVersion: v2
+    appVersion: 1.0.6-rc.2f579d0.20250825054304
+    created: "2025-08-25T05:58:56.301427712Z"
+    description: Information about the architecture and makeup of the LTC's server
+      infrastructure.
+    digest: 95fa45f22917a30cebb29efe143d5e7642841aee98756d16e7c2c1654aa9080c
+    home: https://infrastructure-documentation.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: infrastructure-documentation
+    sources:
+    - https://github.com/bcit-ltc/
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/infrastructure-documentation-1.0.6-rc.2f579d0.20250825054304/infrastructure-documentation-1.0.6-rc.2f579d0.20250825054304.tgz
+    version: 1.0.6-rc.2f579d0.20250825054304
+  - apiVersion: v2
     appVersion: 1.0.5
     created: "2025-08-25T03:46:50.971559801Z"
     description: Information about the architecture and makeup of the LTC's server
@@ -100,4 +118,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/nginx-unprivileged-0.1.0/nginx-unprivileged-0.1.0.tgz
     version: 0.1.0
-generated: "2025-08-25T03:46:50.971583486Z"
+generated: "2025-08-25T05:58:56.301457989Z"
