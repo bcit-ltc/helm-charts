@@ -1,4 +1,4 @@
-name: Remotely-triggered chart bump & commit
+name: Bump ${{ inputs.chart_name }} to ${{ inputs.version }}
 
 on:
   workflow_dispatch:
@@ -21,6 +21,7 @@ concurrency:
 
 jobs:
   bump:
+    name: Remotely-triggered chart bump & commit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
