@@ -254,6 +254,39 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/infrastructure-documentation-1.0.3-rc.93dfa08.20250824171959/infrastructure-documentation-1.0.3-rc.93dfa08.20250824171959.tgz
     version: 1.0.3-rc.93dfa08.20250824171959
+  longhorn:
+  - apiVersion: v1
+    appVersion: v1.9.0-dev
+    created: "2025-08-25T23:50:11.65739205Z"
+    description: Longhorn is a distributed block storage system for Kubernetes.
+    digest: c6f2e1d4984c8c5e723b40ed45712b802aeb27a462351afc7e885370239cf596
+    home: https://github.com/longhorn/longhorn
+    icon: https://raw.githubusercontent.com/cncf/artwork/master/projects/longhorn/icon/color/longhorn-icon-color.png
+    keywords:
+    - longhorn
+    - storage
+    - distributed
+    - block
+    - device
+    - iscsi
+    - nfs
+    kubeVersion: '>=1.25.0-0'
+    maintainers:
+    - email: maintainers@longhorn.io
+      name: Longhorn maintainers
+    name: longhorn
+    sources:
+    - https://github.com/longhorn/longhorn
+    - https://github.com/longhorn/longhorn-engine
+    - https://github.com/longhorn/longhorn-instance-manager
+    - https://github.com/longhorn/longhorn-share-manager
+    - https://github.com/longhorn/longhorn-manager
+    - https://github.com/longhorn/longhorn-ui
+    - https://github.com/longhorn/longhorn-tests
+    - https://github.com/longhorn/backing-image-manager
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/longhorn-1.9.0-dev/longhorn-1.9.0-dev.tgz
+    version: 1.9.0-dev
   nginx-unprivileged:
   - apiVersion: v2
     appVersion: 0.2.1
@@ -279,4 +312,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-08-25T23:43:58.446788736Z"
+generated: "2025-08-25T23:50:11.657453825Z"
