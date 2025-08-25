@@ -106,13 +106,47 @@ jobs:
             --pattern '*.tgz' \
             --dir dist
 
-      - name: Push chart oci package(s) to GHCR
+      - name: Delete existing tag (if any) and push OCI chart(s)
         if: ${{ steps.have_assets.outputs.count != '0' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
         run: |
+          set -euo pipefail
           shopt -s nullglob
+
           for pkg in dist/*.tgz; do
-            echo "Pushing $pkg to GHCR…"
-            helm push "$pkg" oci://ghcr.io/${{ github.repository_owner }}/oci
+            # Read chart metadata from the package
+            name="$(helm show chart "$pkg" | awk -F': ' '/^name:/{print $2; exit}')"
+            version="$(helm show chart "$pkg" | awk -F': ' '/^version:/{print $2; exit}')"
+
+            # GHCR package name is the repo path after ghcr.io: "oci/<chart-name>"
+            package_name="oci%2F${name}"   # URL-encoded "oci/<name>"
+
+            echo "Checking GHCR for existing ${name}:${version}…"
+            # Find any matching version IDs by tag
+            ids=$(gh api --paginate \
+              "/orgs/${OWNER}/packages/container/${package_name}/versions?per_page=100" \
+              --jq ".[] | select(.metadata.container.tags[]? == \"${version}\") | .id" || true)
+
+            if [[ -n "${ids}" ]]; then
+              echo "Found existing tag(s) for ${name}:${version}:"
+              echo "${ids}" | sed 's/^/  id: /'
+              # Delete all matches (defensive)
+              while IFS= read -r id; do
+                [[ -z "$id" ]] && continue
+                echo "Deleting version id ${id}…"
+                gh api -X DELETE "/orgs/${OWNER}/packages/container/${package_name}/versions/${id}"
+              done <<< "${ids}"
+              echo "Deleted existing ${name}:${version} from GHCR."
+            else
+              echo "No existing ${name}:${version} in GHCR."
+            fi
+
+            # Push the package after ensuring no conflicting tag exists
+            ref="oci://ghcr.io/${OWNER}/oci/${name}"
+            echo "Pushing $pkg to ${ref}…"
+            helm push "$pkg" "${ref}"
           done
 
       - name: Show pushed package name(s)
