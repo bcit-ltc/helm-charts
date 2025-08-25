@@ -265,4 +265,18 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/nginx-unprivileged-0.2.1/nginx-unprivileged-0.2.1.tgz
     version: 0.2.1
-generated: "2025-08-25T19:12:42.94776788Z"
+  vault-secrets-operator:
+  - apiVersion: v2
+    appVersion: 0.10.0
+    created: "2025-08-25T23:43:58.446731178Z"
+    description: Official Vault Secrets Operator Chart
+    digest: 13eced4c5cb8e37fa244b854d28334e5246343a6c559e1302011c4b7255b4152
+    kubeVersion: '>=1.21.0-0'
+    name: vault-secrets-operator
+    sources:
+    - https://github.com/hashicorp/vault-secrets-operator
+    type: application
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
+    version: 0.10.0
+generated: "2025-08-25T23:43:58.446788736Z"
