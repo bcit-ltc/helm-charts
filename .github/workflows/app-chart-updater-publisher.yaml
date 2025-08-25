@@ -3,14 +3,10 @@ name: Update, release, and publish Helm charts
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'charts/**'                # run only when chart files change
-      - '.github/workflows/**'     # (optional) allow CI changes to retrigger
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Optional: release tag to publish (skip detection/packaging)'
-        required: false
+  workflow_run:
+    workflows: [ "Remote bump & publish" ]  # fires when remote-bump finishes
+    branches:   [ main ]
+    types: [ completed ]
 
 # Prevent runs from colliding across pushes to main
 concurrency:
@@ -25,11 +21,9 @@ jobs:
   # Package changed charts and create GitHub Releases with .tgz assets
   release:
     name: Run chart-releaser
-    # If manually dispatching with a specific tag, skip packaging
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.tag != '') }}
     runs-on: ubuntu-latest
     outputs:
-      tags_json: ${{ steps.tags.outputs.list }}   # array of packaged tags (e.g., ["app-0.2.0","nginx-unprivileged-1.3.4"])
+      tags_json: ${{ steps.tags.outputs.list }}   # e.g., ["app-0.2.0","nginx-unprivileged-1.3.4"]
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -86,52 +80,6 @@ jobs:
         run: |
           mkdir -p dist
           gh release download "${{ matrix.tag }}" \
-            --repo "${{ github.repository }}" \
-            --pattern '*.tgz' \
-            --dir dist
-
-      - name: Push chart OCI package(s) to GHCR (skip if exists)
-        env:
-          OWNER: ${{ github.repository_owner }}
-        run: |
-          set -euo pipefail
-          shopt -s nullglob
-          for pkg in dist/*.tgz; do
-            name="$(helm show chart "$pkg" | awk -F': ' '/^name:/{print $2; exit}')"
-            version="$(helm show chart "$pkg" | awk -F': ' '/^version:/{print $2; exit}')"
-            ref="oci://ghcr.io/${OWNER}/oci/${name}"
-            if helm show chart "${ref}" --version "${version}" >/dev/null 2>&1; then
-              echo "Already exists: ${ref}:${version} — skipping push."
-            else
-              echo "Pushing $pkg to ${ref}…"
-              helm push "$pkg" "${ref}"
-            fi
-          done
-
-  # Manual republish path: publish a specific tag (no packaging)
-  publish_manual:
-    name: Publish OCI charts to GHCR (manual tag)
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.tag != '' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Helm
-        uses: azure/setup-helm@v4
-        with: { version: v3.14.4 }
-
-      - name: Login to GHCR (password-stdin)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "${GH_TOKEN}" | helm registry login ghcr.io \
-            -u "${{ github.actor }}" \
-            --password-stdin
-
-      - name: Download chart assets for the provided tag
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p dist
-          gh release download "${{ inputs.tag }}" \
             --repo "${{ github.repository }}" \
             --pattern '*.tgz' \
             --dir dist
