@@ -3,13 +3,16 @@ name: Update, release, and publish Helm charts
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'charts/**'                # run only when chart files change
+      - '.github/workflows/**'     # (optional) allow CI changes to retrigger
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Optional: release tag to publish (skip detection)'
+        description: 'Optional: release tag to publish (skip detection/packaging)'
         required: false
 
-# Prevent runs from colliding
+# Prevent runs from colliding across pushes to main
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -19,11 +22,14 @@ permissions:
   packages: write
 
 jobs:
+  # Package changed charts and create GitHub Releases with .tgz assets
   release:
     name: Run chart-releaser
+    # If manually dispatching with a specific tag, skip packaging
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.tag != '') }}
     runs-on: ubuntu-latest
     outputs:
-      new_tag: ${{ steps.release_tag.outputs.tag }}   # publish reads this
+      tags_json: ${{ steps.tags.outputs.list }}   # array of packaged tags (e.g., ["app-0.2.0","nginx-unprivileged-1.3.4"])
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -33,46 +39,37 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - uses: helm/chart-releaser-action@v1.6.0
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.6.0
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Derive the tag from what was actually packaged (e.g., app-0.2.0)
-      - name: Detect packaged chart tag
-        id: release_tag
+      # Collect ALL packaged tags from .cr-release-packages/*.tgz
+      - name: Detect packaged chart tags
+        id: tags
         run: |
           shopt -s nullglob
-          FILES=(.cr-release-packages/*.tgz)
-          if (( ${#FILES[@]} )); then
-            BASE=$(basename "${FILES[0]}")
-            TAG="${BASE%.tgz}"
-            echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-            echo "Packaged tag: $TAG"
+          files=(.cr-release-packages/*.tgz)
+          if (( ${#files[@]} )); then
+            tags=$(printf '%s\n' "${files[@]}" | sed -E 's,.*/(.*)\.tgz$,\1,' | jq -R . | jq -sc .)
           else
-            echo "tag=" >> "$GITHUB_OUTPUT"
-            echo "No packaged charts in this run."
+            tags="[]"
           fi
+          echo "list=$tags" >> "$GITHUB_OUTPUT"
+          echo "Packaged tags: $tags"
 
-  publish:
-    name: Publish OCI charts to GHCR (if a release exists)
+  # Publish all packaged charts from this run (matrix over tags)
+  publish_matrix:
+    name: Publish OCI charts to GHCR (packaged in this run)
     needs: release
-
-    # Skip the entire job unless a manual tag is provided OR something was packaged
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.tag != '') || needs.release.outputs.new_tag != '' }}
+    if: ${{ needs.release.outputs.tags_json != '' && needs.release.outputs.tags_json != '[]' }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tag: ${{ fromJson(needs.release.outputs.tags_json) }}
     steps:
-      - name: Resolve tag (manual input or packaged)
-        id: tag
-        run: |
-          if [[ -n "${{ github.event_name == 'workflow_dispatch' && inputs.tag || '' }}" ]]; then
-            TAG="${{ inputs.tag }}"
-          else
-            TAG="${{ needs.release.outputs.new_tag }}"
-          fi
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Publishing tag: ${TAG}"
-
-      - uses: azure/setup-helm@v4
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
         with: { version: v3.14.4 }
 
       - name: Login to GHCR (password-stdin)
@@ -83,32 +80,63 @@ jobs:
             -u "${{ github.actor }}" \
             --password-stdin
 
-      - name: Check release has *.tgz assets
-        id: have_assets
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          COUNT=$(gh release view "${{ steps.tag.outputs.tag }}" --repo "${{ github.repository }}" \
-            --json assets --jq '.assets | map(select(.name | test("\\.tgz$"))) | length' || echo 0)
-          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
-          if [[ "$COUNT" -eq 0 ]]; then
-            echo "Release has no .tgz assets; skipping."
-          fi
-
-      - name: Download chart assets for the tag
-        if: ${{ steps.have_assets.outputs.count != '0' }}
+      - name: Download chart assets for tag
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p dist
-          gh release download "${{ steps.tag.outputs.tag }}" \
+          gh release download "${{ matrix.tag }}" \
             --repo "${{ github.repository }}" \
             --pattern '*.tgz' \
             --dir dist
 
-      - name: Push chart oci package(s) to GHCR (skip if exists)
-        if: ${{ steps.have_assets.outputs.count != '0' }}
+      - name: Push chart OCI package(s) to GHCR (skip if exists)
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for pkg in dist/*.tgz; do
+            name="$(helm show chart "$pkg" | awk -F': ' '/^name:/{print $2; exit}')"
+            version="$(helm show chart "$pkg" | awk -F': ' '/^version:/{print $2; exit}')"
+            ref="oci://ghcr.io/${OWNER}/oci/${name}"
+            if helm show chart "${ref}" --version "${version}" >/dev/null 2>&1; then
+              echo "Already exists: ${ref}:${version} — skipping push."
+            else
+              echo "Pushing $pkg to ${ref}…"
+              helm push "$pkg" "${ref}"
+            fi
+          done
+
+  # Manual republish path: publish a specific tag (no packaging)
+  publish_manual:
+    name: Publish OCI charts to GHCR (manual tag)
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.tag != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with: { version: v3.14.4 }
+
+      - name: Login to GHCR (password-stdin)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "${GH_TOKEN}" | helm registry login ghcr.io \
+            -u "${{ github.actor }}" \
+            --password-stdin
+
+      - name: Download chart assets for the provided tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p dist
+          gh release download "${{ inputs.tag }}" \
+            --repo "${{ github.repository }}" \
+            --pattern '*.tgz' \
+            --dir dist
+
+      - name: Push chart OCI package(s) to GHCR (skip if exists)
         env:
           OWNER: ${{ github.repository_owner }}
         run: |
