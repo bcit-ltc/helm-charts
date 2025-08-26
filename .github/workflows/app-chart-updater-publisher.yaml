@@ -16,6 +16,7 @@ concurrency:
 permissions:
   contents: write
   packages: write
+  id-token: write
 
 jobs:
   # Package changed charts and create GitHub Releases with .tgz assets
@@ -62,16 +63,17 @@ jobs:
       matrix:
         tag: ${{ fromJson(needs.chart-index-updater.outputs.tags_json) }}
     steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
       - uses: azure/setup-helm@v4
         with: { version: v3.14.4 }
 
-      - name: Login to GHCR (password-stdin)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Single login that both Helm and Cosign can use (writes to ~/.docker/config.json)
+      - name: Login to GHCR (helm)
         run: |
-          echo "${GH_TOKEN}" | helm registry login ghcr.io \
-            -u "${{ github.actor }}" \
-            --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io \
+            -u "${{ github.actor }}" --password-stdin
 
       - name: Download chart assets for tag
         env:
@@ -83,7 +85,9 @@ jobs:
             --pattern '*.tgz' \
             --dir dist
 
-      - name: Push chart OCI package(s) to GHCR (skip if exists)
+      - uses: sigstore/cosign-installer@v3
+
+      - name: Push & sign chart(s) by digest (fail if exists)
         env:
           OWNER: ${{ github.repository_owner }}
         run: |
@@ -92,11 +96,24 @@ jobs:
           for pkg in dist/*.tgz; do
             name="$(helm show chart "$pkg" | awk -F': ' '/^name:/{print $2; exit}')"
             version="$(helm show chart "$pkg" | awk -F': ' '/^version:/{print $2; exit}')"
-            ref="oci://ghcr.io/${OWNER}/oci"
-            if helm show chart "${ref}" --version "${version}" >/dev/null 2>&1; then
-              echo "Already exists: ${ref}:${version} — skipping push."
-            else
-              echo "Pushing $pkg to ${ref}…"
-              helm push "$pkg" "${ref}"
+            repo="oci://ghcr.io/${OWNER}/oci"
+
+            # Push will exit non-zero if the chart:version already exists -> job fails (as requested)
+            PUSH_OUT="$(helm push "$pkg" "${repo}" | tee /dev/stderr)"
+
+            # Extract the sha256 digest that Helm prints after a successful push
+            DGST="$(printf '%s\n' "$PUSH_OUT" | sed -n -E 's/^[Dd]igest:[[:space:]]*(sha256:[0-9a-f]{64}).*$/\1/p')"
+            if [[ -z "${DGST}" ]]; then
+              echo "Failed to parse digest from helm push output"; exit 1
             fi
+
+            REF="ghcr.io/${OWNER}/oci/${name}"
+            echo "Signing ${REF}@${DGST} with Cosign (keyless)…"
+            cosign sign --yes \
+              -a "chart.name=${name}" \
+              -a "chart.version=${version}" \
+              -a "repo=${GITHUB_REPOSITORY}" \
+              -a "workflow=${GITHUB_WORKFLOW}" \
+              -a "sha=${GITHUB_SHA}" \
+              "${REF}@${DGST}"
           done
