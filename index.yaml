@@ -378,6 +378,26 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/nginx-unprivileged-0.2.1/nginx-unprivileged-0.2.1.tgz
     version: 0.2.1
+  rancher:
+  - apiVersion: v2
+    appVersion: v2.11.3
+    created: "2025-08-26T04:48:15.955174802Z"
+    description: Install Rancher Server to manage Kubernetes clusters across providers.
+    digest: 063c7d2d7ff6fde292f686e8911f1bdbefc1c7ad0be6dcb3c554f2f0be9c9456
+    home: https://rancher.com
+    icon: https://raw.githubusercontent.com/rancher/ui/master/public/assets/images/logos/welcome-cow.svg
+    keywords:
+    - rancher
+    kubeVersion: < 1.33.0-0
+    maintainers:
+    - email: charts@rancher.com
+      name: Rancher Labs
+    name: rancher
+    sources:
+    - https://github.com/rancher/rancher
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/rancher-2.11.3/rancher-2.11.3.tgz
+    version: 2.11.3
   vault-secrets-operator:
   - apiVersion: v2
     appVersion: 0.10.0
@@ -392,4 +412,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-08-26T01:35:21.651089091Z"
+generated: "2025-08-26T04:48:15.955299046Z"
