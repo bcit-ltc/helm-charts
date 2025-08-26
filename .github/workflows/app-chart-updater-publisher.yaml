@@ -70,10 +70,17 @@ jobs:
         with: { version: v3.14.4 }
 
       # Single login that both Helm and Cosign can use (writes to ~/.docker/config.json)
-      - name: Login to GHCR (helm)
+      - name: Login to GHCR (Helm)
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io \
             -u "${{ github.actor }}" --password-stdin
+
+      - name: Login to GHCR (Cosign)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download chart assets for tag
         env:
@@ -98,20 +105,9 @@ jobs:
             version="$(helm show chart "$pkg" | awk -F': ' '/^version:/{print $2; exit}')"
             repo="oci://ghcr.io/${OWNER}/oci"
 
-            # Push will exit non-zero if the tag exists → job fails (as requested).
-            # Capture BOTH stdout and stderr for parsing, and mirror to logs.
             PUSH_OUT="$(helm push "$pkg" "${repo}" 2>&1 | tee /dev/stderr)"
-
-            # Example lines Helm prints:
-            #   Pushed: ghcr.io/OWNER/oci/<name>:<version>
-            #   Digest: sha256:aaaaaaaa... (64 hex)
-            DGST="$(printf '%s\n' "$PUSH_OUT" \
-                    | tr -d '\r' \
-                    | awk 'tolower($1)=="digest:" {print $2; exit}')"
-
-            if [[ -z "${DGST:-}" || ! "${DGST}" =~ ^sha256:[0-9A-Fa-f]{64}$ ]]; then
-              echo "Failed to parse digest from helm push output"; exit 1
-            fi
+            DGST="$(printf '%s\n' "$PUSH_OUT" | tr -d '\r' | awk 'tolower($1)=="digest:" {print $2; exit}')"
+            [[ -n "$DGST" && "$DGST" =~ ^sha256:[0-9A-Fa-f]{64}$ ]] || { echo "Failed to parse digest"; exit 1; }
 
             REF="ghcr.io/${OWNER}/oci/${name}"
             echo "Signing ${REF}@${DGST} with Cosign (keyless)…"
