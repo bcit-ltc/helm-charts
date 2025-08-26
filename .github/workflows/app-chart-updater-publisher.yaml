@@ -98,12 +98,18 @@ jobs:
             version="$(helm show chart "$pkg" | awk -F': ' '/^version:/{print $2; exit}')"
             repo="oci://ghcr.io/${OWNER}/oci"
 
-            # Push will exit non-zero if the chart:version already exists -> job fails (as requested)
-            PUSH_OUT="$(helm push "$pkg" "${repo}" | tee /dev/stderr)"
+            # Push will exit non-zero if the tag exists → job fails (as requested).
+            # Capture BOTH stdout and stderr for parsing, and mirror to logs.
+            PUSH_OUT="$(helm push "$pkg" "${repo}" 2>&1 | tee /dev/stderr)"
 
-            # Extract the sha256 digest that Helm prints after a successful push
-            DGST="$(printf '%s\n' "$PUSH_OUT" | sed -n -E 's/^[Dd]igest:[[:space:]]*(sha256:[0-9a-f]{64}).*$/\1/p')"
-            if [[ -z "${DGST}" ]]; then
+            # Example lines Helm prints:
+            #   Pushed: ghcr.io/OWNER/oci/<name>:<version>
+            #   Digest: sha256:aaaaaaaa... (64 hex)
+            DGST="$(printf '%s\n' "$PUSH_OUT" \
+                    | tr -d '\r' \
+                    | awk 'tolower($1)=="digest:" {print $2; exit}')"
+
+            if [[ -z "${DGST:-}" || ! "${DGST}" =~ ^sha256:[0-9A-Fa-f]{64}$ ]]; then
               echo "Failed to parse digest from helm push output"; exit 1
             fi
 
@@ -117,3 +123,4 @@ jobs:
               -a "sha=${GITHUB_SHA}" \
               "${REF}@${DGST}"
           done
+
