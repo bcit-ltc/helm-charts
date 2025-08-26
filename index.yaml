@@ -289,6 +289,16 @@ entries:
     version: 1.9.0-dev
   nginx-unprivileged:
   - apiVersion: v2
+    appVersion: alpine3.22
+    created: "2025-08-26T00:45:24.854597669Z"
+    description: Minimal, standardized chart for running nginx-unprivileged
+    digest: 9cbf5600f7951bb466f1cc1a48df95263f8c83d478506e30919445800f1a9da8
+    name: nginx-unprivileged
+    type: application
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/nginx-unprivileged-0.2.2/nginx-unprivileged-0.2.2.tgz
+    version: 0.2.2
+  - apiVersion: v2
     appVersion: 0.2.1
     created: "2025-08-21T23:28:17.975714325Z"
     description: Minimal, standardized chart for running nginx-unprivileged
@@ -312,4 +322,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-08-25T23:50:11.657453825Z"
+generated: "2025-08-26T00:45:24.854648574Z"
