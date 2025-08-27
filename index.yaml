@@ -398,6 +398,25 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/rancher-2.11.3/rancher-2.11.3.tgz
     version: 2.11.3
+  sugar-suite:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-08-27T20:43:07.896905437Z"
+    description: Sugar-Suite is a "Framework Factory" used to produce customized stylesheets
+      designed for building online courses in HTML.
+    digest: 215c6a97cb61aee967554afdfbf33a2a5b7fa07a71185b20b40279509667af33
+    home: https://sugar-suite.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: sugar-suite
+    sources:
+    - https://github.com/bcit-ltc/
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/sugar-suite-1.0.0/sugar-suite-1.0.0.tgz
+    version: 1.0.0
   vault-secrets-operator:
   - apiVersion: v2
     appVersion: 0.10.0
@@ -412,4 +431,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-08-26T04:48:15.955299046Z"
+generated: "2025-08-27T20:43:07.89699236Z"
