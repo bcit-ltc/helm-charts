@@ -19,6 +19,25 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/conversion-guide-1.0.0/conversion-guide-1.0.0.tgz
     version: 1.0.0
+  course-production-site:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-09-03T22:22:13.1124317Z"
+    description: A reference for anyone preparing Word documents to be converted into
+      HTML.
+    digest: 307d6a6818bc1d3e356f8a5e838015430a3aa3cde09da894f6800a997c457eb9
+    home: https://course-production-site.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: course-production-site
+    sources:
+    - https://github.com/bcit-ltc/
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/course-production-site-1.0.0/course-production-site-1.0.0.tgz
+    version: 1.0.0
   course-workload-estimator:
   - apiVersion: v2
     appVersion: 1.0.0
@@ -504,4 +523,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-09-03T21:41:52.563721198Z"
+generated: "2025-09-03T22:22:13.11254348Z"
