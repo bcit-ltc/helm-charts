@@ -39,6 +39,24 @@ entries:
     - https://github.com/bcit-ltc/helm-charts/releases/download/course-workload-estimator-1.0.0/course-workload-estimator-1.0.0.tgz
     version: 1.0.0
   - apiVersion: v2
+    appVersion: 1.0.0-rc.6adafcf.20250903214120
+    created: "2025-09-03T21:41:52.563608006Z"
+    description: A time calculator for instructors to estimate how many hours of work
+      students might be expected to spend on a course.
+    digest: a90548b667c28f5270a0b66eacbbc4ad330d31f9bbd141acebb99a2cbb671522
+    home: https://course-workload-estimator.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: course-workload-estimator
+    sources:
+    - https://github.com/bcit-ltc/
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/course-workload-estimator-1.0.0-rc.6adafcf.20250903214120/course-workload-estimator-1.0.0-rc.6adafcf.20250903214120.tgz
+    version: 1.0.0-rc.6adafcf.20250903214120
+  - apiVersion: v2
     appVersion: 1.0.0-rc.2ec7bf1.20250825163610
     created: "2025-08-25T16:36:43.76123833Z"
     description: A time calculator for instructors to estimate how many hours of work
@@ -486,4 +504,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-09-03T20:42:52.607524496Z"
+generated: "2025-09-03T21:41:52.563721198Z"
