@@ -1,62 +1,58 @@
-{{/*
-Expand the name of the chart.
-*/}}
-{{- define "qcon-api.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
-{{- end }}
+{{- define "app.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
-*/}}
-{{- define "qcon-api.fullname" -}}
-{{- if .Values.fullnameOverride }}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- $name := default .Chart.Name .Values.nameOverride }}
-{{- if contains $name .Release.Name }}
-{{- .Release.Name | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
-{{- end }}
-{{- end }}
-{{- end }}
+{{- define "app.fullname" -}}
+{{- if .Values.fullnameOverride -}}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s" (include "app.name" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
 
-{{/*
-Create chart name and version as used by the chart label.
-*/}}
-{{- define "qcon-api.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{- end }}
+{{- define "app.labels" -}}
+{{- /* build label-safe chart version */ -}}
+{{- $chartVersionLabel := .Chart.Version
+    | replace "+" "_"
+    | regexReplaceAll "[^A-Za-z0-9_.-]" "_"
+    | trunc 63 | trimSuffix "-" | trimSuffix "_" | trimSuffix "."
+-}}
+{{- $helmChartLabel := printf "%s-%s" .Chart.Name $chartVersionLabel
+    | trunc 63 | trimSuffix "-" | trimSuffix "_" | trimSuffix "."
+-}}
+{{- /* app.kubernetes.io/version: prefer AppVersion, fall back to Chart.Version */ -}}
+{{- $rawAppVer := default .Chart.Version .Chart.AppVersion -}}
+{{- $appVersionLabel := $rawAppVer
+    | replace "+" "_"
+    | regexReplaceAll "[^A-Za-z0-9_.-]" "_"
+    | trunc 63 | trimSuffix "-" | trimSuffix "_" | trimSuffix "."
+-}}
 
-{{/*
-Common labels
-*/}}
-{{- define "qcon-api.labels" -}}
-helm.sh/chart: {{ include "qcon-api.chart" . }}
-{{ include "qcon-api.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- end }}
+{{- $labels := dict
+  "app.kubernetes.io/name"  (include "app.name" .)
+  "app.kubernetes.io/managed-by" .Release.Service
+  "app.kubernetes.io/version" $appVersionLabel
+-}}
+{{- toYaml $labels -}}
+{{- end -}}
 
-{{/*
-Selector labels
-*/}}
-{{- define "qcon-api.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "qcon-api.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
+{{- define "app.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "app.name" . }}
+{{- end -}}
 
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "qcon-api.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "qcon-api.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
-{{- end }}
+{{- define "app.image" -}}
+{{- $registry := .Values.image.registry | default "" -}}
+{{- if $registry -}}
+{{- printf "%s/%s:%s" $registry .Values.image.repository .Values.image.tag -}}
+{{- else -}}
+{{- printf "%s:%s" .Values.image.repository .Values.image.tag -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "app.serviceAccountName" -}}
+{{- if and .Values.serviceAccount.create (not .Values.serviceAccount.name) -}}
+{{ include "app.fullname" . }}
+{{- else -}}
+{{- default (include "app.fullname" .) .Values.serviceAccount.name -}}
+{{- end -}}
+{{- end -}}
