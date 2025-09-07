@@ -14,7 +14,7 @@ If you have already added this repo, run `helm repo update` to retrieve the late
 
 Run `helm search repo bcit-ltc` to see the charts.
 
-Chart OCI images are also available at https://ghcr.io/bcit-ltc/oci/{appName}.
+Chart OCI images are also available at [https://ghcr.io/bcit-ltc/oci/{appName}](https://ghcr.io/bcit-ltc/oci/{appName}).
 
 ## License
 
