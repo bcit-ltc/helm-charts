@@ -22,4 +22,4 @@ This Source Code Form is subject to the terms of the Mozilla Public License, v2.
 
 ## About
 
-Developed in 🇨🇦 Canada by [BCIT's](https://www.bcit.ca/) [Learning and Teaching Centre](https://www.bcit.ca/learning-teaching-centre/). [Contact Us](mailto:ltc_techops@bcit.ca).
+Developed in 🇨🇦 Canada by the [Learning and Teaching Centre](https://www.bcit.ca/learning-teaching-centre/) at [BCIT](https://www.bcit.ca/).
