@@ -1,10 +1,10 @@
-# sugar-suite
+# legacy-socas
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-0.0.0--rc.01a9cdd.20250902234251-informational?style=flat-square) ![AppVersion: 1.0.1](https://img.shields.io/badge/AppVersion-0.0.0--rc.01a9cdd.20250902234251-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-0.0.0--rc.01a9cdd.20250902234251-informational?style=flat-square) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-0.0.0--rc.01a9cdd.20250902234251-informational?style=flat-square)
 
-Sugar-Suite is a "Framework Factory" used to produce customized stylesheets designed for building online courses in HTML.
+legacy-socas is a legacy multimedia application.
 
-**Homepage:** <https://sugar-suite.ltc.bcit.ca>
+**Homepage:** <https://legacy-socas.ltc.bcit.ca>
 
 ## Maintainers
 
@@ -33,16 +33,16 @@ Our registry images are public, but in ["Working with Container Registries"](htt
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer $CR_PAT" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
-        https://api.github.com/orgs/bcit-ltc/packages/container/sugar-suite/versions \
+        https://api.github.com/orgs/bcit-ltc/packages/container/legacy-socas/versions \
         | jq '.[].metadata.container.tags.[]'
 
 5. Pull and inspect the helm chart:
 
-        helm pull --untar oci://ghcr.io/bcit-ltc/sugar-suite --version {VERSION}
+        helm pull --untar oci://ghcr.io/bcit-ltc/legacy-socas --version {VERSION}
 
 6. Install the chart:
 
-        helm install sugar-suite .
+        helm install legacy-socas .
 
 ## Values
 
@@ -63,8 +63,8 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | extraVolumes[0].name | string | `"tmp"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.registry | string | `"ghcr.io"` |  |
-| image.repository | string | `"bcit-ltc/sugar-suite"` |  |
-| image.tag | string | `"1.0.1"` |  |
+| image.repository | string | `"bcit-ltc/legacy-socas"` |  |
+| image.tag | string | `"1.0.0"` |  |
 | imagePullSecrets | list | `[]` |  |
 | ingress.annotations | object | `{}` |  |
 | ingress.enabled | bool | `true` |  |
@@ -76,7 +76,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | livenessProbe.httpGet.port | int | `8080` |  |
 | livenessProbe.initialDelaySeconds | int | `10` |  |
 | livenessProbe.periodSeconds | int | `10` |  |
-| name | string | `"sugar-suite"` |  |
+| name | string | `"legacy-socas"` |  |
 | networkPolicy.enabled | bool | `false` |  |
 | nodeSelector | object | `{}` |  |
 | pdb.enabled | bool | `false` |  |
