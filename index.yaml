@@ -222,6 +222,25 @@ entries:
     version: 1.1.2
   - apiVersion: v2
     appVersion: 1.1.2-rc.c26c18b.20250911055855
+    created: "2025-09-11T06:27:49.326662773Z"
+    description: Information about the architecture and makeup of the LTC's server
+      infrastructure.
+    digest: f15979f9f180e30fd2fde89ec1f5540774e55d160946c0f2132d1253973727bc
+    home: https://infrastructure-documentation.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: infrastructure-documentation
+    sources:
+    - https://github.com/bcit-ltc/
+    - https://github.com/bcit-ltc/infrastructure-documentation
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/infrastructure-documentation-1.1.2-rc.c26c18b.20250911055855/infrastructure-documentation-1.1.2-rc.c26c18b.20250911055855.tgz
+    version: 1.1.2-rc.c26c18b.20250911055855
+  - apiVersion: v2
+    appVersion: 1.1.2-rc.c26c18b.20250911055855
     created: "2025-09-11T05:59:33.04425102Z"
     description: Information about the architecture and makeup of the LTC's server
       infrastructure.
@@ -454,6 +473,24 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/infrastructure-documentation-1.0.3-rc.93dfa08.20250824171959/infrastructure-documentation-1.0.3-rc.93dfa08.20250824171959.tgz
     version: 1.0.3-rc.93dfa08.20250824171959
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-09-11T06:27:49.117485731Z"
+    description: Information about how to use [Qcon](https://qcon.ltc.bcit.ca).
+    digest: 4843e6c074b6ad62616601f0990fcba882db6596593ec5e12ee1b27cb7f15177
+    home: https://qcon-guide.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: infrastructure-documentation
+    sources:
+    - https://github.com/bcit-ltc/
+    - https://github.com/bcit-ltc/qcon-guide
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/infrastructure-documentation-1.0.0/infrastructure-documentation-1.0.0.tgz
+    version: 1.0.0
   longhorn:
   - apiVersion: v1
     appVersion: v1.9.1
@@ -597,6 +634,25 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/qcon-api-0.0.0-rc.cbdc246.20250909173957/qcon-api-0.0.0-rc.cbdc246.20250909173957.tgz
     version: 0.0.0-rc.cbdc246.20250909173957
+  - apiVersion: v2
+    appVersion: 0.0.0-rc.cbdc246.20250909173957
+    created: "2025-09-11T06:27:49.546869097Z"
+    description: qcon-api is the backend API for the QCon application. It provides
+      a websocket endpoint for converting documents from word to SCORM format.
+    digest: 6317c4e4971fa2af2cea2a955be761c860349f627058dae48272273a9cd8bcc7
+    home: https://qcon-api.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: qcon-api
+    sources:
+    - https://github.com/bcit-ltc/
+    - https://github.com/bcit-ltc/qcon-api
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/qcon-api-0.0.0-rc.cbdc246.20250909173957/qcon-api-0.0.0-rc.cbdc246.20250909173957.tgz
+    version: 0.0.0-rc.cbdc246.20250909173957
   rancher:
   - apiVersion: v2
     appVersion: v2.11.3
@@ -672,6 +728,25 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/sugar-suite-0.0.0-rc.01a9cdd.20250902234251/sugar-suite-0.0.0-rc.01a9cdd.20250902234251.tgz
     version: 0.0.0-rc.01a9cdd.20250902234251
+  - apiVersion: v2
+    appVersion: 0.0.0-rc.01a9cdd.20250902234251
+    created: "2025-09-11T06:27:49.8423977Z"
+    description: Sugar-Suite is a "Framework Factory" used to produce customized stylesheets
+      designed for building online courses in HTML.
+    digest: b2870ced411a5cbe4c01b9accb070b1180df00cf0e6844d819ef034c2c1a2248
+    home: https://sugar-suite.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: sugar-suite
+    sources:
+    - https://github.com/bcit-ltc/
+    - https://github.com/bcit-ltc/sugar-suite
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/sugar-suite-0.0.0-rc.01a9cdd.20250902234251/sugar-suite-0.0.0-rc.01a9cdd.20250902234251.tgz
+    version: 0.0.0-rc.01a9cdd.20250902234251
   vault-secrets-operator:
   - apiVersion: v2
     appVersion: 0.10.0
@@ -686,4 +761,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-09-11T05:59:33.044511039Z"
+generated: "2025-09-11T06:27:49.842685687Z"
