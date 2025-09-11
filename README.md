@@ -1,6 +1,6 @@
 # Helm Charts
 
-Helm charts for apps and services built and maintained by BCIT's Learning and Teaching Centre.
+Helm charts for apps and services developed and maintained by BCIT's Learning and Teaching Centre.
 
 ## Usage
 
