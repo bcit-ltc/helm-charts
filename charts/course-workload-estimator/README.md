@@ -1,10 +1,8 @@
 # course-workload-estimator
 
-A time calculator for instructors to estimate how many hours of work students might be expected to spend on a course.
+![Version: 1.0.0-rc.6adafcf.20250903214120](https://img.shields.io/badge/Version-1.0.0--rc.6adafcf.20250903214120-informational?style=flat-square) ![AppVersion: 1.0.0-rc.6adafcf.20250903214120](https://img.shields.io/badge/AppVersion-1.0.0--rc.6adafcf.20250903214120-informational?style=flat-square)
 
-![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![AppVersion: 0.0.1](https://img.shields.io/badge/AppVersion-0.0.1-informational?style=flat-square)
-
-A time calculator for instructors to estimate how many hours of work students might be expected to spend on a course.
+A time calculator to estimate the number of hours of work students might be expected to spend completing coursework.
 
 **Homepage:** <https://course-workload-estimator.ltc.bcit.ca>
 
@@ -66,7 +64,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"bcit-ltc/course-workload-estimator"` |  |
-| image.tag | string | `"1.1.0"` |  |
+| image.tag | string | `"1.0.0-rc.6adafcf.20250903214120"` |  |
 | imagePullSecrets | list | `[]` |  |
 | ingress.annotations | object | `{}` |  |
 | ingress.enabled | bool | `true` |  |
