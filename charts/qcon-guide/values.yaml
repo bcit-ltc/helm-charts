@@ -1,0 +1,139 @@
+# Special app-specific values
+# api:
+#   name: "api"
+#   url: "https://app.ltc.bcit.ca/api"
+
+# Common default values reflect the "stable" (production) environment.
+name: "qcon-guide"
+# Sets the repo and tag of the deployment.
+image:
+  registry: "ghcr.io"
+  repository: "bcit-ltc/qcon-guide"
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+# This is for the secrets for pulling an image from a private repository.
+# See: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []
+# Workload configuration
+replicaCount: 1
+revisionHistoryLimit: 3
+progressDeadlineSeconds: 600
+# Pod metadata
+podAnnotations: {}
+podLabels: {}
+# ServiceAccount
+serviceAccount:
+  create: true
+  name: "" # if empty use release name
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+# Security contexts (safe defaults for nginx-unprivileged)
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+  readOnlyRootFilesystem: true
+  runAsUser: 101
+  runAsGroup: 101
+# Container port and probes
+container:
+  port: 8080
+readinessProbe:
+  httpGet:
+    path: /
+    port: 8080
+  initialDelaySeconds: 3
+  periodSeconds: 10
+livenessProbe:
+  httpGet:
+    path: /
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 10
+startupProbe:
+  httpGet:
+    path: /
+    port: 8080
+  failureThreshold: 30
+  periodSeconds: 2
+# Resources (set sensible defaults per app)
+resources: {}
+# For more information on configuring resources, see the K8s documentation:
+# https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+# cpuRequest: "100m"
+# cpuLimit: "100m"
+# memRequest: "64Mi"
+# memLimit: "128Mi"
+# Scheduling
+nodeSelector: {}
+tolerations: []
+affinity: {}
+# Service
+service:
+  type: ClusterIP
+  port: 8080
+  annotations: {}
+# Ingress
+defaultDomain: ltc.bcit.ca
+ingress:
+  enabled: true
+  ingressClassName: "" # e.g. "nginx" | "traefik"
+  host: "" # if empty -> <name>.<defaultDomain>
+  annotations: {}
+  tlsSecret: "star-ltc-bcit-ca" # Defaults to star-ltc-bcit-ca.
+  extraPaths: [] # advanced users: extra path rules (rendered raw)
+  # extraPaths:     # Optional
+  #   - path: /api
+  #     backend:
+  #       service:
+  #         name: api-service
+  #         port:
+  #           number: 3000
+# ConfigMap support
+useDefaultNginxConfig: true
+# Extensibility
+extraEnv: []
+extraEnvFrom: []
+extraVolumeMounts:
+  - name: tmp
+    mountPath: /tmp
+    # - name: nginx-config
+    #   mountPath: /etc/nginx/conf.d
+# - name: mypath
+#   mountPath: "/app/mypath"
+#   readOnly: true
+extraVolumes:
+  - name: tmp
+    emptyDir: {}
+    # - name: nginx-config
+    #   configMap:
+    #     name: nginx-config
+# - name: mysecret
+#   secret:
+#     secretName: mysecret
+#     optional: false
+# Optional features
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+pdb:
+  enabled: false
+  minAvailable: 1
+networkPolicy:
+  enabled: false
+  # When enabled, allow ingress on service.port within the namespace.
+#####
+##### For later development #####
+#####
+# # This configures a Statefulset to create a PVC for data
+# dataStorage:
+#   enabled: false
+#   size: 10Gi
+#   # Location where the PVC will be mounted.
+#   mountPath: "/app/data"  

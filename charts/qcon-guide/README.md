@@ -1,10 +1,10 @@
-# course-production-site
+# infrastructure-documentation
 
 ![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-1.0.0-informational?style=flat-square)
 
-A reference for anyone preparing Word documents to be converted into HTML.
+Information about how to use [Qcon](https://qcon.ltc.bcit.ca).
 
-**Homepage:** <https://course-production-site.ltc.bcit.ca>
+**Homepage:** <https://qcon-guide.ltc.bcit.ca>
 
 ## Maintainers
 
@@ -19,7 +19,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 
 1. Create a [GitHub personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) and set it in your terminal shell:
 
-        rexport CR_PAT=YOUR_TOKEN
+        export CR_PAT=YOUR_TOKEN
 
 2. Install [Helm](https://helm.sh/docs/intro/install) and [jq](https://jqlang.org/download/).
 
@@ -33,16 +33,16 @@ Our registry images are public, but in ["Working with Container Registries"](htt
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer $CR_PAT" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
-        https://api.github.com/orgs/bcit-ltc/packages/container/course-production-site/versions \
+        https://api.github.com/orgs/bcit-ltc/packages/container/qcon-guide/versions \
         | jq '.[].metadata.container.tags.[]'
 
 5. Pull and inspect the helm chart:
 
-        helm pull --untar oci://ghcr.io/bcit-ltc/course-production-site --version {VERSION}
+        helm pull --untar oci://ghcr.io/bcit-ltc/qcon-guide --version {VERSION}
 
 6. Install the chart:
 
-        helm install course-production-site .
+        helm install qcon-guide .
 
 ## Values
 
@@ -63,7 +63,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | extraVolumes[0].name | string | `"tmp"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.registry | string | `"ghcr.io"` |  |
-| image.repository | string | `"bcit-ltc/course-production-site"` |  |
+| image.repository | string | `"bcit-ltc/qcon-guide"` |  |
 | image.tag | string | `"1.0.0"` |  |
 | imagePullSecrets | list | `[]` |  |
 | ingress.annotations | object | `{}` |  |
@@ -76,7 +76,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | livenessProbe.httpGet.port | int | `8080` |  |
 | livenessProbe.initialDelaySeconds | int | `10` |  |
 | livenessProbe.periodSeconds | int | `10` |  |
-| name | string | `"course-production-site"` |  |
+| name | string | `"qcon-guide"` |  |
 | networkPolicy.enabled | bool | `false` |  |
 | nodeSelector | object | `{}` |  |
 | pdb.enabled | bool | `false` |  |

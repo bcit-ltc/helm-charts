@@ -1,13 +1,10 @@
 # sugar-suite
-Sugar-Suite is a "Framework Factory" used to produce customized stylesheets designed for building online courses in HTML. It is built using Sass/Compass which provides an expressive and programmatic method for authoring the CSS. In order to produce the CSS, the Sass files (.scss) are "pre-processed".
 
-## Quickstart
+![Version: 0.0.0-rc.01a9cdd.20250902234251](https://img.shields.io/badge/Version-0.0.0--rc.01a9cdd.20250902234251-informational?style=flat-square) ![AppVersion: 0.0.0-rc.01a9cdd.20250902234251](https://img.shields.io/badge/AppVersion-0.0.0--rc.01a9cdd.20250902234251-informational?style=flat-square)
 
-<!-- ```bash
-helm install sugar-suite ./nginx-unprivileged-app   --set image.tag=1.27-alpine   --set ingress.enabled=true   --set defaultDomain=ltc.bcit.ca
-``` -->
+Sugar-Suite is a "Framework Factory" used to produce customized stylesheets designed for building online courses in HTML.
 
-<!-- Then visit: `http://sugar-suite.ltc.bcit.ca` (or use port-forward from the NOTES). -->
+**Homepage:** <https://sugar-suite.ltc.bcit.ca>
 
 ## Maintainers
 
@@ -51,41 +48,68 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| affinity | object | `{}` |  |
+| autoscaling.enabled | bool | `false` |  |
+| autoscaling.maxReplicas | int | `5` |  |
+| autoscaling.minReplicas | int | `2` |  |
+| autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
 | container.port | int | `8080` |  |
 | defaultDomain | string | `"ltc.bcit.ca"` |  |
+| extraEnv | list | `[]` |  |
+| extraEnvFrom | list | `[]` |  |
+| extraVolumeMounts[0].mountPath | string | `"/tmp"` |  |
+| extraVolumeMounts[0].name | string | `"tmp"` |  |
+| extraVolumes[0].emptyDir | object | `{}` |  |
+| extraVolumes[0].name | string | `"tmp"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.registry | string | `"ghcr.io"` |  |
 | image.repository | string | `"bcit-ltc/sugar-suite"` |  |
-| image.tag | string | `"1.1.0"` |  |
+| image.tag | string | `"0.0.0-rc.01a9cdd.20250902234251"` |  |
 | imagePullSecrets | list | `[]` |  |
 | ingress.annotations | object | `{}` |  |
-| ingress.create | bool | `false` |  |
-| ingress.host | string | `"sugar-suite.ltc.bcit.ca"` |  |
-| ingress.tlsSecret | string | `""` |  |
+| ingress.enabled | bool | `true` |  |
+| ingress.extraPaths | list | `[]` |  |
+| ingress.host | string | `""` |  |
+| ingress.ingressClassName | string | `""` |  |
+| ingress.tlsSecret | string | `"star-ltc-bcit-ca"` |  |
+| livenessProbe.httpGet.path | string | `"/"` |  |
+| livenessProbe.httpGet.port | int | `8080` |  |
+| livenessProbe.initialDelaySeconds | int | `10` |  |
+| livenessProbe.periodSeconds | int | `10` |  |
 | name | string | `"sugar-suite"` |  |
-| podSecurityContext | object | `{}` |  |
-| progressDeadlineSeconds | int | `300` |  |
+| networkPolicy.enabled | bool | `false` |  |
+| nodeSelector | object | `{}` |  |
+| pdb.enabled | bool | `false` |  |
+| pdb.minAvailable | int | `1` |  |
+| podAnnotations | object | `{}` |  |
+| podLabels | object | `{}` |  |
+| podSecurityContext.runAsNonRoot | bool | `true` |  |
+| podSecurityContext.seccompProfile.type | string | `"RuntimeDefault"` |  |
+| progressDeadlineSeconds | int | `600` |  |
+| readinessProbe.httpGet.path | string | `"/"` |  |
+| readinessProbe.httpGet.port | int | `8080` |  |
+| readinessProbe.initialDelaySeconds | int | `3` |  |
+| readinessProbe.periodSeconds | int | `10` |  |
 | replicaCount | int | `1` |  |
-| resources.cpuLimit | string | `"100m"` |  |
-| resources.cpuRequest | string | `"100m"` |  |
-| resources.memLimit | string | `"128Mi"` |  |
-| resources.memRequest | string | `"64Mi"` |  |
-| revisionHistoryLimit | int | `2` |  |
-| securityContext | object | `{}` |  |
+| resources | object | `{}` |  |
+| revisionHistoryLimit | int | `3` |  |
+| securityContext.allowPrivilegeEscalation | bool | `false` |  |
+| securityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| securityContext.readOnlyRootFilesystem | bool | `true` |  |
+| securityContext.runAsGroup | int | `101` |  |
+| securityContext.runAsUser | int | `101` |  |
+| service.annotations | object | `{}` |  |
 | service.port | int | `8080` |  |
 | service.type | string | `"ClusterIP"` |  |
-| serviceAccount.annotations | object | `{}` |  |
 | serviceAccount.automount | bool | `true` |  |
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.name | string | `""` |  |
-| volumeMounts[0].mountPath | string | `"/tmp"` |  |
-| volumeMounts[0].name | string | `"tmp"` |  |
-| volumeMounts[1].mountPath | string | `"/etc/nginx/conf.d"` |  |
-| volumeMounts[1].name | string | `"nginx-config"` |  |
-| volumes[0].emptyDir | object | `{}` |  |
-| volumes[0].name | string | `"tmp"` |  |
-| volumes[1].configMap.name | string | `"nginx-config"` |  |
-| volumes[1].name | string | `"nginx-config"` |  |
+| startupProbe.failureThreshold | int | `30` |  |
+| startupProbe.httpGet.path | string | `"/"` |  |
+| startupProbe.httpGet.port | int | `8080` |  |
+| startupProbe.periodSeconds | int | `2` |  |
+| tolerations | list | `[]` |  |
+| useDefaultNginxConfig | bool | `true` |  |
 
 ## Building this README.md
 
