@@ -474,6 +474,24 @@ entries:
     - https://github.com/bcit-ltc/helm-charts/releases/download/infrastructure-documentation-1.0.3-rc.93dfa08.20250824171959/infrastructure-documentation-1.0.3-rc.93dfa08.20250824171959.tgz
     version: 1.0.3-rc.93dfa08.20250824171959
   - apiVersion: v2
+    appVersion: 1.0.1
+    created: "2025-09-11T06:30:17.797037621Z"
+    description: Information about how to use [Qcon](https://qcon.ltc.bcit.ca).
+    digest: 06db506de8187f0055a624faaa8ca7faa81b157727b138bd0bf037074c292a27
+    home: https://qcon-guide.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: infrastructure-documentation
+    sources:
+    - https://github.com/bcit-ltc/
+    - https://github.com/bcit-ltc/qcon-guide
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/infrastructure-documentation-1.0.1/infrastructure-documentation-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
     appVersion: 1.0.0
     created: "2025-09-11T06:27:49.117485731Z"
     description: Information about how to use [Qcon](https://qcon.ltc.bcit.ca).
@@ -761,4 +779,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-09-11T06:27:49.842685687Z"
+generated: "2025-09-11T06:30:17.797335431Z"
