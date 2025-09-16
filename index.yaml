@@ -1138,6 +1138,24 @@ entries:
     version: 0.0.0-rc.cbdc246.20250909173957
   qcon-guide:
   - apiVersion: v2
+    appVersion: 1.0.2
+    created: "2025-09-16T23:22:58.695209333Z"
+    description: Information about how to use [Qcon](https://qcon.ltc.bcit.ca).
+    digest: fdb07297d9c7b55fdc7ffafcb0049a8cf68c15643de37c8551fbad2d8cc0904d
+    home: https://qcon-guide.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: qcon-guide
+    sources:
+    - https://github.com/bcit-ltc/
+    - https://github.com/bcit-ltc/qcon-guide
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/qcon-guide-1.0.2/qcon-guide-1.0.2.tgz
+    version: 1.0.2
+  - apiVersion: v2
     appVersion: 1.0.1
     created: "2025-09-16T23:07:16.712964463Z"
     description: Information about how to use [Qcon](https://qcon.ltc.bcit.ca).
@@ -1319,4 +1337,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-09-16T23:13:55.433096698Z"
+generated: "2025-09-16T23:22:58.695457916Z"
