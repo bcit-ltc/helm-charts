@@ -1191,6 +1191,25 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/qcon-guide-1.0.1-rc.66eb9b3.20250916231317/qcon-guide-1.0.1-rc.66eb9b3.20250916231317.tgz
     version: 1.0.1-rc.66eb9b3.20250916231317
+  qcon-web:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-09-17T16:44:54.421081644Z"
+    description: qcon-web is a web application that provides a user interface for
+      the QCon quiz conversion tool. it uses the Qcon API.
+    digest: 8761fcab53d1f15fa0f5dfb2fc5e4294dcb5030a1acf623fab266d7511f317b4
+    home: https://qcon-web.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: qcon-web
+    sources:
+    - https://github.com/bcit-ltc/
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/qcon-web-1.0.0/qcon-web-1.0.0.tgz
+    version: 1.0.0
   rancher:
   - apiVersion: v2
     appVersion: v2.11.3
@@ -1337,4 +1356,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-09-16T23:22:58.695457916Z"
+generated: "2025-09-17T16:44:54.421366369Z"
