@@ -18,45 +18,6 @@ imagePullSecrets: []
 replicaCount: 1
 revisionHistoryLimit: 3
 progressDeadlineSeconds: 600
-defaultDomain: ltc.bcit.ca
-container:
-  port: 8000
-
-useDefaultNginxConfig: true
-nginx:
-  image: nginxinc/nginx-unprivileged:1.25-alpine
-  pullPolicy: IfNotPresent
-  resources:
-    requests: { cpu: 100m, memory: 100Mi }
-    limits:   { cpu: 100m, memory: 250Mi }
-
-postgres:
-  enabled: true
-  image: postgres
-  config:
-    POSTGRES_HOST_AUTH_METHOD: trust
-
-ingress:
-  enabled: true
-  ingressClassName: nginx
-  host: qcon-api.ltc.bcit.ca
-  tlsSecret: qcon-api-star-ltc-bcit-ca
-  annotations: {}
-
-service:
-  type: ClusterIP
-  port: 80
-  annotations: {}
-
-extraEnvFrom:
-  - secretRef: { name: qcon-api-postgres-credentials }
-  - secretRef: { name: qcon-api-tokens }
-  - secretRef: { name: qcon-api-admin-credentials }
-
-readinessProbe: null
-livenessProbe: null
-startupProbe: null
-resources: {}
 
 podAnnotations: {}
 podLabels: {}
@@ -80,25 +41,28 @@ securityContext:
   runAsGroup: 101
 # Container port and probes
 container:
-  port: 8080
-readinessProbe:
-  httpGet:
-    path: /
-    port: 8080
-  initialDelaySeconds: 3
-  periodSeconds: 10
-livenessProbe:
-  httpGet:
-    path: /
-    port: 8080
-  initialDelaySeconds: 10
-  periodSeconds: 10
-startupProbe:
-  httpGet:
-    path: /
-    port: 8080
-  failureThreshold: 30
-  periodSeconds: 2
+  port: 8000
+readinessProbe: null
+livenessProbe: null
+startupProbe: null
+# readinessProbe:
+#   httpGet:
+#     path: /
+#     port: 8000
+#   initialDelaySeconds: 3
+#   periodSeconds: 10
+# livenessProbe:
+#   httpGet:
+#     path: /
+#     port: 8000
+#   initialDelaySeconds: 10
+#   periodSeconds: 10
+# startupProbe:
+#   httpGet:
+#     path: /
+#     port: 8000
+#   failureThreshold: 30
+#   periodSeconds: 2
 # Resources (set sensible defaults per app)
 resources: {}
 # For more information on configuring resources, see the K8s documentation:
@@ -111,7 +75,6 @@ resources: {}
 nodeSelector: {}
 affinity: {}
 tolerations: []
-affinity: {}
 # Service
 service:
   type: ClusterIP
@@ -134,24 +97,43 @@ ingress:
   #         port:
   #           number: 3000
 # ConfigMap support
-useDefaultNginxConfig: true
+
+nginx:
+  image: nginxinc/nginx-unprivileged:1.25-alpine
+  pullPolicy: IfNotPresent
+  resources:
+    requests: { cpu: 100m, memory: 100Mi }
+    limits:   { cpu: 100m, memory: 250Mi }
+  port: 8080
+
+postgres:
+  enabled: true
+  image: postgres
+  config:
+    POSTGRES_HOST_AUTH_METHOD: trust
+  port: 5432
+
 # Extensibility
 extraEnv: []
-extraEnvFrom: []
+extraEnvFrom:
+  - secretRef: { name: qcon-api-postgres-credentials }
+  - secretRef: { name: qcon-api-tokens }
+  - secretRef: { name: qcon-api-admin-credentials }
+
 extraVolumeMounts:
   - name: tmp
     mountPath: /tmp
-    # - name: nginx-config
-    #   mountPath: /etc/nginx/conf.d
+  - name: nginx-config
+    mountPath: /etc/nginx/conf.d
 # - name: mypath
 #   mountPath: "/app/mypath"
 #   readOnly: true
 extraVolumes:
   - name: tmp
     emptyDir: {}
-    # - name: nginx-config
-    #   configMap:
-    #     name: nginx-config
+  - name: nginx-config
+    configMap:
+      name: nginx-config
 # - name: mysecret
 #   secret:
 #     secretName: mysecret
