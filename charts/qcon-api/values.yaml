@@ -18,7 +18,46 @@ imagePullSecrets: []
 replicaCount: 1
 revisionHistoryLimit: 3
 progressDeadlineSeconds: 600
-# Pod metadata
+defaultDomain: ltc.bcit.ca
+container:
+  port: 8000
+
+useDefaultNginxConfig: true
+nginx:
+  image: nginxinc/nginx-unprivileged:1.25-alpine
+  pullPolicy: IfNotPresent
+  resources:
+    requests: { cpu: 100m, memory: 100Mi }
+    limits:   { cpu: 100m, memory: 250Mi }
+
+postgres:
+  enabled: true
+  image: postgres
+  config:
+    POSTGRES_HOST_AUTH_METHOD: trust
+
+ingress:
+  enabled: true
+  ingressClassName: nginx
+  host: qcon-api.ltc.bcit.ca
+  tlsSecret: qcon-api-star-ltc-bcit-ca
+  annotations: {}
+
+service:
+  type: ClusterIP
+  port: 80
+  annotations: {}
+
+extraEnvFrom:
+  - secretRef: { name: qcon-api-postgres-credentials }
+  - secretRef: { name: qcon-api-tokens }
+  - secretRef: { name: qcon-api-admin-credentials }
+
+readinessProbe: null
+livenessProbe: null
+startupProbe: null
+resources: {}
+
 podAnnotations: {}
 podLabels: {}
 # ServiceAccount
@@ -70,6 +109,7 @@ resources: {}
 # memLimit: "128Mi"
 # Scheduling
 nodeSelector: {}
+affinity: {}
 tolerations: []
 affinity: {}
 # Service

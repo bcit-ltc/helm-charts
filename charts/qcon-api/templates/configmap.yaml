@@ -6,14 +6,37 @@ metadata:
     {{- include "app.labels" . | nindent 4 }}
 data:
   default.conf: |
+    upstream channels-backend { server 127.0.0.1:8000; }
+    client_body_in_file_only clean;
     server {
       listen 8080 default_server;
       server_name _;
-      location / {
-        root /usr/share/nginx/html;
-        index index.html index.htm;
-        try_files $uri $uri/ =404;
+      client_max_body_size 20M;
+      root /var/www/html;
+      location / { try_files $uri @proxy_to_app; }
+      location /static/ { autoindex on; alias /var/www/html/static/; }
+      location @proxy_to_app {
+        proxy_pass http://channels-backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $server_name;
       }
-      error_page 500 502 503 504 /50x.html;
-      location = /50x.html { root /usr/share/nginx/html; }
     }
+---
+{{- if and .Values.postgres.enabled .Values.postgres.config }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "app.fullname" . }}-postgres
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+data:
+{{- range $k, $v := .Values.postgres.config }}
+  {{ $k }}: {{ $v | quote }}
+{{- end }}
+{{- end }}

@@ -70,6 +70,28 @@ spec:
             {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+        - name: nginx
+          image: {{ .Values.nginx.image }}
+          imagePullPolicy: {{ .Values.nginx.pullPolicy }}
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.nginx.resources | nindent 12 }}
+        {{- if .Values.postgres.enabled }}
+        - name: postgres
+          image: {{ .Values.postgres.image }}
+          envFrom:
+            - configMapRef: { name: {{ include "app.fullname" . }}-postgres }
+            {{- with .Values.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - containerPort: 5432
+              name: postgres
+              protocol: TCP
+        {{- end }}
       volumes:
         {{- if .Values.useDefaultNginxConfig }}
         - name: nginx-conf
