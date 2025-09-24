@@ -1,161 +1,378 @@
-# Special app-specific values
-# api:
-#   name: "api"
-#   url: "https://app.ltc.bcit.ca/api"
+# SPDX-License-Identifier: MPL-2.0
 
-# Common default values reflect the "stable" (production) environment.
-name: "qcon-api"
-# Sets the repo and tag of the deployment.
-image:
-  registry: "ghcr.io"
-  repository: "bcit-ltc/qcon-api"
-  tag: "1.0.0"
-  pullPolicy: IfNotPresent
-# This is for the secrets for pulling an image from a private repository.
-# See: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-imagePullSecrets: []
-# Workload configuration
-replicaCount: 1
-revisionHistoryLimit: 3
-progressDeadlineSeconds: 600
+# Overarching parameters and default chart values.
+global:
+  # enabled is the master enabled switch. Setting this to true or false
+  # will enable or disable all the components within this chart by default.
+  enabled: true
 
-podAnnotations: {}
-podLabels: {}
-# ServiceAccount
+  name: "qcon-api"
+  imagePullSecrets: []
+
+  # Orchestration tweaks
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 600
+
+# Configuration for the service account
 serviceAccount:
   create: true
-  name: "" # if empty use release name
-  # Automatically mount a ServiceAccount's API credentials?
-  automount: true
-# Security contexts (safe defaults for nginx-unprivileged)
-podSecurityContext:
-  runAsNonRoot: true
-  seccompProfile:
-    type: RuntimeDefault
-securityContext:
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop: ["ALL"]
-  readOnlyRootFilesystem: true
-  runAsUser: 101
-  runAsGroup: 101
-# Container port and probes
-container:
-  port: 8000
-readinessProbe: null
-livenessProbe: null
-startupProbe: null
-# readinessProbe:
-#   httpGet:
-#     path: /
-#     port: 8000
-#   initialDelaySeconds: 3
-#   periodSeconds: 10
-# livenessProbe:
-#   httpGet:
-#     path: /
-#     port: 8000
-#   initialDelaySeconds: 10
-#   periodSeconds: 10
-# startupProbe:
-#   httpGet:
-#     path: /
-#     port: 8000
-#   failureThreshold: 30
-#   periodSeconds: 2
-# Resources (set sensible defaults per app)
-resources: {}
-# For more information on configuring resources, see the K8s documentation:
-# https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-# cpuRequest: "100m"
-# cpuLimit: "100m"
-# memRequest: "64Mi"
-# memLimit: "128Mi"
-# Scheduling
-nodeSelector: {}
-affinity: {}
-tolerations: []
-# Service
-service:
-  type: ClusterIP
-  port: 8080
+
+  # The name of the service account to create. If empty uses release name
+  name: ""
+
+  # Create a Secret API object to store a non-expiring token for the service account.
+  # Prior to v1.24.0, Kubernetes used to generate this secret for each service account by default.
+  # Kubernetes now recommends using short-lived tokens from the TokenRequest API or projected volumes instead if possible.
+  # For more details, see https://kubernetes.io/docs/concepts/configuration/secret/#service-account-token-secrets
+  createSecret: true
+
+  # Extra labels to attach to the service account
+  # Should be a YAML map of the labels to apply to the serviceAccount
+  extraLabels: {}
+
+  # Extra annotations to attach to the service account
   annotations: {}
-# Ingress
-defaultDomain: ltc.bcit.ca
+
+# Main app configuration
+processor:
+  image:
+    registry: "ghcr.io"
+    repository: "bcit-ltc/qcon-api"
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+
+  replicas: 1
+  
+  # Extra labels to attach to the processor pods
+  # Should be a YAML map of the labels to apply to the deployment template
+  extraLabels: {}
+
+  # Extra annotations to attach to the processor deployment
+  annotations: {}
+
+  # Port on which processor is listening
+  port: 8000
+
+  # extraEnvVars is a list of extra environment variables that
+  # are set literally.
+  extraEnvVars:
+    - GIT_TAG: "v1.0.0"
+
+  # Mounts for the processor container. These automatically create
+  # corresponding volumes in the pod.
+  # volumeMounts create emptyDir volumes.
+  volumeMounts:
+    - name: shared-data
+      mountPath: /var/www/html
+
+  configMounts: []
+
+  secretMounts:
+    - name: admin-credentials
+      secretName: admin-credentials
+      mountPath: /etc/secrets/admin-credentials
+
+    - name: postgres-credentials          # volume name (must be DNS-1123 compliant)
+      secretName: postgres-credentials    # existing Secret in the same namespace
+      mountPath: /etc/secrets/postgres-credentials
+      readOnly: true                      # defaults to true if omitted
+      optional: false                     # allow pod to start if Secret missing? (default false)
+      items:                              # optional: map specific keys to paths (and per-file mode)
+        - key: username
+          path: username
+        - key: password
+          path: password
+
+    - name: api-token
+      secretName: api-token
+      mountPath: /etc/secrets/api-token
+      readOnly: true
+
+
+# Enables a service for the processor app
+service:
+  enabled: true
+
+  # Service type: by default, connect to the app using an internal cluster IP
+  type: ClusterIP
+
+  # Port on which app is listening
+  port: 8080
+
+  # Target port to which the service should be mapped to
+  targetPort: 8080
+
+  # Extra annotations to attach to the service
+  annotations: {}
+
+
+# Creates an ingress for external access
 ingress:
   enabled: true
-  ingressClassName: "" # e.g. "nginx" | "traefik"
-  host: "" # if empty -> <name>.<defaultDomain>
+  labels: {}
   annotations: {}
-  tlsSecret: "star-ltc-bcit-ca" # Defaults to star-ltc-bcit-ca.
-  extraPaths: [] # advanced users: extra path rules (rendered raw)
-  # extraPaths:     # Optional
+  ingressClassName: ""
+
+  # As of Kubernetes 1.19, all Ingress Paths must have a pathType configured. The default value below should be sufficient in most cases.
+  # See: https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types for other possible values.
+  pathType: Prefix
+  hosts:
+    - host: "ltc.bcit.ca"
+      paths: []
+  extraPaths: []
   #   - path: /api
   #     backend:
   #       service:
   #         name: api-service
   #         port:
   #           number: 3000
-# ConfigMap support
+  tls:
+    - secretName: "star-ltc-bcit-ca"
+      hosts:
+        - "ltc.bcit.ca"
 
-nginx:
+
+# Configuration for the frontend
+frontend:
+  enabled: true
+
+  # The name of the frontend container to create. If empty uses "frontend"
+  name: nginx
+
   image: nginxinc/nginx-unprivileged:1.25-alpine
   pullPolicy: IfNotPresent
+
+  # Extra annotations to attach to the frontend
+  annotations: {}
+
+  # Add a checksum annotation to the server pods that is a hash
+  # of the configuration. Can be used to identify configuration changes.
+  includeConfigAnnotation: false
+
+  # Security context for the pod template and the app container
+    # Pod-level defaults
+    #   runAsNonRoot: true
+    #   runAsGroup: 101
+    #   runAsUser: 101
+    #   fsGroup: 101
+    #   readOnlyRootFilesystem: true
+    #   allowPrivilegeEscalation: false
+
+    # Container-level defaults
+    #   capabilities:
+    #     drop:
+    #       - ALL
+  securityContext:
+    pod: {}
+    container: {}
+
+  # Configs are stored in ConfigMaps and projected through volumes. Be sure to 
+  # set matching configMounts.
+  configs:
+    - name: nginx-config
+      data:
+        nginx.conf: |-
+          upstream channels-backend {
+              server 127.0.0.1:8000;
+          }
+
+          client_body_in_file_only clean;
+          # client_body_temp_path /tmp 1 2;
+
+          server {
+              listen 8080 default_server;
+              server_name _;
+
+              client_max_body_size 20M;
+              root /var/www/html;
+
+              location / {
+                  # checks for static file, if not found proxy to app
+                  try_files $uri @proxy_to_app;
+              }
+
+              location /static/ {
+                  autoindex on;
+                  alias /var/www/html/static/;
+              }
+
+              location @proxy_to_app {
+                  proxy_pass http://channels-backend;
+
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection "upgrade";
+
+                  proxy_redirect off;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Host $server_name;
+              }
+
+          }
+
+  # Resource requests and limits mapped directly to the value of
+  # the resources field for a PodSpec.
   resources:
-    requests: { cpu: 100m, memory: 100Mi }
-    limits:   { cpu: 100m, memory: 250Mi }
+    requests:
+      memory: 64Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi
+      cpu: 250m
+
+  # Port on which the frontend is listening
   port: 8080
 
-postgres:
+  # Mounts for the frontend container. These automatically create
+  # corresponding volumes in the pod.
+  # volumeMounts create emptyDir volumes.
+  volumeMounts:
+    - name: shared-data
+      mountPath: /var/www/html
+    - name: tmp
+      mountPath: /tmp
+
+  configMounts:
+    - name: nginx-config
+      mountPath: /etc/nginx/conf.d
+
+  secretMounts: []
+
+  # Defines livenessProbe settings
+  livenessProbe:
+    enabled: false
+    # exec is preferred to httpGet (path) as the livenessProbe handler.
+    execCommand: []
+    # - /bin/sh
+    # - -c
+    # Path for the httpGet handler
+    path: "/"
+    # Port number on which livenessProbe will be checked if httpGet is used as the livenessProbe handler
+    port: 8080
+    # When a probe fails, Kubernetes will try failureThreshold times before giving up
+    failureThreshold: 2
+    # Number of seconds after the container has started before probe initiates
+    initialDelaySeconds: 10
+    # How often (in seconds) to perform the probe
+    periodSeconds: 5
+    # Minimum consecutive successes for the probe to be considered successful after having failed
+    successThreshold: 1
+    # Number of seconds after which the probe times out.
+    timeoutSeconds: 5
+
+  # Defines custom readinessProbe settings
+  readinessProbe:
+    enabled: false
+    # If you need to use a http path instead of the default exec
+    # path: /health?standbyok=true
+    # Port number on which readinessProbe will be checked.
+    port: 8080
+    # When a probe fails, Kubernetes will try failureThreshold times before giving up
+    failureThreshold: 2
+    # Number of seconds after the container has started before probe initiates
+    initialDelaySeconds: 5
+    # How often (in seconds) to perform the probe
+    periodSeconds: 10
+    # Minimum consecutive successes for the probe to be considered successful after having failed
+    successThreshold: 1
+    # Number of seconds after which the probe times out.
+    timeoutSeconds: 5
+
+  # Used to define startupProbe settings
+  startupProbe:
+    enabled: false
+    # When a probe fails, Kubernetes will try failureThreshold times before giving up
+    failureThreshold: 12
+    # Number of seconds after the container has started before probe initiates
+    initialDelaySeconds: 5
+    # How often (in seconds) to perform the probe
+    periodSeconds: 5
+    # Minimum consecutive successes for the probe to be considered successful after having failed
+    successThreshold: 1
+    # Number of seconds after which the probe times out.
+    timeoutSeconds: 5
+
+  # extraEnvVars is a list of extra environment variables that
+  # are set literally.
+  extraEnvVars:
+    - GIT_TAG: "v1.0.0"
+
+# Backend service configuration
+backend:
   enabled: true
+
+  # The name of the backend container to create. If empty uses "backend".
+  name: ""
+
   image: postgres
-  config:
-    POSTGRES_HOST_AUTH_METHOD: trust
+
+  # configs create configMaps that are passed to containers using envFrom
+  configEnvs:
+    - name: postgres-config
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  # Port on which the backend is listening
   port: 5432
 
-# Extensibility
-extraEnv: []
-extraEnvFrom:
-  - secretRef: { name: qcon-api-postgres-credentials }
-  - secretRef: { name: qcon-api-tokens }
-  - secretRef: { name: qcon-api-admin-credentials }
+  # Mounts for the backend container. These automatically create
+  # corresponding volumes in the pod.
+  # volumeMounts create emptyDir volumes.
+  volumeMounts:
+    - name: shared-data
+      mountPath: /var/www/html
+    - name: tmp         # creates emptyDir
+      mountPath: /tmp
 
-extraVolumeMounts:
-  - name: tmp
-    mountPath: /tmp
-  - name: nginx-config
-    mountPath: /etc/nginx/conf.d
-# - name: mypath
-#   mountPath: "/app/mypath"
-#   readOnly: true
-extraVolumes:
-  - name: tmp
-    emptyDir: {}
-  - name: nginx-config
-    configMap:
-      name: nginx-config
-# - name: mysecret
-#   secret:
-#     secretName: mysecret
-#     optional: false
-# Optional features
-autoscaling:
-  enabled: false
-  minReplicas: 2
-  maxReplicas: 5
-  targetCPUUtilizationPercentage: 80
-pdb:
-  enabled: false
-  minAvailable: 1
-networkPolicy:
-  enabled: false
-  # When enabled, allow ingress on service.port within the namespace.
-#####
-##### For later development #####
-#####
-# # This configures a Statefulset to create a PVC for data
+  configMounts: []
+
+  secretMounts:
+    - name: postgres-credentials          # volume name (must be DNS-1123 compliant)
+      secretName: postgres-credentials    # existing Secret in the same namespace
+      mountPath: /etc/secrets/postgres-credentials
+      readOnly: true                      # defaults to true if omitted
+      optional: false                     # allow pod to start if Secret missing? (default false)
+      items:                              # optional: map specific keys to paths (and per-file mode)
+        - key: username
+          path: username
+        - key: password
+          path: password
+
+
+# Unconfigured options
+# # Configuration for persistent volume claims
 # dataStorage:
-#   enabled: false
+#   enabled: true
+#   # Size of the PVC created
 #   size: 10Gi
 #   # Location where the PVC will be mounted.
 #   mountPath: "/app/data"
+#   # Name of the storage class to use.  If null it will use the
+#   # configured default Storage Class.
+#   storageClass: null
+#   # Access Mode of the storage device being used for the PVC
+#   accessMode: ReadWriteOnce
+#   # Annotations to apply to the PVC
+#   annotations: {}
+#   # Labels to apply to the PVC
+#   labels: {}
+
+
+# # Configuration for API connections
+# api:
+#   enabled: false
+#   name: "api"
+#   url: "https://app.ltc.bcit.ca/api"
+
+
+# autoscaling:
+#   enabled: false
+#   minReplicas: 2
+#   maxReplicas: 5
+#   targetCPUUtilizationPercentage: 80
+# pdb:
+#   enabled: false
+#   minAvailable: 1
+# networkPolicy:
+#   enabled: false

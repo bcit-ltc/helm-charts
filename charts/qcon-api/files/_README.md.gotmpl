@@ -29,16 +29,16 @@ Our registry images are public, but in ["Working with Container Registries"](htt
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer $CR_PAT" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
-        https://api.github.com/orgs/bcit-ltc/packages/container/qcon-api/versions \
+        https://api.github.com/orgs/bcit-ltc/packages/container/{{ template "chart.name" }}/versions \
         | jq '.[].metadata.container.tags.[]'
 
 5. Pull and inspect the helm chart:
 
-        helm pull --untar oci://ghcr.io/bcit-ltc/qcon-api --version {VERSION}
+        helm pull --untar oci://ghcr.io/bcit-ltc/{{ template "chart.name" }} --version {VERSION}
 
 6. Install the chart:
 
-        helm install qcon-api .
+        helm install {{ template "chart.name" }} .
 
 {{ template "chart.requirementsSection" . }}
 

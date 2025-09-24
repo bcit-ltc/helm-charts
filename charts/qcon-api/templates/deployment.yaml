@@ -1,109 +1,93 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "app.fullname" . }}
+  name: {{ include "app.name" . }}
   labels:
-    {{- include "app.labels" . | nindent 4 }}
+    helm.sh/chart: {{ include "app.chart" . }}
+    app.kubernetes.io/name: {{ include "app.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+  {{ include "app.deployment.annotations" . | nindent 2 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
-  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
-  progressDeadlineSeconds: {{ .Values.progressDeadlineSeconds }}
+  replicas: {{ .Values.processor.replicas }}
+  revisionHistoryLimit: {{ .Values.global.revisionHistoryLimit }}
+  progressDeadlineSeconds: {{ .Values.global.progressDeadlineSeconds }}
   selector:
     matchLabels:
-      {{- include "app.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: {{ include "app.name" . }}
+      component: server
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
   template:
     metadata:
       labels:
-        {{- include "app.selectorLabels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
+        helm.sh/chart: {{ include "app.chart" . }}
+        app.kubernetes.io/name: {{ include "app.name" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        component: server
+        {{- with .Values.processor.extraLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- with .Values.podAnnotations }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{ template "app.annotations" . }}
     spec:
-      serviceAccountName: {{ include "app.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "app.serviceAccount.name" . }}
+      {{ include "frontend.securityContext.pod" . | nindent 6 }}
+
       containers:
         - name: {{ include "app.name" . }}
-          image: {{ include "app.image" . }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.processor.image.registry }}/{{ .Values.processor.image.repository }}:{{ .Values.processor.image.tag }}"
+          imagePullPolicy: {{ .Values.processor.image.pullPolicy | default "IfNotPresent" }}
           ports:
-            - name: http
-              containerPort: {{ .Values.container.port }}
-              protocol: TCP
-          {{- with .Values.readinessProbe }}
-          readinessProbe:
-            {{- toYaml . | nindent 12 }}
+            - containerPort: {{ .Values.processor.port }}
+          {{- $procEnvFrom := include "app.componentEnvFrom" .Values.processor }}
+          {{- if $procEnvFrom }}
+          envFrom:
+{{ $procEnvFrom | nindent 12 }}
           {{- end }}
-          {{- with .Values.livenessProbe }}
-          livenessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.startupProbe }}
-          startupProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.resources }}
-          resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.extraEnv }}
           env:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.extraEnvFrom }}
-          envFrom:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- include "app.extraEnvironmentVars" .Values.processor | nindent 12 }}
+          {{- with include "app.componentVolumeMounts" .Values.processor }}
           volumeMounts:
-            {{- with .Values.extraVolumeMounts }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
-        - name: nginx
-          image: {{ .Values.nginx.image }}
-          imagePullPolicy: {{ .Values.nginx.pullPolicy }}
+{{ . | nindent 12 }}
+          {{- end }}
+        - name: {{ default "nginx" .Values.frontend.name }}
+          image: "{{ .Values.frontend.image }}"
+          imagePullPolicy: {{ .Values.frontend.pullPolicy | default "IfNotPresent" }}
           ports:
-            - name: http
-              containerPort: {{ .Values.nginx.port }}
-              protocol: TCP
-          resources:
-            {{- toYaml .Values.nginx.resources | nindent 12 }}
-        {{- if .Values.postgres.enabled }}
-        - name: postgres
-          image: {{ .Values.postgres.image }}
+            - containerPort: {{ .Values.frontend.port }}
+          {{- $feEnvFrom := include "app.componentEnvFrom" .Values.frontend }}
+          {{- if $feEnvFrom }}
           envFrom:
-            - configMapRef: { name: {{ include "app.fullname" . }}-postgres }
-            {{- with .Values.extraEnvFrom }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
+{{ $feEnvFrom | nindent 12 }}
+          {{- end }}
+          env:
+            {{- include "app.extraEnvironmentVars" .Values.frontend | nindent 12 }}
+          {{ include "frontend.securityContext.container" . | nindent 10 }}
+          {{ include "frontend.resources" . | nindent 10 }}
+          {{- with include "app.componentVolumeMounts" .Values.frontend }}
+          volumeMounts:
+{{ . | nindent 12 }}
+          {{- end }}
+
+        - name: {{ default "backend" .Values.backend.name | default "backend" }}
+          image: "{{ .Values.backend.image }}"
           ports:
-            - name: postgres
-              containerPort: {{ .Values.postgres.port }}
-              protocol: TCP
-        {{- end }}
+            - containerPort: {{ .Values.backend.port }}
+          {{- $beEnvFrom := include "app.componentEnvFrom" .Values.backend }}
+          {{- if $beEnvFrom }}
+          envFrom:
+{{ $beEnvFrom | nindent 12 }}
+          {{- end }}
+          {{- with include "app.componentVolumeMounts" .Values.backend }}
+          volumeMounts:
+{{ . | nindent 12 }}
+          {{- end }}
+
       volumes:
-        {{- with .Values.extraVolumes }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+{{ include "app.podVolumes" . | nindent 8 }}
+
+      {{- include "imagePullSecrets" . | nindent 6 }}

@@ -1,37 +1,56 @@
-{{- if .Values.ingress.enabled }}
-{{- $svcPort := .Values.service.port -}}
-{{- $host := .Values.ingress.host | default (printf "%s.%s" (include "app.fullname" .) .Values.defaultDomain) -}}
+{{/*
+SPDX-License-Identifier: MPL-2.0
+*/}}
+
+{{- if .Values.ingress.enabled -}}
+{{- $extraPaths   := .Values.ingress.extraPaths -}}
+{{- $serviceName  := include "app.name" . -}}
+{{- $servicePort  := .Values.service.port -}}
+{{- $pathType     := .Values.ingress.pathType | default "Prefix" -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "app.fullname" . }}
+  name: {{ include "app.name" . }}
   labels:
-    {{- include "app.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
-  annotations:
+    helm.sh/chart: {{ include "app.chart" . }}
+    app.kubernetes.io/name: {{ include "app.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    {{- with .Values.ingress.labels }}
     {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- end }}
+{{- template "app.ingress.annotations" . }}
 spec:
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName | quote }}
+    {{- end }}
+  {{- end }}
   {{- if .Values.ingress.ingressClassName }}
-  ingressClassName: {{ .Values.ingress.ingressClassName | quote }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
   {{- end }}
   rules:
-    - host: {{ $host | quote }}
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          {{- if $extraPaths }}
+{{ toYaml $extraPaths | indent 10 }}
+          {{- end }}
+          {{- range (.paths | default (list "/")) }}
+          - path: {{ . }}
+            pathType: {{ $pathType }}
             backend:
               service:
-                name: {{ include "app.fullname" . }}
+                name: {{ $serviceName }}
                 port:
-                  number: {{ $svcPort }}
-          {{- with .Values.ingress.extraPaths }}
-          {{- toYaml . | nindent 10 }}
+                  number: {{ $servicePort }}
           {{- end }}
-  {{- if .Values.ingress.tlsSecret }}
-  tls:
-    - hosts: [{{ $host | quote }}]
-      secretName: {{ .Values.ingress.tlsSecret | quote }}
-  {{- end }}
+    {{- end }}
 {{- end }}
