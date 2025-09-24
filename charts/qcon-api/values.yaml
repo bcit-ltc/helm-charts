@@ -5,34 +5,26 @@ global:
   # enabled is the master enabled switch. Setting this to true or false
   # will enable or disable all the components within this chart by default.
   enabled: true
-
   name: "qcon-api"
   imagePullSecrets: []
-
   # Orchestration tweaks
   revisionHistoryLimit: 3
   progressDeadlineSeconds: 600
-
 # Configuration for the service account
 serviceAccount:
   create: true
-
   # The name of the service account to create. If empty uses release name
   name: ""
-
   # Create a Secret API object to store a non-expiring token for the service account.
   # Prior to v1.24.0, Kubernetes used to generate this secret for each service account by default.
   # Kubernetes now recommends using short-lived tokens from the TokenRequest API or projected volumes instead if possible.
   # For more details, see https://kubernetes.io/docs/concepts/configuration/secret/#service-account-token-secrets
   createSecret: true
-
   # Extra labels to attach to the service account
   # Should be a YAML map of the labels to apply to the serviceAccount
   extraLabels: {}
-
   # Extra annotations to attach to the service account
   annotations: {}
-
 # Main app configuration
 processor:
   image:
@@ -40,79 +32,60 @@ processor:
     repository: "bcit-ltc/qcon-api"
     tag: "1.0.0"
     pullPolicy: IfNotPresent
-
   replicas: 1
-  
   # Extra labels to attach to the processor pods
   # Should be a YAML map of the labels to apply to the deployment template
   extraLabels: {}
-
   # Extra annotations to attach to the processor deployment
   annotations: {}
-
   # Port on which processor is listening
   port: 8000
-
   # extraEnvVars is a list of extra environment variables that
   # are set literally.
   extraEnvVars:
     - GIT_TAG: "v1.0.0"
-
   # Mounts for the processor container. These automatically create
   # corresponding volumes in the pod.
   # volumeMounts create emptyDir volumes.
   volumeMounts:
     - name: shared-data
       mountPath: /var/www/html
-
   configMounts: []
-
   secretMounts:
     - name: admin-credentials
       secretName: admin-credentials
       mountPath: /etc/secrets/admin-credentials
-
-    - name: postgres-credentials          # volume name (must be DNS-1123 compliant)
-      secretName: postgres-credentials    # existing Secret in the same namespace
+    - name: postgres-credentials # volume name (must be DNS-1123 compliant)
+      secretName: postgres-credentials # existing Secret in the same namespace
       mountPath: /etc/secrets/postgres-credentials
-      readOnly: true                      # defaults to true if omitted
-      optional: false                     # allow pod to start if Secret missing? (default false)
-      items:                              # optional: map specific keys to paths (and per-file mode)
+      readOnly: true # defaults to true if omitted
+      optional: false # allow pod to start if Secret missing? (default false)
+      items: # optional: map specific keys to paths (and per-file mode)
         - key: username
           path: username
         - key: password
           path: password
-
     - name: api-token
       secretName: api-token
       mountPath: /etc/secrets/api-token
       readOnly: true
-
-
 # Enables a service for the processor app
 service:
   enabled: true
-
   # Service type: by default, connect to the app using an internal cluster IP
   type: ClusterIP
-
   # Port on which app is listening
   port: 8080
-
   # Target port to which the service should be mapped to
   targetPort: 8080
-
   # Extra annotations to attach to the service
   annotations: {}
-
-
 # Creates an ingress for external access
 ingress:
   enabled: true
   labels: {}
   annotations: {}
   ingressClassName: ""
-
   # As of Kubernetes 1.19, all Ingress Paths must have a pathType configured. The default value below should be sufficient in most cases.
   # See: https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types for other possible values.
   pathType: Prefix
@@ -130,42 +103,34 @@ ingress:
     - secretName: "star-ltc-bcit-ca"
       hosts:
         - "ltc.bcit.ca"
-
-
 # Configuration for the frontend
 frontend:
   enabled: true
-
   # The name of the frontend container to create. If empty uses "frontend"
   name: nginx
-
   image: nginxinc/nginx-unprivileged:1.25-alpine
   pullPolicy: IfNotPresent
-
   # Extra annotations to attach to the frontend
   annotations: {}
-
   # Add a checksum annotation to the server pods that is a hash
   # of the configuration. Can be used to identify configuration changes.
   includeConfigAnnotation: false
-
   # Security context for the pod template and the app container
-    # Pod-level defaults
-    #   runAsNonRoot: true
-    #   runAsGroup: 101
-    #   runAsUser: 101
-    #   fsGroup: 101
-    #   readOnlyRootFilesystem: true
-    #   allowPrivilegeEscalation: false
+  # Pod-level defaults
+  #   runAsNonRoot: true
+  #   runAsGroup: 101
+  #   runAsUser: 101
+  #   fsGroup: 101
+  #   readOnlyRootFilesystem: true
+  #   allowPrivilegeEscalation: false
 
-    # Container-level defaults
-    #   capabilities:
-    #     drop:
-    #       - ALL
+  # Container-level defaults
+  #   capabilities:
+  #     drop:
+  #       - ALL
   securityContext:
     pod: {}
     container: {}
-
   # Configs are stored in ConfigMaps and projected through volumes. Be sure to 
   # set matching configMounts.
   configs:
@@ -211,7 +176,6 @@ frontend:
               }
 
           }
-
   # Resource requests and limits mapped directly to the value of
   # the resources field for a PodSpec.
   resources:
@@ -221,10 +185,8 @@ frontend:
     limits:
       memory: 256Mi
       cpu: 250m
-
   # Port on which the frontend is listening
   port: 8080
-
   # Mounts for the frontend container. These automatically create
   # corresponding volumes in the pod.
   # volumeMounts create emptyDir volumes.
@@ -233,13 +195,10 @@ frontend:
       mountPath: /var/www/html
     - name: tmp
       mountPath: /tmp
-
   configMounts:
     - name: nginx-config
       mountPath: /etc/nginx/conf.d
-
   secretMounts: []
-
   # Defines livenessProbe settings
   livenessProbe:
     enabled: false
@@ -261,7 +220,6 @@ frontend:
     successThreshold: 1
     # Number of seconds after which the probe times out.
     timeoutSeconds: 5
-
   # Defines custom readinessProbe settings
   readinessProbe:
     enabled: false
@@ -279,7 +237,6 @@ frontend:
     successThreshold: 1
     # Number of seconds after which the probe times out.
     timeoutSeconds: 5
-
   # Used to define startupProbe settings
   startupProbe:
     enabled: false
@@ -293,53 +250,44 @@ frontend:
     successThreshold: 1
     # Number of seconds after which the probe times out.
     timeoutSeconds: 5
-
   # extraEnvVars is a list of extra environment variables that
   # are set literally.
   extraEnvVars:
     - GIT_TAG: "v1.0.0"
-
 # Backend service configuration
 backend:
   enabled: true
-
   # The name of the backend container to create. If empty uses "backend".
   name: ""
-
   image: postgres
-
   # configs create configMaps that are passed to containers using envFrom
   configEnvs:
     - name: postgres-config
       POSTGRES_HOST_AUTH_METHOD: trust
-
   # Port on which the backend is listening
   port: 5432
-
   # Mounts for the backend container. These automatically create
   # corresponding volumes in the pod.
   # volumeMounts create emptyDir volumes.
   volumeMounts:
     - name: shared-data
       mountPath: /var/www/html
-    - name: tmp         # creates emptyDir
+    - name: tmp # creates emptyDir
       mountPath: /tmp
-
   configMounts: []
-
   secretMounts:
-    - name: postgres-credentials          # volume name (must be DNS-1123 compliant)
-      secretName: postgres-credentials    # existing Secret in the same namespace
+    - name: postgres-credentials # volume name (must be DNS-1123 compliant)
+      secretName: postgres-credentials # existing Secret in the same namespace
       mountPath: /etc/secrets/postgres-credentials
-      readOnly: true                      # defaults to true if omitted
-      optional: false                     # allow pod to start if Secret missing? (default false)
-      items:                              # optional: map specific keys to paths (and per-file mode)
+      readOnly: true # defaults to true if omitted
+      optional: false # allow pod to start if Secret missing? (default false)
+      items: # optional: map specific keys to paths (and per-file mode)
         - key: username
           path: username
         - key: password
           path: password
-
-
+image:
+  tag: 1.0.1
 # Unconfigured options
 # # Configuration for persistent volume claims
 # dataStorage:
@@ -358,13 +306,11 @@ backend:
 #   # Labels to apply to the PVC
 #   labels: {}
 
-
 # # Configuration for API connections
 # api:
 #   enabled: false
 #   name: "api"
 #   url: "https://app.ltc.bcit.ca/api"
-
 
 # autoscaling:
 #   enabled: false
