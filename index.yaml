@@ -222,6 +222,25 @@ entries:
     version: 1.0.0-rc.4746564.20250911032757
   infrastructure-documentation:
   - apiVersion: v2
+    appVersion: 1.1.3
+    created: "2025-09-24T04:58:39.485587056Z"
+    description: Information about the architecture and makeup of the LTC's server
+      infrastructure.
+    digest: cc76c9f408b46db4a241d151bce6b172d5f41f96e39e018dbb0de898f7626f1e
+    home: https://infrastructure-documentation.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: infrastructure-documentation
+    sources:
+    - https://github.com/bcit-ltc/
+    - https://github.com/bcit-ltc/infrastructure-documentation
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/infrastructure-documentation-1.1.3/infrastructure-documentation-1.1.3.tgz
+    version: 1.1.3
+  - apiVersion: v2
     appVersion: 1.1.2
     created: "2025-08-25T19:12:42.947680517Z"
     description: Information about the architecture and makeup of the LTC's server
@@ -1573,4 +1592,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-09-24T04:56:01.27759986Z"
+generated: "2025-09-24T04:58:39.485896915Z"
