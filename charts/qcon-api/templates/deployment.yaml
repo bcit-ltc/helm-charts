@@ -32,7 +32,7 @@ spec:
         {{- with .Values.processor.extraLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{ template "app.annotations" . }}
+      {{ include "app.pod.annotations" . | nindent 6 }}
     spec:
       serviceAccountName: {{ include "app.serviceAccount.name" . }}
       {{ include "frontend.securityContext.pod" . | nindent 6 }}
@@ -43,51 +43,86 @@ spec:
           imagePullPolicy: {{ .Values.processor.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ .Values.processor.port }}
+
           {{- $procEnvFrom := include "app.componentEnvFrom" .Values.processor }}
           {{- if $procEnvFrom }}
           envFrom:
 {{ $procEnvFrom | nindent 12 }}
           {{- end }}
+
           env:
             {{- include "app.extraEnvironmentVars" .Values.processor | nindent 12 }}
-          {{- with include "app.componentVolumeMounts" .Values.processor }}
+
+          {{- $procMounts := include "app.componentVolumeMounts" .Values.processor -}}
+          {{- $procData  := include "app.dataStorage.processorVolumeMount" . -}}
+          {{- if or $procMounts $procData }}
           volumeMounts:
-{{ . | nindent 12 }}
+            {{- if $procMounts }}
+{{ $procMounts | nindent 12 }}
+            {{- end }}
+            {{- if $procData }}
+{{ $procData | nindent 12 }}
+            {{- end }}
           {{- end }}
-        - name: {{ default "nginx" .Values.frontend.name }}
+
+        - name: {{ default "frontend" .Values.frontend.name }}
           image: "{{ .Values.frontend.image }}"
           imagePullPolicy: {{ .Values.frontend.pullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ .Values.frontend.port }}
+
           {{- $feEnvFrom := include "app.componentEnvFrom" .Values.frontend }}
           {{- if $feEnvFrom }}
           envFrom:
 {{ $feEnvFrom | nindent 12 }}
           {{- end }}
+
           env:
             {{- include "app.extraEnvironmentVars" .Values.frontend | nindent 12 }}
+
           {{ include "frontend.securityContext.container" . | nindent 10 }}
           {{ include "frontend.resources" . | nindent 10 }}
-          {{- with include "app.componentVolumeMounts" .Values.frontend }}
+
+          {{- $feMounts := include "app.componentVolumeMounts" .Values.frontend -}}
+          {{- $feData   := include "app.dataStorage.frontendVolumeMount" . -}}
+          {{- if or $feMounts $feData }}
           volumeMounts:
-{{ . | nindent 12 }}
+            {{- if $feMounts }}
+{{ $feMounts | nindent 12 }}
+            {{- end }}
+            {{- if $feData }}
+{{ $feData | nindent 12 }}
+            {{- end }}
           {{- end }}
 
-        - name: {{ default "backend" .Values.backend.name | default "backend" }}
+        - name: {{ default "backend" .Values.backend.name }}
           image: "{{ .Values.backend.image }}"
           ports:
             - containerPort: {{ .Values.backend.port }}
+
           {{- $beEnvFrom := include "app.componentEnvFrom" .Values.backend }}
           {{- if $beEnvFrom }}
           envFrom:
 {{ $beEnvFrom | nindent 12 }}
           {{- end }}
-          {{- with include "app.componentVolumeMounts" .Values.backend }}
+
+          env:
+            {{- include "app.extraEnvironmentVars" .Values.backend | nindent 12 }}
+
+          {{- $beMounts := include "app.componentVolumeMounts" .Values.backend -}}
+          {{- $beData   := include "app.dataStorage.backendVolumeMount" . -}}
+          {{- if or $beMounts $beData }}
           volumeMounts:
-{{ . | nindent 12 }}
+            {{- if $beMounts }}
+{{ $beMounts | nindent 12 }}
+            {{- end }}
+            {{- if $beData }}
+{{ $beData | nindent 12 }}
+            {{- end }}
           {{- end }}
 
       volumes:
 {{ include "app.podVolumes" . | nindent 8 }}
+{{ include "app.dataStorage.podVolume" . | nindent 8 }}
 
       {{- include "imagePullSecrets" . | nindent 6 }}

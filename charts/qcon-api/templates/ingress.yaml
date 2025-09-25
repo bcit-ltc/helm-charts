@@ -17,7 +17,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
-    {{- with .Values.ingress.labels }}
+    {{- with .Values.ingress.extraLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 {{- template "app.ingress.annotations" . }}
