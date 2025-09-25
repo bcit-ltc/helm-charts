@@ -1,97 +1,121 @@
+{{- /* Skip rendering if no components are enabled */ -}}
+{{- if or .Values.processor.enabled .Values.frontend.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "app.fullname" . }}
+  name: {{ include "app.name" . }}
   labels:
-    {{- include "app.labels" . | nindent 4 }}
+    helm.sh/chart: {{ include "app.chart" . }}
+    app.kubernetes.io/name: {{ include "app.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+  {{ include "app.deployment.annotations" . | nindent 2 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
-  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
-  progressDeadlineSeconds: {{ .Values.progressDeadlineSeconds }}
+  replicas: {{ .Values.processor.replicas }}
+  revisionHistoryLimit: {{ .Values.global.revisionHistoryLimit }}
+  progressDeadlineSeconds: {{ .Values.global.progressDeadlineSeconds }}
   selector:
     matchLabels:
-      {{- include "app.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: {{ include "app.name" . }}
+      component: server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
   template:
     metadata:
       labels:
-        {{- include "app.selectorLabels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
+        helm.sh/chart: {{ include "app.chart" . }}
+        app.kubernetes.io/name: {{ include "app.name" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        component: server
+        {{- with .Values.processor.extraLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- with .Values.podAnnotations }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{ include "app.pod.annotations" . | nindent 6 }}
     spec:
-      serviceAccountName: {{ include "app.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "app.serviceAccount.name" . }}
+      {{- end }}
+
+      {{ include "frontend.securityContext.pod" . | nindent 6 }}
+
       containers:
+        {{- /* Processor container */ -}}
+        {{- if .Values.processor.enabled }}
         - name: {{ include "app.name" . }}
-          image: {{ include "app.image" . }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.processor.image.registry }}/{{ .Values.processor.image.repository }}:{{ .Values.processor.image.tag }}"
+          imagePullPolicy: {{ .Values.processor.image.pullPolicy | default "IfNotPresent" }}
+          {{- $procEnvFrom := include "app.componentEnvFrom" .Values.processor }}
+          {{- if $procEnvFrom }}
+          envFrom:
+{{ $procEnvFrom | nindent 12 }}
+          {{- end }}
+          {{- $procEnv := include "app.extraEnvironmentVars" .Values.processor | trim }}
+          {{- if $procEnv }}
+          env:
+{{ $procEnv | nindent 12 }}
+          {{- end }}
+          {{- $procMounts := include "app.componentVolumeMounts" .Values.processor -}}
+          {{- $procData  := include "app.dataStorage.processorVolumeMount" . -}}
+          {{- if or $procMounts $procData }}
+          volumeMounts:
+            {{- if $procMounts }}
+{{ $procMounts | nindent 12 }}
+            {{- end }}
+            {{- if $procData }}
+{{ $procData | nindent 12 }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+
+        {{- /* Frontend container */ -}}
+        {{- if .Values.frontend.enabled }}
+        - name: {{ default "frontend" .Values.frontend.name }}
+          image: "{{ .Values.frontend.image.registry }}/{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.pullPolicy | default "IfNotPresent" }}
           ports:
             - name: http
-              containerPort: {{ .Values.container.port }}
-              protocol: TCP
-          {{- with .Values.readinessProbe }}
-          readinessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.livenessProbe }}
-          livenessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.startupProbe }}
-          startupProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.resources }}
-          resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.extraEnv }}
-          env:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.extraEnvFrom }}
+              containerPort: {{ .Values.frontend.port }}
+          {{- $feEnvFrom := include "app.componentEnvFrom" .Values.frontend }}
+          {{- if $feEnvFrom }}
           envFrom:
-            {{- toYaml . | nindent 12 }}
+{{ $feEnvFrom | nindent 12 }}
           {{- end }}
+          {{- $feEnv := include "app.extraEnvironmentVars" .Values.frontend | trim }}
+          {{- if $feEnv }}
+          env:
+{{ $feEnv | nindent 12 }}
+          {{- end }}
+          {{ include "frontend.securityContext.container" . | nindent 10 }}
+          {{ include "frontend.resources" . | nindent 10 }}
+          {{- $feMounts := include "app.componentVolumeMounts" .Values.frontend -}}
+          {{- $feData   := include "app.dataStorage.frontendVolumeMount" . -}}
+          {{- if or $feMounts $feData }}
           volumeMounts:
-            {{- if .Values.useDefaultNginxConfig }}
-            - name: nginx-conf
-              mountPath: /etc/nginx/conf.d/default.conf
-              subPath: default.conf
+            {{- if $feMounts }}
+{{ $feMounts | nindent 12 }}
             {{- end }}
-            {{- with .Values.extraVolumeMounts }}
-            {{- toYaml . | nindent 12 }}
+            {{- if $feData }}
+{{ $feData | nindent 12 }}
             {{- end }}
+          {{- end }}
+        {{- end }}
+
+      {{- /* Volumes: only render when non-empty */ -}}
+      {{- $podVols := include "app.podVolumes" . | trim -}}
+      {{- $dataVol := include "app.dataStorage.podVolume" . | trim -}}
+      {{- if or $podVols $dataVol }}
       volumes:
-        {{- if .Values.useDefaultNginxConfig }}
-        - name: nginx-conf
-          configMap:
-            name: {{ include "app.fullname" . }}-nginx
+        {{- if $podVols }}
+{{ $podVols | nindent 8 }}
         {{- end }}
-        {{- with .Values.extraVolumes }}
-        {{- toYaml . | nindent 8 }}
+        {{- if $dataVol }}
+{{ $dataVol | nindent 8 }}
         {{- end }}
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+
+      {{- include "imagePullSecrets" . | nindent 6 }}
+{{- end }}

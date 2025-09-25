@@ -50,8 +50,11 @@ spec:
 {{ $procEnvFrom | nindent 12 }}
           {{- end }}
 
+          {{- $procEnv := include "app.extraEnvironmentVars" .Values.processor | trim -}}
+          {{- if $procEnv }}
           env:
-            {{- include "app.extraEnvironmentVars" .Values.processor | nindent 12 }}
+{{ $procEnv | nindent 12 }}
+          {{- end }}
 
           {{- $procMounts := include "app.componentVolumeMounts" .Values.processor -}}
           {{- $procData  := include "app.dataStorage.processorVolumeMount" . -}}
@@ -77,8 +80,11 @@ spec:
 {{ $feEnvFrom | nindent 12 }}
           {{- end }}
 
+          {{- $feEnv := include "app.extraEnvironmentVars" .Values.frontend | trim -}}
+          {{- if $feEnv }}
           env:
-            {{- include "app.extraEnvironmentVars" .Values.frontend | nindent 12 }}
+{{ $feEnv | nindent 12 }}
+          {{- end }}
 
           {{ include "frontend.securityContext.container" . | nindent 10 }}
           {{ include "frontend.resources" . | nindent 10 }}
@@ -106,8 +112,11 @@ spec:
 {{ $beEnvFrom | nindent 12 }}
           {{- end }}
 
+          {{- $beEnv := include "app.extraEnvironmentVars" .Values.backend | trim -}}
+          {{- if $beEnv }}
           env:
-            {{- include "app.extraEnvironmentVars" .Values.backend | nindent 12 }}
+{{ $beEnv | nindent 12 }}
+          {{- end }}
 
           {{- $beMounts := include "app.componentVolumeMounts" .Values.backend -}}
           {{- $beData   := include "app.dataStorage.backendVolumeMount" . -}}

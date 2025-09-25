@@ -1,19 +1,53 @@
+{{/*
+SPDX-License-Identifier: MPL-2.0
+*/}}
+
+{{- $seen := dict -}}
+{{- $components := list (dict "cfg" .Values.processor) (dict "cfg" .Values.frontend) -}}
+
+{{- range $comp := $components }}
+  {{- $c := index $comp "cfg" -}}
+
+  {{/* ----- ConfigMaps from `configs`: [{ name, data: {...} }] ----- */}}
+  {{- range $cfg := ($c.configs | default list) }}
+    {{- $name := $cfg.name | default "" -}}
+    {{- if and $name (not (hasKey $seen $name)) }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "app.fullname" . }}-nginx
+  name: {{ $name | quote }}
   labels:
-    {{- include "app.labels" . | nindent 4 }}
+    helm.sh/chart: {{ include "app.chart" $ }}
+    app.kubernetes.io/name: {{ include "app.name" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    app.kubernetes.io/version: {{ $.Chart.AppVersion }}
 data:
-  default.conf: |
-    server {
-      listen 8080 default_server;
-      server_name _;
-      location / {
-        root /usr/share/nginx/html;
-        index index.html index.htm;
-        try_files $uri $uri/ =404;
-      }
-      error_page 500 502 503 504 /50x.html;
-      location = /50x.html { root /usr/share/nginx/html; }
-    }
+{{ toYaml ($cfg.data | default dict) | nindent 2 }}
+    {{- $_ := set $seen $name true }}
+    {{- end }}
+  {{- end }}
+
+  {{/* ----- ConfigMaps from `configEnvs`: [{ name, <KVs...> }] ----- */}}
+  {{- range $cfg := ($c.configEnvs | default list) }}
+    {{- $name := $cfg.name | default "" -}}
+    {{- if and $name (not (hasKey $seen $name)) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name | quote }}
+  labels:
+    helm.sh/chart: {{ include "app.chart" $ }}
+    app.kubernetes.io/name: {{ include "app.name" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    app.kubernetes.io/version: {{ $.Chart.AppVersion }}
+data:
+{{ toYaml (omit $cfg "name") | nindent 2 }}
+    {{- $_ := set $seen $name true }}
+    {{- end }}
+  {{- end }}
+
+{{- end }}
