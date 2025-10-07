@@ -89,17 +89,21 @@ processor:
       mountPath: /etc/secrets/db-credentials
       readOnly: true # defaults to true if omitted
       optional: false # allow pod to start if Secret missing? (default false)
-      items: # optional: map specific keys to paths (and per-file mode)
-        - key: username
-          path: username
-        - key: password
-          path: password
+      # items: # optional: map specific keys to paths (and per-file mode)
+      #   - key: PGUSER
+      #     path: username
+      #   - key: PGPASSWORD
+      #     path: password
 
-    - name: api-token
-      secretName: api-token
-      mountPath: /etc/secrets/api-token
+    - name: tokens
+      secretName: tokens
+      mountPath: /etc/secrets/tokens
       readOnly: true
-
+      items: # optional: map specific keys to paths (and per-file mode)
+        - key: DJANGO_SECRET_KEY
+          path: DJANGO_SECRET_KEY
+        - key: API_KEY
+          path: API_KEY
 
 # -- Enables a service for the processor app
 # @default -- `{}`
@@ -388,11 +392,11 @@ backend:
       mountPath: /etc/secrets/db-credentials
       readOnly: true # defaults to true if omitted
       optional: false # allow pod to start if Secret missing? (default false)
-      items: # optional: map specific keys to paths (and per-file mode)
-        - key: username
-          path: username
-        - key: password
-          path: password
+      # items: # optional: map specific keys to paths (and per-file mode)
+      #   - key: username
+      #     path: username
+      #   - key: password
+      #     path: password
 
 
 # Configuration for persistent volume claims
