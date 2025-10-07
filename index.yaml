@@ -1391,6 +1391,25 @@ entries:
     version: 0.2.1
   qcon-api:
   - apiVersion: v2
+    appVersion: 1.0.2
+    created: "2025-10-07T07:59:02.095706962Z"
+    description: qcon-api is the backend API for the QCon application. It provides
+      a websocket endpoint for converting documents from word to SCORM format.
+    digest: 6a1cd55a93d4cf6b78c8337446eb598816aca4d2616ff3613b2064667e018cc7
+    home: https://qcon-api.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: qcon-api
+    sources:
+    - https://github.com/bcit-ltc/
+    - https://github.com/bcit-ltc/qcon-api
+    urls:
+    - https://github.com/bcit-ltc/helm-charts/releases/download/qcon-api-1.0.2/qcon-api-1.0.2.tgz
+    version: 1.0.2
+  - apiVersion: v2
     appVersion: 1.0.1
     created: "2025-09-24T04:56:01.277322745Z"
     description: qcon-api is the backend API for the QCon application. It provides
@@ -1703,4 +1722,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-09-25T17:36:56.982809028Z"
+generated: "2025-10-07T07:59:02.2372484Z"
