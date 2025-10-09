@@ -6,8 +6,6 @@ global:
   imagePullSecrets: []
   revisionHistoryLimit: 3
   progressDeadlineSeconds: 600
-
-
 # -- Configuration for the service account
 # @default -- `{}`
 serviceAccount:
@@ -25,8 +23,6 @@ serviceAccount:
   extraLabels: {}
   # Extra annotations to attach to the service account
   annotations: {}
-
-
 # -- Main app configuration
 # @default -- `{}`
 processor:
@@ -40,50 +36,40 @@ processor:
     # -- Image default tag
     tag: "1.0.2"
     pullPolicy: IfNotPresent
-
   # -- Number of replicas for the processor
   replicas: 1
-
   # -- Extra labels to attach to the processor pods
   #    Should be a YAML map of the labels to apply to the deployment template
   extraLabels: {}
-
   # Extra annotations to attach to the processor deployment
   annotations: {}
-
   # -- Port on which processor is listening
   port: 8000
-
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars: []
-    # - API_URL: "https://app.ltc.bcit.ca/api"
+  # - API_URL: "https://app.ltc.bcit.ca/api"
 
   # -- Create `ConfigMap` resources that are passed to containers using envFrom
   # @default -- `[]`
   configEnvs: []
-
   # -- Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts.
   # @default -- `[]`
   configs: []
-
   # -- volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod.
   # @default -- `[]`
   volumeMounts:
     - name: shared-data
       mountPath: /var/www/html
-
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []
-
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts:
     - name: admin-credentials
       secretName: admin-credentials
       mountPath: /etc/secrets/admin-credentials
-
     - name: db-credentials # volume name (must be DNS-1123 compliant)
       secretName: db-credentials # existing Secret in the same namespace
       mountPath: /etc/secrets/db-credentials
@@ -94,7 +80,6 @@ processor:
       #     path: username
       #   - key: PGPASSWORD
       #     path: password
-
     - name: tokens
       secretName: tokens
       mountPath: /etc/secrets/tokens
@@ -104,7 +89,6 @@ processor:
           path: DJANGO_SECRET_KEY
         - key: API_KEY
           path: API_KEY
-
 # -- Enables a service for the processor app
 # @default -- `{}`
 service:
@@ -118,8 +102,6 @@ service:
   targetPort: 8080
   # Extra annotations to attach to the service
   annotations: {}
-
-
 # -- Creates an ingress for external access
 # @default -- `{}`
 ingress:
@@ -136,13 +118,11 @@ ingress:
   # See: https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types for other possible values.
   # -- Ingress pathType
   pathType: Prefix
-
   # -- Ingress host definitions
   # @default -- `[]`
   hosts:
     - host: "ltc.bcit.ca"
       paths: []
-
   # -- Extra paths to include in the ingress
   extraPaths: []
   #   - path: /api
@@ -158,8 +138,6 @@ ingress:
     - secretName: "star-ltc-bcit-ca"
       hosts:
         - "ltc.bcit.ca"
-
-
 # -- Configuration for the frontend
 # @default -- `{}`
 frontend:
@@ -171,14 +149,11 @@ frontend:
   image: nginxinc/nginx-unprivileged:1.25-alpine
   # -- Frontend image pull policy
   pullPolicy: IfNotPresent
-
   # Extra annotations to attach to the frontend
   annotations: {}
-
   # -- Add a checksum annotation to the server pods that is a hash
   #    of the configuration. Can be used to identify configuration changes.
   includeConfigAnnotation: false
-
   # -- Security context for the pod template and the app container<br>
   # @default -- 
   # Pod-level defaults:<br>
@@ -196,7 +171,6 @@ frontend:
   securityContext:
     pod: {}
     container: {}
-
   resources:
     # -- Resource requests mapped directly to the value of
     #    the resources field for a PodSpec.
@@ -208,19 +182,15 @@ frontend:
     limits:
       memory: 256Mi
       cpu: 250m
-
   # -- Port on which the frontend is listening
   port: 8080
-
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars:
-    - GIT_TAG: "v1.0.2"   # should match processor.image.tag
-
+    - GIT_TAG: "v1.0.2" # should match processor.image.tag
   # -- configEnvs create ConfigMaps that are passed to containers using envFrom
   # @default -- `[]`
   configEnvs: []
-
   # -- Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts.
   # @default -- `[]`
   configs:
@@ -266,7 +236,6 @@ frontend:
               }
 
           }
-
   # -- volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod.
   # @default -- `[]`
   volumeMounts:
@@ -274,17 +243,14 @@ frontend:
       mountPath: /var/www/html
     - name: tmp
       mountPath: /tmp
-
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts:
     - name: nginx-config
       mountPath: /etc/nginx/conf.d
-
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts: []
-
   # Defines custom livenessProbe settings
   livenessProbe:
     # -- Enables livenessProbe
@@ -308,7 +274,6 @@ frontend:
     successThreshold: 1
     # Number of seconds after which the probe times out.
     timeoutSeconds: 5
-
   # Defines custom readinessProbe settings
   readinessProbe:
     # -- Enables readinessProbe
@@ -327,7 +292,6 @@ frontend:
     successThreshold: 1
     # Number of seconds after which the probe times out.
     timeoutSeconds: 5
-
   # Defines custom startupProbe settings
   startupProbe:
     # -- Enables startupProbe
@@ -342,8 +306,6 @@ frontend:
     successThreshold: 1
     # Number of seconds after which the probe times out.
     timeoutSeconds: 5
-
-
 # -- Configuration for the backend
 # @default -- `{}`
 backend:
@@ -353,25 +315,21 @@ backend:
   name: ""
   # -- Container image to use for the backend
   image: postgres
-
   # -- Port on which the backend is listening
   port: 5432
-
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars: []
-    # - GIT_TAG: "v1.0.0"
+  # - GIT_TAG: "v1.0.0"
 
   # -- configEnvs create configMaps that are passed to containers using envFrom
   # @default -- `[]`
   configEnvs:
     - name: postgres-config
       POSTGRES_HOST_AUTH_METHOD: trust
-
   # -- Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts.
   # @default -- `[]`
   configs: []
-
   # -- volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod.
   # @default -- `[]`
   volumeMounts:
@@ -379,11 +337,9 @@ backend:
       mountPath: /var/www/html
     - name: tmp
       mountPath: /tmp
-
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []
-
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts:
@@ -397,8 +353,6 @@ backend:
       #     path: username
       #   - key: password
       #     path: password
-
-
 # Configuration for persistent volume claims
 # -- Configuration for data storage
 dataStorage:
@@ -417,7 +371,8 @@ dataStorage:
   annotations: {}
   # -- Labels to apply to the PVC
   labels: {}
-
+image:
+  tag: 1.0.2
 # Unconfigured options
 #
 # autoscaling:
