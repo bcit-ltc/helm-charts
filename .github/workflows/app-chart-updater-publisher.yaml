@@ -100,6 +100,11 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
+
+          # install crane (for tagging latest)
+          curl -sSL https://github.com/google/go-containerregistry/releases/latest/download/crane-linux-amd64 \
+            -o /usr/local/bin/crane && chmod +x /usr/local/bin/crane
+
           for pkg in dist/*.tgz; do
             name="$(helm show chart "$pkg" | awk -F': ' '/^name:/{print $2; exit}')"
             version="$(helm show chart "$pkg" | awk -F': ' '/^version:/{print $2; exit}')"
@@ -118,5 +123,8 @@ jobs:
               -a "workflow=${GITHUB_WORKFLOW}" \
               -a "sha=${GITHUB_SHA}" \
               "${REF}@${DGST}"
-          done
 
+            # Add 'latest' tag (simple inline addition)
+            crane tag "${REF}@${DGST}" latest
+
+          done

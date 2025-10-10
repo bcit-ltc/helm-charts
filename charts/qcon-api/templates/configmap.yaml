@@ -3,7 +3,7 @@ SPDX-License-Identifier: MPL-2.0
 */}}
 
 {{- $seen := dict -}}
-{{- $components := list (dict "cfg" .Values.processor) (dict "cfg" .Values.frontend) (dict "cfg" .Values.backend) -}}
+{{- $components := list (dict "cfg" .Values.processor) (dict "cfg" .Values.frontend) -}}
 
 {{- range $comp := $components }}
   {{- $c := index $comp "cfg" -}}

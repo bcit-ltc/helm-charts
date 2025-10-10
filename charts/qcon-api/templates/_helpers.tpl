@@ -55,11 +55,6 @@ SPDX-License-Identifier: MPL-2.0
 {{- $_ := set . "frontendEnabled" (default false .Values.frontend.enabled) -}}
 {{- end -}}
 
-{{/* Whether backend is enabled (defaults to false if unset) */}}
-{{- define "app.backendEnabled" -}}
-{{- $_ := set . "backendEnabled" (default false .Values.backend.enabled) -}}
-{{- end -}}
-
 {{/* ----------------------------
      Annotation passthroughs
    ---------------------------- */}}
@@ -214,7 +209,7 @@ annotations:
    ---------------------------- */}}
 {{- define "app.podVolumes" -}}
 {{- $seen := dict -}}
-{{- $components := list .Values.processor .Values.frontend .Values.backend -}}
+{{- $components := list .Values.processor .Values.frontend -}}
 
 {{- range $c := $components }}
   {{- if $c }}
@@ -309,14 +304,6 @@ imagePullSecrets:
 {{- end -}}
 {{- end -}}
 
-{{/* VolumeMount for the backend container */}}
-{{- define "app.dataStorage.backendVolumeMount" -}}
-{{- if and .Values.dataStorage .Values.dataStorage.enabled .Values.dataStorage.mountPath }}
-- name: {{ include "app.dataStorage.volumeName" . }}
-  mountPath: {{ .Values.dataStorage.mountPath | quote }}
-{{- end -}}
-{{- end -}}
-
 {{/* ----------------------------
      Config checksum annotations
    ---------------------------- */}}
@@ -339,8 +326,7 @@ imagePullSecrets:
 {{- define "app.pod.annotations" -}}
 {{- $p := include "app.componentConfigChecksum" .Values.processor -}}
 {{- $f := include "app.componentConfigChecksum" .Values.frontend -}}
-{{- $b := include "app.componentConfigChecksum" .Values.backend -}}
-{{- $hasChecks := or $p (or $f $b) -}}
+{{- $hasChecks := or $p $f -}}
 {{- if or $hasChecks .Values.frontend.annotations }}
 annotations:
   {{- with .Values.frontend.annotations }}
@@ -356,9 +342,6 @@ annotations:
   {{- end }}
   {{- if $f }}
   checksum/frontend-config: {{ $f | quote }}
-  {{- end }}
-  {{- if $b }}
-  checksum/backend-config: {{ $b | quote }}
   {{- end }}
 {{- end }}
 {{- end -}}
