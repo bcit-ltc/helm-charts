@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   workflow_run:
-    workflows: [ "Remotely-triggered chart bump & commit" ]  # fires when remote-bump finishes
+    workflows: [ "Remotely-triggered chart bump & commit" ]
     branches:   [ main ]
     types: [ completed ]
 
@@ -101,22 +101,17 @@ jobs:
 
       - uses: sigstore/cosign-installer@v3
 
+      # Reliable install for crane (no curl/tar)
+      - uses: imjasonh/setup-crane@v0.4
+        with:
+          version: v0.20.1
+
       - name: Push & sign chart(s) by digest (fail if exists)
         env:
           OWNER: ${{ github.repository_owner }}
         run: |
           set -euo pipefail
           shopt -s nullglob
-
-          # install crane (correctly, from tarball)
-          CRANE_VERSION=v0.20.1
-          mkdir -p "$HOME/bin"
-          echo "$HOME/bin" >> "$GITHUB_PATH"
-          curl -sSL -o /tmp/crane.tgz \
-            "https://github.com/google/go-containerregistry/releases/download/${CRANE_VERSION}/crane_Linux_x86_64.tar.gz"
-          tar -xzf /tmp/crane.tgz -C /tmp crane
-          mv /tmp/crane "$HOME/bin/crane"
-          crane version
 
           for pkg in dist/*.tgz; do
             name="$(helm show chart "$pkg" | awk -F': ' '/^name:/{print $2; exit}')"
