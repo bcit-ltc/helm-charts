@@ -1,14 +1,18 @@
 apiVersion: v2
-name: course-workload-estimator
+appVersion: 1.0.2
 description: A time calculator to estimate the number of hours of work students might be expected to spend completing coursework.
-version: 1.0.2
-appVersion: "1.0.2"
 home: https://course-workload-estimator.ltc.bcit.ca
+icon: https://course-production.ltc.bcit.ca/favicon.ico
 maintainers:
-  - name: BCIT LTC
-    email: ltc_techops@bcit.ca
+  - email: ltc_techops@bcit.ca
+    name: BCIT LTC
     url: https://www.bcit.ca/learning-teaching-centre/
+name: course-workload-estimator
 sources:
   - https://github.com/bcit-ltc/
   - https://github.com/bcit-ltc/course-workload-estimator
-icon: https://course-production.ltc.bcit.ca/favicon.ico
+version: 1.0.2
+dependencies:
+  - name: apps-common
+    version: 0.1.0
+    repository: https://bcit-ltc.github.io/helm-charts
