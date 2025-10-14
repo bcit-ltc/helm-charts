@@ -60,12 +60,23 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      # NEW: Helm is needed for dependency build
+      - uses: azure/setup-helm@v4
+        with: { version: v3.14.4 }
+
+      # NEW: add your gh-pages chart repo so apps can resolve apps-common
+      - name: Add chart repos for dependencies
+        run: |
+          set -euo pipefail
+          helm repo add bcit-ltc https://bcit-ltc.github.io/helm-charts
+          helm repo update
+
+      # Build deps for all app charts (skip the library)
       - name: Build chart dependencies (apps)
         run: |
           set -euo pipefail
           for d in charts/*; do
             [[ -f "$d/Chart.yaml" ]] || continue
-            # Skip the library (no deps to build)
             [[ "$(basename "$d")" == "apps-common" ]] && continue
             echo "==> helm dependency build $d"
             helm dependency build "$d"
@@ -74,10 +85,11 @@ jobs:
       - name: Run chart-releaser for all charts
         uses: helm/chart-releaser-action@v1.6.0
         with:
-          charts_dir: charts               # process everything under charts/
+          charts_dir: charts
           skip_existing: true
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
   # 3) Publish packaged charts to GHCR
   publish-oci:
