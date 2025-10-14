@@ -1,5 +1,3 @@
-{{- /* Skip rendering if no components are enabled */ -}}
-{{- if or .Values.processor.enabled .Values.frontend.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,15 +18,16 @@ spec:
       app.kubernetes.io/name: {{ include "app.name" . }}
       component: server
   strategy:
-    type: RollingUpdate
     rollingUpdate:
       maxSurge: 25%
       maxUnavailable: 25%
+    type: RollingUpdate
   template:
     metadata:
       labels:
         helm.sh/chart: {{ include "app.chart" . }}
         app.kubernetes.io/name: {{ include "app.name" . }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         component: server
         {{- with .Values.processor.extraLabels }}
@@ -36,28 +35,35 @@ spec:
         {{- end }}
       {{ include "app.pod.annotations" . | nindent 6 }}
     spec:
-      {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "app.serviceAccount.name" . }}
-      {{- end }}
-
       {{ include "frontend.securityContext.pod" . | nindent 6 }}
 
       containers:
-        {{- /* Processor container */ -}}
-        {{- if .Values.processor.enabled }}
+        {{- if (default false .Values.processor.enabled) }}
         - name: {{ include "app.name" . }}
           image: "{{ .Values.processor.image.registry }}/{{ .Values.processor.image.repository }}:{{ .Values.processor.image.tag }}"
           imagePullPolicy: {{ .Values.processor.image.pullPolicy | default "IfNotPresent" }}
+          ports:
+            - containerPort: {{ .Values.processor.port }}
+
           {{- $procEnvFrom := include "app.componentEnvFrom" .Values.processor }}
           {{- if $procEnvFrom }}
           envFrom:
 {{ $procEnvFrom | nindent 12 }}
           {{- end }}
-          {{- $procEnv := include "app.extraEnvironmentVars" .Values.processor | trim }}
-          {{- if $procEnv }}
+
+          {{- $procEnv := include "app.extraEnvironmentVars" .Values.processor | trim -}}
+          {{- if or $procEnv true }}
           env:
+            - name: APP_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/version']
+            {{- if $procEnv }}
 {{ $procEnv | nindent 12 }}
+            {{- end }}
           {{- end }}
+
           {{- $procMounts := include "app.componentVolumeMounts" .Values.processor -}}
           {{- $procData  := include "app.dataStorage.processorVolumeMount" . -}}
           {{- if or $procMounts $procData }}
@@ -71,51 +77,73 @@ spec:
           {{- end }}
         {{- end }}
 
-        {{- /* Frontend container */ -}}
-        {{- if .Values.frontend.enabled }}
+        {{- if (default false .Values.frontend.enabled) }}
         - name: {{ default "frontend" .Values.frontend.name }}
           image: "{{ .Values.frontend.image.registry }}/{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
-          imagePullPolicy: {{ .Values.frontend.pullPolicy | default "IfNotPresent" }}
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy | default "IfNotPresent" }}
           ports:
-            - name: http
-              containerPort: {{ .Values.frontend.port }}
+            - containerPort: {{ .Values.frontend.port }}
+
           {{- $feEnvFrom := include "app.componentEnvFrom" .Values.frontend }}
           {{- if $feEnvFrom }}
           envFrom:
 {{ $feEnvFrom | nindent 12 }}
           {{- end }}
-          {{- $feEnv := include "app.extraEnvironmentVars" .Values.frontend | trim }}
-          {{- if $feEnv }}
+
+          {{- $feEnv := include "app.extraEnvironmentVars" .Values.frontend | trim -}}
+          {{- if or $feEnv true }}
           env:
+            - name: APP_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/version']
+            {{- if $feEnv }}
 {{ $feEnv | nindent 12 }}
+            {{- end }}
           {{- end }}
+
           {{ include "frontend.securityContext.container" . | nindent 10 }}
           {{ include "frontend.resources" . | nindent 10 }}
-          {{- $feMounts := include "app.componentVolumeMounts" .Values.frontend -}}
+
+          {{- $feMounts := include "app.componentVolumeMounts" .Values.frontend | trim -}}
           {{- $feData   := include "app.dataStorage.frontendVolumeMount" . -}}
           {{- if or $feMounts $feData }}
           volumeMounts:
             {{- if $feMounts }}
 {{ $feMounts | nindent 12 }}
+            {{- else }}
+            # Defaults when frontend.volumeMounts/configMounts are empty
+            - name: tmp
+              mountPath: /tmp
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
             {{- end }}
             {{- if $feData }}
 {{ $feData | nindent 12 }}
             {{- end }}
+          {{- else }}
+          # Defaults when both sets are empty and no data volume mount is present
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
           {{- end }}
         {{- end }}
 
-      {{- /* Volumes: only render when non-empty */ -}}
-      {{- $podVols := include "app.podVolumes" . | trim -}}
-      {{- $dataVol := include "app.dataStorage.podVolume" . | trim -}}
-      {{- if or $podVols $dataVol }}
       volumes:
-        {{- if $podVols }}
-{{ $podVols | nindent 8 }}
-        {{- end }}
-        {{- if $dataVol }}
-{{ $dataVol | nindent 8 }}
-        {{- end }}
+{{ include "app.podVolumes" . | nindent 8 }}
+{{ include "app.dataStorage.podVolume" . | nindent 8 }}
+
+      # Ensure default volumes exist if frontend mounts were empty
+      {{- if eq (len (default (list) .Values.frontend.volumeMounts)) 0 }}
+      - name: tmp
+        emptyDir: {}
+      {{- end }}
+      {{- if eq (len (default (list) .Values.frontend.configMounts)) 0 }}
+      - name: nginx-config
+        configMap:
+          name: nginx-config
       {{- end }}
 
       {{- include "imagePullSecrets" . | nindent 6 }}
-{{- end }}

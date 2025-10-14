@@ -6,3 +6,6 @@ Thank you for deploying {{ include "app.name" . }}.
 2. Port-forward (if no Ingress)
   $ kubectl port-forward svc/{{ include "app.name" . }} 8080:{{ .Values.service.port }}
   Then open: http://127.0.0.1:8080/
+
+3. Ingress (if enabled)
+  Host: {{ .Values.ingress.host | default (printf "%s.%s" (include "app.name" .) .Values.defaultDomain) }}

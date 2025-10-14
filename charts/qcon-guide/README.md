@@ -54,42 +54,42 @@ Our registry images are public, but in ["Working with Container Registries"](htt
     helm install qcon-guide .
     ```
 
+## Requirements
+
+| Repository | Name | Version |
+|------------|------|---------|
+| https://bcit-ltc.github.io/helm-charts | apps-common | 0.1.0 |
+
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| backend | object | `{}` | Configuration for the backend |
-| backend.auth | object | `{}` | Configures backend endpoint authentication |
-| backend.auth.existingSecret | string | `""` | `Secret` (preferred) Must have keys<br>   &nbsp;&nbsp;POSTGRES_DB<br>   &nbsp;&nbsp;POSTGRES_USER<br>   &nbsp;&nbsp;POSTGRES_PASSWORD<br> If an existing secret name is not provided, the chart will create one. |
-| backend.enabled | bool | `false` | Enable or disable backend components. |
-| backend.image | string | `"postgres:16"` | Specifies the backend container image |
-| backend.service | object | `{"name":"backend","port":5432}` | Configures a service for the backend |
-| backend.storage | object | `{}` | Configures a persistent volume for the backend |
-| dataStorage | object | `{}` | Configuration for data storage |
 | dataStorage.accessMode | string | `"ReadWriteOnce"` | Access Mode of the storage device being used for the PVC |
+| dataStorage.annotations | object | `{}` | Annotations to apply to the PVC |
 | dataStorage.enabled | bool | `false` | Enable or disable data storage components. |
+| dataStorage.labels | object | `{}` | Labels to apply to the PVC |
 | dataStorage.mountPath | string | `"/app/data"` | Location where the PVC will be mounted. |
 | dataStorage.size | string | `"10Gi"` | Size of the PVC created |
 | dataStorage.storageClass | string | `nil` | Name of the storage class to use. If null it will use the configured default Storage Class. |
-| frontend | object | `{}` | Configuration for the frontend |
+| frontend | object | `{}` | Configuration for the "frontend" |
 | frontend.configEnvs | list | `[]` | configEnvs create ConfigMaps that are passed to containers using envFrom |
 | frontend.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
 | frontend.configs | list | `[]` | Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts. |
 | frontend.enabled | bool | `true` | Enable or disable frontend components. |
 | frontend.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
+| frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image pull policy |
 | frontend.image.registry | string | `"docker.io"` | Image default registry |
 | frontend.image.repository | string | `"nginxinc/nginx-unprivileged"` | Image default repository |
 | frontend.image.tag | string | `"1.25-alpine"` | Image default tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
-| frontend.name | string | `""` | The name of the frontend container to create. If empty uses "frontend" |
+| frontend.name | string | `"nginx"` | The name of the frontend container to create. If empty uses "frontend" |
 | frontend.port | int | `8080` | Port on which the frontend is listening |
-| frontend.pullPolicy | string | `"IfNotPresent"` | Frontend image pull policy |
 | frontend.readinessProbe.enabled | bool | `false` | Enables readinessProbe |
 | frontend.resources.limits | object | `{"cpu":"250m","memory":"256Mi"}` | Resource limits mapped directly to the value of    the resources field for a PodSpec. |
 | frontend.resources.requests | object | `{"cpu":"100m","memory":"64Mi"}` | Resource requests mapped directly to the value of    the resources field for a PodSpec. |
 | frontend.secretMounts | list | `[]` | volumeMounts to be added as secrets |
-| frontend.securityContext | object | `{}`<br> | Security context for the pod template and the app container<br> Pod-level defaults:<br>   &nbsp;&nbsp;runAsNonRoot: true<br>   &nbsp;&nbsp;runAsGroup: 101<br>   &nbsp;&nbsp;runAsUser: 101<br>   &nbsp;&nbsp;fsGroup: 101<br>   &nbsp;&nbsp;readOnlyRootFilesystem: true<br>   &nbsp;&nbsp;allowPrivilegeEscalation: false<br>  Container-level defaults:<br> &nbsp;&nbsp;capabilities:<br> &nbsp;&nbsp;&nbsp;&nbsp;drop:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ALL<br> |
+| frontend.securityContext | object | `{"container":{},"pod":{}}` | Security context for the pod template and the app container<br> Pod-level defaults:<br>   &nbsp;&nbsp;runAsNonRoot: true<br>   &nbsp;&nbsp;runAsGroup: 101<br>   &nbsp;&nbsp;runAsUser: 101<br>   &nbsp;&nbsp;fsGroup: 101<br>   &nbsp;&nbsp;readOnlyRootFilesystem: true<br>   &nbsp;&nbsp;allowPrivilegeEscalation: false<br>  Container-level defaults:<br> &nbsp;&nbsp;capabilities:<br> &nbsp;&nbsp;&nbsp;&nbsp;drop:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ALL<br> |
 | frontend.startupProbe.enabled | bool | `false` | Enables startupProbe |
 | frontend.volumeMounts | list | `[]` | volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod. |
 | global.imagePullSecrets | list | `[]` |  |
@@ -98,33 +98,37 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | global.revisionHistoryLimit | int | `3` |  |
 | ingress | object | `{}` | Creates an ingress for external access |
 | ingress.annotations | object | `{}` | Extra annotations to attach to the ingress resource |
-| ingress.enabled | bool | `false` | Enable or disable ingress components. |
+| ingress.enabled | bool | `true` | Enable or disable ingress components. |
 | ingress.extraLabels | object | `{}` | Extra labels to attach to the processor pods    Should be a YAML map of the labels to apply to the deployment template |
 | ingress.extraPaths | list | `[]` | Extra paths to include in the ingress |
 | ingress.hosts | list | `[]` | Ingress host definitions |
 | ingress.ingressClassName | string | `""` | Default IngressClass to use. If empty, use the cluster's default |
 | ingress.pathType | string | `"Prefix"` | Ingress pathType |
 | ingress.tls | list | `[]` | TLS configuration for the ingress |
-| processor | object | `{}` | Processor configuration |
+| processor | object | `{}` | Main "backend" configuration |
 | processor.configEnvs | list | `[]` | Create `ConfigMap` resources that are passed to containers using envFrom |
 | processor.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
 | processor.configs | list | `[]` | Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts. |
 | processor.enabled | bool | `false` | Enable or disable processor components. |
 | processor.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
 | processor.extraLabels | object | `{}` | Extra labels to attach to the processor pods    Should be a YAML map of the labels to apply to the deployment template |
+| processor.image.pullPolicy | string | `"IfNotPresent"` | Image default pull policy |
 | processor.image.registry | string | `""` | Image default registry |
 | processor.image.repository | string | `""` | Image default repository |
 | processor.image.tag | string | `""` | Image default tag |
+| processor.port | int | `8000` | Port on which processor is listening |
 | processor.replicas | int | `1` | Number of replicas for the processor |
 | processor.secretMounts | list | `[]` | volumeMounts to be added as secrets |
 | processor.volumeMounts | list | `[]` | volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod. |
-| service | object | `{}` | Enables a service for the processor app |
-| service.enabled | bool | `false` | Enable or disable service components. |
+| service | object | `{}` | Enables a service for the app |
+| service.enabled | bool | `true` | Enable or disable service components. |
 | service.port | int | `8080` | Port on which the app is listening |
+| service.targetPort | int | `8080` | Target port to which the service should be mapped to |
 | service.type | string | `"ClusterIP"` | Service type: by default, connect to the app using an internal cluster IP |
 | serviceAccount | object | `{}` | Configuration for the service account |
-| serviceAccount.create | bool | `false` | Enable or disable service account creation. |
+| serviceAccount.create | bool | `true` | Enable or disable service account creation. |
 | serviceAccount.createSecret | bool | `true` | Create a Secret API object to store a non-expiring token for the service account. |
+| serviceAccount.extraLabels | object | `{}` | Extra labels to attach to the service account.    Should be a YAML map of the labels to apply to the serviceAccount |
 | serviceAccount.name | string | `""` | Name of the service account to create. If empty uses global.name |
 
 ## Building/updating README.md

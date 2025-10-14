@@ -27,6 +27,7 @@ spec:
       labels:
         helm.sh/chart: {{ include "app.chart" . }}
         app.kubernetes.io/name: {{ include "app.name" . }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         component: server
         {{- with .Values.processor.extraLabels }}
@@ -54,7 +55,6 @@ spec:
           {{- $procEnv := include "app.extraEnvironmentVars" .Values.processor | trim -}}
           {{- if or $procEnv true }}
           env:
-            # Downward API: expose app.kubernetes.io/version label
             - name: APP_VERSION
               valueFrom:
                 fieldRef:
@@ -80,7 +80,7 @@ spec:
         {{- if (default false .Values.frontend.enabled) }}
         - name: {{ default "frontend" .Values.frontend.name }}
           image: "{{ .Values.frontend.image.registry }}/{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
-          imagePullPolicy: {{ .Values.frontend.pullPolicy | default "IfNotPresent" }}
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ .Values.frontend.port }}
 
@@ -93,7 +93,6 @@ spec:
           {{- $feEnv := include "app.extraEnvironmentVars" .Values.frontend | trim -}}
           {{- if or $feEnv true }}
           env:
-            # Downward API: expose app.kubernetes.io/version label
             - name: APP_VERSION
               valueFrom:
                 fieldRef:
@@ -106,21 +105,45 @@ spec:
           {{ include "frontend.securityContext.container" . | nindent 10 }}
           {{ include "frontend.resources" . | nindent 10 }}
 
-          {{- $feMounts := include "app.componentVolumeMounts" .Values.frontend -}}
+          {{- $feMounts := include "app.componentVolumeMounts" .Values.frontend | trim -}}
           {{- $feData   := include "app.dataStorage.frontendVolumeMount" . -}}
           {{- if or $feMounts $feData }}
           volumeMounts:
             {{- if $feMounts }}
 {{ $feMounts | nindent 12 }}
+            {{- else }}
+            # Defaults when frontend.volumeMounts/configMounts are empty
+            - name: tmp
+              mountPath: /tmp
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
             {{- end }}
             {{- if $feData }}
 {{ $feData | nindent 12 }}
             {{- end }}
+          {{- else }}
+          # Defaults when both sets are empty and no data volume mount is present
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
           {{- end }}
         {{- end }}
 
       volumes:
 {{ include "app.podVolumes" . | nindent 8 }}
 {{ include "app.dataStorage.podVolume" . | nindent 8 }}
+
+      # Ensure default volumes exist if frontend mounts were empty
+      {{- if eq (len (default (list) .Values.frontend.volumeMounts)) 0 }}
+      - name: tmp
+        emptyDir: {}
+      {{- end }}
+      {{- if eq (len (default (list) .Values.frontend.configMounts)) 0 }}
+      - name: nginx-config
+        configMap:
+          name: nginx-config
+      {{- end }}
 
       {{- include "imagePullSecrets" . | nindent 6 }}

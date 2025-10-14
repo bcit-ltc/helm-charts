@@ -1,8 +1,8 @@
 # qcon-api
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![AppVersion: 1.0.1](https://img.shields.io/badge/AppVersion-1.0.1-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![AppVersion: 1.1.0](https://img.shields.io/badge/AppVersion-1.1.0-informational?style=flat-square)
 
-qcon-api is the backend API for the QCon application. It provides a websocket endpoint for converting documents from word to SCORM format.
+Backend API for the Qcon application. It provides a websocket endpoint for converting documents from word to SCORM format.
 
 **Homepage:** <https://qcon-api.ltc.bcit.ca>
 
@@ -54,41 +54,37 @@ Our registry images are public, but in ["Working with Container Registries"](htt
     helm install qcon-api .
     ```
 
+## Requirements
+
+| Repository | Name | Version |
+|------------|------|---------|
+| https://bcit-ltc.github.io/helm-charts | apps-common | 0.1.0 |
+
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| backend | object | `{}` | Configuration for the backend |
-| backend.configEnvs | list | `[]` | configEnvs create configMaps that are passed to containers using envFrom |
-| backend.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
-| backend.configs | list | `[]` | Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts. |
-| backend.enabled | bool | `true` | Enable or disable backend components. |
-| backend.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
-| backend.image | string | `"postgres"` | Container image to use for the backend |
-| backend.name | string | `""` | Name of the backend container to create. If empty uses "backend". |
-| backend.port | int | `5432` | Port on which the backend is listening |
-| backend.secretMounts | list | `[]` | volumeMounts to be added as secrets |
-| backend.volumeMounts | list | `[]` | volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod. |
-| dataStorage | object | `{"accessMode":"ReadWriteOnce","annotations":{},"enabled":true,"labels":{},"mountPath":"/app/data","size":"10Gi","storageClass":null}` | Configuration for data storage |
 | dataStorage.accessMode | string | `"ReadWriteOnce"` | Access Mode of the storage device being used for the PVC |
 | dataStorage.annotations | object | `{}` | Annotations to apply to the PVC |
-| dataStorage.enabled | bool | `true` | Enable or disable data storage components. |
+| dataStorage.enabled | bool | `false` | Enable or disable data storage components. |
 | dataStorage.labels | object | `{}` | Labels to apply to the PVC |
 | dataStorage.mountPath | string | `"/app/data"` | Location where the PVC will be mounted. |
 | dataStorage.size | string | `"10Gi"` | Size of the PVC created |
 | dataStorage.storageClass | string | `nil` | Name of the storage class to use. If null it will use the configured default Storage Class. |
-| frontend | object | `{}` | Configuration for the frontend |
+| frontend | object | `{}` | Configuration for the "frontend" |
 | frontend.configEnvs | list | `[]` | configEnvs create ConfigMaps that are passed to containers using envFrom |
 | frontend.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
 | frontend.configs | list | `[]` | Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts. |
 | frontend.enabled | bool | `true` | Enable or disable frontend components. |
 | frontend.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
-| frontend.image | string | `"nginxinc/nginx-unprivileged:1.25-alpine"` | Container image to use for the frontend |
+| frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image pull policy |
+| frontend.image.registry | string | `"docker.io"` | Image default registry |
+| frontend.image.repository | string | `"nginxinc/nginx-unprivileged"` | Image default repository |
+| frontend.image.tag | string | `"1.25-alpine"` | Image default tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"nginx"` | The name of the frontend container to create. If empty uses "frontend" |
 | frontend.port | int | `8080` | Port on which the frontend is listening |
-| frontend.pullPolicy | string | `"IfNotPresent"` | Frontend image pull policy |
 | frontend.readinessProbe.enabled | bool | `false` | Enables readinessProbe |
 | frontend.resources.limits | object | `{"cpu":"250m","memory":"256Mi"}` | Resource limits mapped directly to the value of    the resources field for a PodSpec. |
 | frontend.resources.requests | object | `{"cpu":"100m","memory":"64Mi"}` | Resource requests mapped directly to the value of    the resources field for a PodSpec. |
@@ -109,21 +105,22 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | ingress.ingressClassName | string | `""` | Default IngressClass to use. If empty, use the cluster's default |
 | ingress.pathType | string | `"Prefix"` | Ingress pathType |
 | ingress.tls | list | `[]` | TLS configuration for the ingress |
-| processor | object | `{}` | Main app configuration |
+| processor | object | `{}` | Main "backend" configuration |
 | processor.configEnvs | list | `[]` | Create `ConfigMap` resources that are passed to containers using envFrom |
 | processor.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
 | processor.configs | list | `[]` | Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts. |
 | processor.enabled | bool | `true` | Enable or disable processor components. |
 | processor.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
 | processor.extraLabels | object | `{}` | Extra labels to attach to the processor pods    Should be a YAML map of the labels to apply to the deployment template |
+| processor.image.pullPolicy | string | `"IfNotPresent"` | Image default pull policy |
 | processor.image.registry | string | `"ghcr.io"` | Image default registry |
 | processor.image.repository | string | `"bcit-ltc/qcon-api"` | Image default repository |
-| processor.image.tag | string | `"1.0.0"` | Image default tag |
+| processor.image.tag | string | `"1.1.0"` | Image default tag |
 | processor.port | int | `8000` | Port on which processor is listening |
 | processor.replicas | int | `1` | Number of replicas for the processor |
 | processor.secretMounts | list | `[]` | volumeMounts to be added as secrets |
 | processor.volumeMounts | list | `[]` | volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod. |
-| service | object | `{}` | Enables a service for the processor app |
+| service | object | `{}` | Enables a service for the app |
 | service.enabled | bool | `true` | Enable or disable service components. |
 | service.port | int | `8080` | Port on which the app is listening |
 | service.targetPort | int | `8080` | Target port to which the service should be mapped to |
