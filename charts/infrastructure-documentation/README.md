@@ -1,6 +1,6 @@
 # infrastructure-documentation
 
-![Version: 1.1.5](https://img.shields.io/badge/Version-1.1.5-informational?style=flat-square) ![AppVersion: 1.1.5](https://img.shields.io/badge/AppVersion-1.1.5-informational?style=flat-square)
+![Version: 1.1.7-rc.a2c0fac.20251014215313](https://img.shields.io/badge/Version-1.1.7--rc.a2c0fac.20251014215313-informational?style=flat-square) ![AppVersion: 1.1.7-rc.a2c0fac.20251014215313](https://img.shields.io/badge/AppVersion-1.1.7--rc.a2c0fac.20251014215313-informational?style=flat-square)
 
 Information about the architecture and makeup of the LTC's server infrastructure.
 
@@ -80,7 +80,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image pull policy |
 | frontend.image.registry | string | `"ghcr.io"` | Image default registry |
 | frontend.image.repository | string | `"bcit-ltc/infrastructure-documentation"` | Image default repository |
-| frontend.image.tag | string | `"1.1.5"` | Image default tag |
+| frontend.image.tag | string | `"1.1.7-rc.a2c0fac.20251014215313"` | Image default tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"infrastructure-documentation"` | The name of the frontend container to create. If empty uses "frontend" |
@@ -97,14 +97,6 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | global.progressDeadlineSeconds | int | `600` |  |
 | global.revisionHistoryLimit | int | `3` |  |
 | ingress | object | `{}` | Creates an ingress for external access |
-| ingress.annotations | object | `{}` | Extra annotations to attach to the ingress resource |
-| ingress.enabled | bool | `true` | Enable or disable ingress components. |
-| ingress.extraLabels | object | `{}` | Extra labels to attach to the processor pods    Should be a YAML map of the labels to apply to the deployment template |
-| ingress.extraPaths | list | `[]` | Extra paths to include in the ingress |
-| ingress.hosts | list | `[]` | Ingress host definitions |
-| ingress.ingressClassName | string | `""` | Default IngressClass to use. If empty, use the cluster's default |
-| ingress.pathType | string | `"Prefix"` | Ingress pathType |
-| ingress.tls | list | `[]` | TLS configuration for the ingress |
 | processor | object | `{}` | Main "backend" configuration |
 | processor.configEnvs | list | `[]` | Create `ConfigMap` resources that are passed to containers using envFrom |
 | processor.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |

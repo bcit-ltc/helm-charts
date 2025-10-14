@@ -1,10 +1,10 @@
-# infrastructure-documentation
+# course-workload-estimator
 
-![Version: 1.1.5](https://img.shields.io/badge/Version-1.1.5-informational?style=flat-square) ![AppVersion: 1.1.5](https://img.shields.io/badge/AppVersion-1.1.5-informational?style=flat-square)
+![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square) ![AppVersion: 1.0.2](https://img.shields.io/badge/AppVersion-1.0.2-informational?style=flat-square)
 
-Information about the architecture and makeup of the LTC's server infrastructure.
+A time calculator to estimate the number of hours of work students might be expected to spend completing coursework.
 
-**Homepage:** <https://infrastructure-documentation.ltc.bcit.ca>
+**Homepage:** <https://course-workload-estimator.ltc.bcit.ca>
 
 ## Maintainers
 
@@ -38,20 +38,20 @@ Our registry images are public, but in ["Working with Container Registries"](htt
     -H "Accept: application/vnd.github+json" \
     -H "Authorization: Bearer $CR_PAT" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    https://api.github.com/orgs/bcit-ltc/packages/container/infrastructure-documentation/versions \
+    https://api.github.com/orgs/bcit-ltc/packages/container/course-workload-estimator/versions \
     | jq '.[].metadata.container.tags.[]'
     ```
 
 1. Pull and inspect the helm chart:
 
     ```console
-    helm pull --untar oci://ghcr.io/bcit-ltc/infrastructure-documentation --version {VERSION}
+    helm pull --untar oci://ghcr.io/bcit-ltc/course-workload-estimator --version {VERSION}
     ```
 
 1. Install the chart:
 
     ```console
-    helm install infrastructure-documentation .
+    helm install course-workload-estimator .
     ```
 
 ## Requirements
@@ -79,11 +79,11 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image pull policy |
 | frontend.image.registry | string | `"ghcr.io"` | Image default registry |
-| frontend.image.repository | string | `"bcit-ltc/infrastructure-documentation"` | Image default repository |
-| frontend.image.tag | string | `"1.1.5"` | Image default tag |
+| frontend.image.repository | string | `"bcit-ltc/course-workload-estimator"` | Image default repository |
+| frontend.image.tag | string | `"1.0.2"` | Image default tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
-| frontend.name | string | `"infrastructure-documentation"` | The name of the frontend container to create. If empty uses "frontend" |
+| frontend.name | string | `"course-workload-estimator"` | The name of the frontend container to create. If empty uses "frontend" |
 | frontend.port | int | `8080` | Port on which the frontend is listening |
 | frontend.readinessProbe.enabled | bool | `false` | Enables readinessProbe |
 | frontend.resources.limits | object | `{"cpu":"250m","memory":"256Mi"}` | Resource limits mapped directly to the value of    the resources field for a PodSpec. |
@@ -93,18 +93,10 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.startupProbe.enabled | bool | `false` | Enables startupProbe |
 | frontend.volumeMounts | list | `[]` | volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod. |
 | global.imagePullSecrets | list | `[]` |  |
-| global.name | string | `"infrastructure-documentation"` | Authoritative name |
+| global.name | string | `"course-workload-estimator"` | Authoritative name |
 | global.progressDeadlineSeconds | int | `600` |  |
 | global.revisionHistoryLimit | int | `3` |  |
 | ingress | object | `{}` | Creates an ingress for external access |
-| ingress.annotations | object | `{}` | Extra annotations to attach to the ingress resource |
-| ingress.enabled | bool | `true` | Enable or disable ingress components. |
-| ingress.extraLabels | object | `{}` | Extra labels to attach to the processor pods    Should be a YAML map of the labels to apply to the deployment template |
-| ingress.extraPaths | list | `[]` | Extra paths to include in the ingress |
-| ingress.hosts | list | `[]` | Ingress host definitions |
-| ingress.ingressClassName | string | `""` | Default IngressClass to use. If empty, use the cluster's default |
-| ingress.pathType | string | `"Prefix"` | Ingress pathType |
-| ingress.tls | list | `[]` | TLS configuration for the ingress |
 | processor | object | `{}` | Main "backend" configuration |
 | processor.configEnvs | list | `[]` | Create `ConfigMap` resources that are passed to containers using envFrom |
 | processor.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
