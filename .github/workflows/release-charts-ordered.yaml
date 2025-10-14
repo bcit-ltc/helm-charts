@@ -83,17 +83,19 @@ jobs:
           done
 
       # 2b) Package app charts ourselves to .cr-release-packages (includes vendored deps)
-      - name: Package app charts (pre-package)
+      - name: Package app charts (pre-package with deps)
         run: |
           set -euo pipefail
           mkdir -p .cr-release-packages
           for d in charts/*; do
             [[ -f "$d/Chart.yaml" ]] || continue
             [[ "$(basename "$d")" == "apps-common" ]] && continue
-            echo "==> helm package $d -d .cr-release-packages"
-            helm package "$d" -d .cr-release-packages
+            echo "==> helm package --dependency-update $d -d .cr-release-packages"
+            helm package --dependency-update "$d" -d .cr-release-packages
+            echo "==> vendored deps under $d/charts"
+            ls -la "$d/charts" || true
           done
-          ls -la .cr-release-packages
+
 
       # 2c) Upload/index ONLY (skip packaging inside chart-releaser)
       - name: Upload & index pre-packaged charts
