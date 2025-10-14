@@ -68,10 +68,29 @@ jobs:
       - name: Add chart repos for dependencies
         run: |
           set -euo pipefail
-          helm repo add bcit-ltc https://bcit-ltc.github.io/helm-charts
+          helm repo add bcit-ltc https://bcit-ltc.github.io/helm-charts || true
           helm repo update
 
-      # 2a) Build deps for all app charts (skip the library)
+      # Install yq for parsing Chart.yaml
+      - uses: mikefarah/yq@v4.44.3
+
+      # Pre-vendor library deps (apps-common) into each app's charts/ dir
+      - name: Pre-vendor library dependencies (apps-common)
+        run: |
+          set -euo pipefail
+          for d in charts/*; do
+            [[ -f "$d/Chart.yaml" ]] || continue
+            [[ "$(basename "$d")" == "apps-common" ]] && continue
+            if yq -e '.dependencies[] | select(.name=="apps-common")' "$d/Chart.yaml" > /dev/null 2>&1; then
+              ver="$(yq -r '.dependencies[] | select(.name=="apps-common") | .version' "$d/Chart.yaml")"
+              echo "==> Vendoring apps-common@$ver into $d/charts/"
+              mkdir -p "$d/charts"
+              helm pull bcit-ltc/apps-common --version "$ver" --untar --untardir "$d/charts"
+              ls -la "$d/charts" || true
+            fi
+          done
+
+      # (Optional) Build deps for any other non-library repos you might depend on
       - name: Build chart dependencies (apps)
         run: |
           set -euo pipefail
@@ -82,30 +101,29 @@ jobs:
             helm dependency build "$d"
           done
 
-      # 2b) Package app charts ourselves to .cr-release-packages (includes vendored deps)
-      - name: Package app charts (pre-package with deps)
+      # Package app charts ourselves (pre-package) so CR only uploads/indexes
+      - name: Package app charts (pre-package)
         run: |
           set -euo pipefail
           mkdir -p .cr-release-packages
           for d in charts/*; do
             [[ -f "$d/Chart.yaml" ]] || continue
             [[ "$(basename "$d")" == "apps-common" ]] && continue
-            echo "==> helm package --dependency-update $d -d .cr-release-packages"
-            helm package --dependency-update "$d" -d .cr-release-packages
-            echo "==> vendored deps under $d/charts"
-            ls -la "$d/charts" || true
+            echo "==> helm package $d -d .cr-release-packages"
+            helm package "$d" -d .cr-release-packages
           done
+          ls -la .cr-release-packages
 
-
-      # 2c) Upload/index ONLY (skip packaging inside chart-releaser)
+      # Upload & index ONLY (skip packaging inside chart-releaser)
       - name: Upload & index pre-packaged charts
         uses: helm/chart-releaser-action@v1.6.0
         with:
           charts_dir: charts          # used for changed chart detection / metadata
           skip_existing: true
-          skip_packaging: true        # <— key: use the pre-built .tgz files
+          skip_packaging: true        # use pre-built .tgz files in .cr-release-packages
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
   # 3) Publish packaged charts to GHCR
   publish-oci:
