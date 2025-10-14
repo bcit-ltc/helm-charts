@@ -52,6 +52,8 @@ jobs:
         uses: helm/chart-releaser-action@v1.6.0
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CR_CHARTS_DIR: charts/apps-common     # <— only the library
+          CR_SKIP_EXISTING: true                # <— skip if already released
 
   # 2) Package and release ALL app charts
   release-apps:
@@ -87,6 +89,8 @@ jobs:
         uses: helm/chart-releaser-action@v1.6.0
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CR_CHARTS_DIR: charts                # <— default: all charts/
+          CR_SKIP_EXISTING: true               # <— keep idempotent
 
   # 3) Publish packaged charts to GHCR
   publish-oci:
