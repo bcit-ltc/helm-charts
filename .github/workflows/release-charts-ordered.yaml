@@ -60,7 +60,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # Helm needed for dep build
+      # Helm needed for dep build and packaging
       - uses: azure/setup-helm@v4
         with: { version: v3.14.4 }
 
@@ -71,7 +71,7 @@ jobs:
           helm repo add bcit-ltc https://bcit-ltc.github.io/helm-charts
           helm repo update
 
-      # Build deps for all app charts (skip the library)
+      # 2a) Build deps for all app charts (skip the library)
       - name: Build chart dependencies (apps)
         run: |
           set -euo pipefail
@@ -82,42 +82,26 @@ jobs:
             helm dependency build "$d"
           done
 
-      # Make vendored deps visible to chart-releaser (tracked in index, no commit)
-      - name: Force-add vendored dependencies to git index
+      # 2b) Package app charts ourselves to .cr-release-packages (includes vendored deps)
+      - name: Package app charts (pre-package)
         run: |
           set -euo pipefail
+          mkdir -p .cr-release-packages
           for d in charts/*; do
             [[ -f "$d/Chart.yaml" ]] || continue
             [[ "$(basename "$d")" == "apps-common" ]] && continue
-            if compgen -G "$d/charts/*.tgz" > /dev/null; then
-              echo "==> git add -f $d/charts/*.tgz"
-              git add -f "$d"/charts/*.tgz
-            fi
+            echo "==> helm package $d -d .cr-release-packages"
+            helm package "$d" -d .cr-release-packages
           done
-          # show what will be visible to chart-releaser
-          git status --porcelain
+          ls -la .cr-release-packages
 
-      # Sanity check: verify vendored deps exist where needed (debug)
-      - name: Verify vendored dependencies exist
-        run: |
-          set -euo pipefail
-          check() {
-            local app="$1"
-            echo "==> Checking vendored deps for charts/${app}"
-            ls -la "charts/${app}/charts" || true
-            if [[ ! -d "charts/${app}/charts" ]] || ! ls "charts/${app}/charts/"apps-common-*.tgz >/dev/null 2>&1; then
-              echo "ERROR: apps-common not vendored for ${app}" >&2
-              exit 1
-            fi
-          }
-          check qcon-api
-
-      # Package/upload/index all charts
-      - name: Run chart-releaser for all charts
+      # 2c) Upload/index ONLY (skip packaging inside chart-releaser)
+      - name: Upload & index pre-packaged charts
         uses: helm/chart-releaser-action@v1.6.0
         with:
-          charts_dir: charts
+          charts_dir: charts          # used for changed chart detection / metadata
           skip_existing: true
+          skip_packaging: true        # <— key: use the pre-built .tgz files
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
