@@ -1,5 +1,21 @@
 apiVersion: v1
 entries:
+  apps-common:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2025-10-14T00:18:11.929539-07:00"
+    description: Common helpers and partials for LTC Helm charts (library chart).
+    digest: fb8addfce14c304e049f89ab9454be0b13dcbaec0f7a631c7b2070bc558bc5a0
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    keywords:
+    - library
+    - helpers
+    - common
+    name: apps-common
+    type: library
+    urls:
+    - https://bcit-ltc.github.io/helm-charts/apps-common-0.1.0.tgz
+    version: 0.1.0
   conversion-guide:
   - apiVersion: v2
     appVersion: 1.0.0
@@ -149,42 +165,6 @@ entries:
     - https://github.com/bcit-ltc/helm-charts/releases/download/course-workload-estimator-1.0.0-rc.6adafcf.20250903214120/course-workload-estimator-1.0.0-rc.6adafcf.20250903214120.tgz
     version: 1.0.0-rc.6adafcf.20250903214120
   - apiVersion: v2
-    appVersion: 1.0.0-rc.6adafcf.20250903214120
-    created: "2025-09-11T03:17:24.826259064Z"
-    description: A time calculator to estimate the number of hours of work students
-      might be expected to spend completing coursework.
-    digest: 9cbb535e8cec8a00ac9f9e9a8d61567847bd7285624764dacb3699bedfcb3e65
-    home: https://course-workload-estimator.ltc.bcit.ca
-    icon: https://course-production.ltc.bcit.ca/favicon.ico
-    maintainers:
-    - email: ltc_techops@bcit.ca
-      name: BCIT LTC
-      url: https://www.bcit.ca/learning-teaching-centre/
-    name: course-workload-estimator
-    sources:
-    - https://github.com/bcit-ltc/
-    urls:
-    - https://github.com/bcit-ltc/helm-charts/releases/download/course-workload-estimator-1.0.0-rc.6adafcf.20250903214120/course-workload-estimator-1.0.0-rc.6adafcf.20250903214120.tgz
-    version: 1.0.0-rc.6adafcf.20250903214120
-  - apiVersion: v2
-    appVersion: 1.0.0-rc.6adafcf.20250903214120
-    created: "2025-09-11T03:18:25.721578948Z"
-    description: A time calculator to estimate the number of hours of work students
-      might be expected to spend completing coursework.
-    digest: 37de0353d485890dc31119a4d56103cf6d0c449c0e963801b7510a5e7f82a5c1
-    home: https://course-workload-estimator.ltc.bcit.ca
-    icon: https://course-production.ltc.bcit.ca/favicon.ico
-    maintainers:
-    - email: ltc_techops@bcit.ca
-      name: BCIT LTC
-      url: https://www.bcit.ca/learning-teaching-centre/
-    name: course-workload-estimator
-    sources:
-    - https://github.com/bcit-ltc/
-    urls:
-    - https://github.com/bcit-ltc/helm-charts/releases/download/course-workload-estimator-1.0.0-rc.6adafcf.20250903214120/course-workload-estimator-1.0.0-rc.6adafcf.20250903214120.tgz
-    version: 1.0.0-rc.6adafcf.20250903214120
-  - apiVersion: v2
     appVersion: 1.0.0-rc.2ec7bf1.20250825163610
     created: "2025-08-25T16:36:43.76123833Z"
     description: A time calculator for instructors to estimate how many hours of work
@@ -312,24 +292,6 @@ entries:
     sources:
     - https://github.com/bcit-ltc/
     - https://github.com/bcit-ltc/infrastructure-documentation
-    urls:
-    - https://github.com/bcit-ltc/helm-charts/releases/download/infrastructure-documentation-1.1.2-rc.c26c18b.20250911055855/infrastructure-documentation-1.1.2-rc.c26c18b.20250911055855.tgz
-    version: 1.1.2-rc.c26c18b.20250911055855
-  - apiVersion: v2
-    appVersion: 1.1.2-rc.c26c18b.20250911055855
-    created: "2025-09-11T05:59:33.04425102Z"
-    description: Information about the architecture and makeup of the LTC's server
-      infrastructure.
-    digest: 4f351a0de46683bcd493c7282b97e736a63352c4dbceef960fac6286f082bd11
-    home: https://infrastructure-documentation.ltc.bcit.ca
-    icon: https://course-production.ltc.bcit.ca/favicon.ico
-    maintainers:
-    - email: ltc_techops@bcit.ca
-      name: BCIT LTC
-      url: https://www.bcit.ca/learning-teaching-centre/
-    name: infrastructure-documentation
-    sources:
-    - https://github.com/bcit-ltc/
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/infrastructure-documentation-1.1.2-rc.c26c18b.20250911055855/infrastructure-documentation-1.1.2-rc.c26c18b.20250911055855.tgz
     version: 1.1.2-rc.c26c18b.20250911055855
@@ -1502,25 +1464,6 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/qcon-api-0.0.0-rc.cbdc246.20250909173957/qcon-api-0.0.0-rc.cbdc246.20250909173957.tgz
     version: 0.0.0-rc.cbdc246.20250909173957
-  - apiVersion: v2
-    appVersion: 0.0.0-rc.cbdc246.20250909173957
-    created: "2025-09-11T06:27:49.546869097Z"
-    description: qcon-api is the backend API for the QCon application. It provides
-      a websocket endpoint for converting documents from word to SCORM format.
-    digest: 6317c4e4971fa2af2cea2a955be761c860349f627058dae48272273a9cd8bcc7
-    home: https://qcon-api.ltc.bcit.ca
-    icon: https://course-production.ltc.bcit.ca/favicon.ico
-    maintainers:
-    - email: ltc_techops@bcit.ca
-      name: BCIT LTC
-      url: https://www.bcit.ca/learning-teaching-centre/
-    name: qcon-api
-    sources:
-    - https://github.com/bcit-ltc/
-    - https://github.com/bcit-ltc/qcon-api
-    urls:
-    - https://github.com/bcit-ltc/helm-charts/releases/download/qcon-api-0.0.0-rc.cbdc246.20250909173957/qcon-api-0.0.0-rc.cbdc246.20250909173957.tgz
-    version: 0.0.0-rc.cbdc246.20250909173957
   qcon-guide:
   - apiVersion: v2
     appVersion: 1.0.2
@@ -1690,43 +1633,6 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/sugar-suite-0.0.0-rc.01a9cdd.20250902234251/sugar-suite-0.0.0-rc.01a9cdd.20250902234251.tgz
     version: 0.0.0-rc.01a9cdd.20250902234251
-  - apiVersion: v2
-    appVersion: 0.0.0-rc.01a9cdd.20250902234251
-    created: "2025-09-03T18:16:37.905967952Z"
-    description: Sugar-Suite is a "Framework Factory" used to produce customized stylesheets
-      designed for building online courses in HTML.
-    digest: f65927835209dacf1f229ead46394c00cdf738ae84413a5ba2e9cbdb2a8c414a
-    home: https://sugar-suite.ltc.bcit.ca
-    icon: https://course-production.ltc.bcit.ca/favicon.ico
-    maintainers:
-    - email: ltc_techops@bcit.ca
-      name: BCIT LTC
-      url: https://www.bcit.ca/learning-teaching-centre/
-    name: sugar-suite
-    sources:
-    - https://github.com/bcit-ltc/
-    urls:
-    - https://github.com/bcit-ltc/helm-charts/releases/download/sugar-suite-0.0.0-rc.01a9cdd.20250902234251/sugar-suite-0.0.0-rc.01a9cdd.20250902234251.tgz
-    version: 0.0.0-rc.01a9cdd.20250902234251
-  - apiVersion: v2
-    appVersion: 0.0.0-rc.01a9cdd.20250902234251
-    created: "2025-09-11T06:27:49.8423977Z"
-    description: Sugar-Suite is a "Framework Factory" used to produce customized stylesheets
-      designed for building online courses in HTML.
-    digest: b2870ced411a5cbe4c01b9accb070b1180df00cf0e6844d819ef034c2c1a2248
-    home: https://sugar-suite.ltc.bcit.ca
-    icon: https://course-production.ltc.bcit.ca/favicon.ico
-    maintainers:
-    - email: ltc_techops@bcit.ca
-      name: BCIT LTC
-      url: https://www.bcit.ca/learning-teaching-centre/
-    name: sugar-suite
-    sources:
-    - https://github.com/bcit-ltc/
-    - https://github.com/bcit-ltc/sugar-suite
-    urls:
-    - https://github.com/bcit-ltc/helm-charts/releases/download/sugar-suite-0.0.0-rc.01a9cdd.20250902234251/sugar-suite-0.0.0-rc.01a9cdd.20250902234251.tgz
-    version: 0.0.0-rc.01a9cdd.20250902234251
   template-app:
   - apiVersion: v2
     appVersion: 1.0.0
@@ -1760,4 +1666,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-10-10T16:13:57.546473504Z"
+generated: "2025-10-14T00:18:11.929099-07:00"
