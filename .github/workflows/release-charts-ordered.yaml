@@ -156,15 +156,18 @@ jobs:
         env:
           OWNER: ${{ github.repository_owner }}
           TAGS_JSON: ${{ steps.tags.outputs.list }}
+          LIB_NAME: apps-common
         run: |
           set -euo pipefail
           repo="oci://ghcr.io/${OWNER}/oci"
+          # Sanitize workflow name for Cosign annotation (alnum + . _ - only)
+          WORKFLOW_SAFE="$(printf '%s' "${GITHUB_WORKFLOW:-}" | tr -c '[:alnum:]._-' '.')"
           for pkg in dist/*.tgz; do
             name="$(helm show chart "$pkg" | awk -F': ' '/^name:/{print $2; exit}')"
             version="$(helm show chart "$pkg" | awk -F': ' '/^version:/{print $2; exit}')"
 
             # Optional: don't push the library to OCI (comment out to include it)
-            if [[ "$name" == "${LIB_NAME}" ]]; then
+            if [[ "$name" == "${LIB_NAME:-apps-common}" ]]; then
               echo "Skipping OCI publish for library chart: $name"
               continue
             fi
@@ -179,7 +182,7 @@ jobs:
               -a "chart.name=${name}" \
               -a "chart.version=${version}" \
               -a "repo=${GITHUB_REPOSITORY}" \
-              -a "workflow=${GITHUB_WORKFLOW}" \
+              -a "workflow=${WORKFLOW_SAFE}" \
               -a "sha=${GITHUB_SHA}" \
               "${REF}@${DGST}"
 
