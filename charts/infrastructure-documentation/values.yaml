@@ -210,39 +210,38 @@ processor:
 # -- Creates an ingress for external access
 # @default -- `{}`
 ingress:
-  # -- Enable or disable ingress components.
   enabled: true
-  # -- Extra labels to attach to the processor pods
-  #    Should be a YAML map of the labels to apply to the deployment template
-  extraLabels: {}
-  # -- Extra annotations to attach to the ingress resource
-  annotations: {}
-  # -- Default IngressClass to use. If empty, use the cluster's default
+
+  defaultDomain: ltc.bcit.ca
+
+  # Optional: "nginx", "traefik", etc. If empty, cluster default is used.
   ingressClassName: ""
-  # As of Kubernetes 1.19, all Ingress Paths must have a pathType configured. The default value below should be sufficient in most cases.
-  # See: https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types for other possible values.
-  # -- Ingress pathType
-  pathType: Prefix
-  # -- Ingress host definitions
-  # @default -- `[]`
-  hosts:
-    - host: "ltc.bcit.ca"
-      paths: []
-  # -- Extra paths to include in the ingress
-  extraPaths: []
+
+  # Host to expose. If empty, defaults to "<global.name>.<defaultDomain>"
+  host: ""
+
+  # Annotations applied to the Ingress
+  annotations: {}
+
+  # TLS secret to use. If empty, defaults to "star-ltc-bcit-ca"
+  # and the host defaults to "<global.name>.<defaultDomain>" if not set.
+  tlsSecret: ""
+
+  # Advanced use: extra path rules to render verbatim BEFORE the default "/".
+  # Example:
+  # extraPaths:
   #   - path: /api
+  #     pathType: Prefix
   #     backend:
   #       service:
-  #         name: api-service
+  #         name: my-api
   #         port:
   #           number: 3000
+  extraPaths: []
 
-  # -- TLS configuration for the ingress
-  # @default -- `[]`
-  tls:
-    - secretName: "star-ltc-bcit-ca"
-      hosts:
-        - "ltc.bcit.ca"
+  # Optional: path type for the default route ("/")
+  pathType: Prefix
+
 # Configuration for persistent volume claims
 dataStorage:
   # -- Enable or disable data storage components.

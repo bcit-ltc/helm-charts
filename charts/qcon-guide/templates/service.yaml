@@ -30,5 +30,5 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: {{ include "app.name" . }}
-    component: server
+
 {{- end }}
