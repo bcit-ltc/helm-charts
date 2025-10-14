@@ -135,15 +135,6 @@ spec:
 {{ include "app.podVolumes" . | nindent 8 }}
 {{ include "app.dataStorage.podVolume" . | nindent 8 }}
 
-      # Ensure default volumes exist if frontend mounts were empty
-      {{- if eq (len (default (list) .Values.frontend.volumeMounts)) 0 }}
-      - name: tmp
-        emptyDir: {}
-      {{- end }}
-      {{- if eq (len (default (list) .Values.frontend.configMounts)) 0 }}
-      - name: nginx-config
-        configMap:
-          name: nginx-config
-      {{- end }}
+{{ include "app.defaultFrontendVolumes" . | nindent 8 }}
 
       {{- include "imagePullSecrets" . | nindent 6 }}

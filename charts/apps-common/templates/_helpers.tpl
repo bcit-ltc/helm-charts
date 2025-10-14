@@ -250,6 +250,19 @@ annotations:
 {{- end }}
 {{- end -}}
 
+{{/* Default volumes for frontend when mounts are empty */}}
+{{- define "app.defaultFrontendVolumes" -}}
+{{- if eq (len (default (list) .Values.frontend.volumeMounts)) 0 }}
+- name: tmp
+  emptyDir: {}
+{{- end }}
+{{- if eq (len (default (list) .Values.frontend.configMounts)) 0 }}
+- name: nginx-config
+  configMap:
+    name: nginx-config
+{{- end }}
+{{- end -}}
+
 {{/* ----------------------------
      imagePullSecrets (from global.imagePullSecrets)
    ---------------------------- */}}
