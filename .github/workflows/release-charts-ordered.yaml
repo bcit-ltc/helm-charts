@@ -36,34 +36,21 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # Create a temporary .cr.yaml that points ONLY to charts/apps-common
-      - name: Create temporary .cr.yaml (library only)
-        run: |
-          cat > .cr.yaml <<'YAML'
-          owner: ${{ github.repository_owner }}
-          git-repo: ${{ github.event.repository.name }}
-          charts_dir: charts/apps-common
-          packages_with_index: true
-          skip_existing: true
-          YAML
-          cat .cr.yaml
-
       - name: Run chart-releaser for library
         uses: helm/chart-releaser-action@v1.6.0
+        with:
+          charts_dir: charts/apps-common   # only the library folder
+          skip_existing: true              # do not fail if the release tag already exists
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CR_CHARTS_DIR: charts/apps-common     # <— only the library
-          CR_SKIP_EXISTING: true                # <— skip if already released
 
-  # 2) Package and release ALL app charts
+  # 2) Package and release ALL charts (apps) — now that the lib is indexed
   release-apps:
     name: Release app charts
     needs: release-lib
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    # outputs:
-    #   tags_json: ${{ steps.tags.outputs.list }}   # e.g., ["app-0.2.0","nginx-unprivileged-1.3.4"]
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -73,26 +60,15 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # Create a .cr.yaml that points to the whole charts/ dir
-      - name: Create .cr.yaml (all charts)
-        run: |
-          cat > .cr.yaml <<'YAML'
-          owner: ${{ github.repository_owner }}
-          git-repo: ${{ github.event.repository.name }}
-          charts_dir: charts
-          packages_with_index: true
-          skip_existing: true
-          YAML
-          cat .cr.yaml
-
       - name: Run chart-releaser for all charts
         uses: helm/chart-releaser-action@v1.6.0
+        with:
+          charts_dir: charts               # process everything under charts/
+          skip_existing: true
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CR_CHARTS_DIR: charts                # <— default: all charts/
-          CR_SKIP_EXISTING: true               # <— keep idempotent
 
-  # 3) Publish packaged charts to GHCR
+  # 3) Publish packaged charts to GHCR (mirrors your current publish step)
   publish-oci:
     name: Publish OCI charts to GHCR
     needs: release-apps
@@ -127,15 +103,13 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
-          # Download all .tgz assets from the most recent releases created in this run.
-          # We fetch the last 30 releases and filter by created date in this workflow run window.
-          mapfile -t rels < <(gh release list --limit 30 --json name,createdAt | jq -r '.[].name')
-          if ((${#rels[@]}==0)); then
-            echo "No releases found"; exit 0
-          fi
+
+          # Download .tgz assets from recent releases (broad net; harmless if no new packages)
+          mapfile -t rels < <(gh release list --limit 30 --json name | jq -r '.[].name')
           for r in "${rels[@]}"; do
             gh release download "$r" --pattern '*.tgz' --dir dist || true
           done
+
           shopt -s nullglob
           files=(dist/*.tgz)
           if (( ${#files[@]} )); then
@@ -155,19 +129,20 @@ jobs:
         if: ${{ steps.tags.outputs.list != '' && steps.tags.outputs.list != '[]' }}
         env:
           OWNER: ${{ github.repository_owner }}
-          TAGS_JSON: ${{ steps.tags.outputs.list }}
-          LIB_NAME: apps-common
+          LIB_NAME: ${{ env.LIB_NAME }}
         run: |
           set -euo pipefail
           repo="oci://ghcr.io/${OWNER}/oci"
+
           # Sanitize workflow name for Cosign annotation (alnum + . _ - only)
-          WORKFLOW_SAFE="$(printf '%s' "${GITHUB_WORKFLOW:-}" | tr -c '[:alnum:]._-' '.')"
+          WORKFLOW_SAFE="$(printf '%s' "${GITHUB_WORKFLOW:-}" | tr -c '[:alnum:]._-' '_')"
+
           for pkg in dist/*.tgz; do
             name="$(helm show chart "$pkg" | awk -F': ' '/^name:/{print $2; exit}')"
             version="$(helm show chart "$pkg" | awk -F': ' '/^version:/{print $2; exit}')"
 
-            # Optional: don't push the library to OCI (comment out to include it)
-            if [[ "$name" == "${LIB_NAME:-apps-common}" ]]; then
+            # Skip pushing the library chart to OCI (optional)
+            if [[ "$name" == "${LIB_NAME}" ]]; then
               echo "Skipping OCI publish for library chart: $name"
               continue
             fi
@@ -186,6 +161,6 @@ jobs:
               -a "sha=${GITHUB_SHA}" \
               "${REF}@${DGST}"
 
-            # Add 'latest' tag for convenience
+            # Add 'latest' tag
             crane tag "${REF}@${DGST}" latest
           done
