@@ -33,9 +33,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          set -f  # disable pathname expansion to avoid "no matches found"
+          set -f
           name='${{ inputs.chart_name }}'
-          # must be DNS-1123 label (same as Kubernetes name)
           echo -n "$name" | grep -Eq '^[a-z0-9]([-a-z0-9]*[a-z0-9])?$' || { echo "Invalid chart_name: $name" >&2; exit 1; }
 
       - name: Update files
@@ -51,10 +50,8 @@ jobs:
           VALUES="$CHART_DIR/values.yaml"
           CHART="$CHART_DIR/Chart.yaml"
 
-          # Must have Chart.yaml
           [[ -f "$CHART" ]] || { echo "Chart not found at $CHART_DIR" >&2; echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
-          # Ensure Chart.yaml has the required keys (robust: no yq -e)
           CHART_VERSION="$(yq -r '.version    // ""' "$CHART")"
           APP_VER_FIELD="$(yq -r '.appVersion // ""' "$CHART")"
           [[ -n "$CHART_VERSION" ]] || { echo "Missing or empty .version in $CHART" >&2; exit 1; }
@@ -65,13 +62,12 @@ jobs:
 
           # 2) Optionally bump values.yaml image tag (only if values.yaml exists and looks like an app)
           if [[ -f "$VALUES" ]]; then
-            # Detect whether this chart uses frontend/processor images (so we don’t mutate library-only charts)
             HAS_FRONTEND_REPO="$(yq -r '(.frontend.image.repository // "") != ""' "$VALUES")"
             HAS_PROCESSOR_REPO="$(yq -r '(.processor.image.repository // "") != ""' "$VALUES")"
 
             if [[ "$HAS_FRONTEND_REPO" == "true" || "$HAS_PROCESSOR_REPO" == "true" ]]; then
-              # Read processor.enabled with a safe default (false if missing)
-              PROC_ENABLED="$(yq -r '(.processor.enabled // false) | (if . then "true" else "false" end)' "$VALUES")"
+              # Read processor.enabled safely (defaults to false)
+              PROC_ENABLED="$(yq -r '.processor.enabled // false' "$VALUES")"
 
               if [[ "$PROC_ENABLED" == "true" ]]; then
                 echo "Processor enabled — setting .processor.image.tag to ${APP_VERSION}"
@@ -95,7 +91,6 @@ jobs:
             echo "No values.yaml; only Chart.yaml bumped."
           fi
 
-          # Output "changed" if anything changed
           if git status --porcelain | grep -q .; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
