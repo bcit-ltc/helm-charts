@@ -82,6 +82,21 @@ jobs:
             helm dependency build "$d"
           done
 
+      # Make vendored deps visible to chart-releaser (tracked in index, no commit)
+      - name: Force-add vendored dependencies to git index
+        run: |
+          set -euo pipefail
+          for d in charts/*; do
+            [[ -f "$d/Chart.yaml" ]] || continue
+            [[ "$(basename "$d")" == "apps-common" ]] && continue
+            if compgen -G "$d/charts/*.tgz" > /dev/null; then
+              echo "==> git add -f $d/charts/*.tgz"
+              git add -f "$d"/charts/*.tgz
+            fi
+          done
+          # show what will be visible to chart-releaser
+          git status --porcelain
+
       # Sanity check: verify vendored deps exist where needed (debug)
       - name: Verify vendored dependencies exist
         run: |
