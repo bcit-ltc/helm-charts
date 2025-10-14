@@ -54,9 +54,11 @@ jobs:
           # Must have Chart.yaml
           [[ -f "$CHART" ]] || { echo "Chart not found at $CHART_DIR" >&2; echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
-          # Ensure Chart.yaml has the required keys (treat empty as error)
-          yq -e '.version        | select(type=="string" and length>0)' "$CHART" > /dev/null
-          yq -e '.appVersion     | select(type=="string" and length>0)' "$CHART" > /dev/null
+          # Ensure Chart.yaml has the required keys (robust: no yq -e)
+          CHART_VERSION="$(yq -r '.version    // ""' "$CHART")"
+          APP_VER_FIELD="$(yq -r '.appVersion // ""' "$CHART")"
+          [[ -n "$CHART_VERSION" ]] || { echo "Missing or empty .version in $CHART" >&2; exit 1; }
+          [[ -n "$APP_VER_FIELD" ]] || { echo "Missing or empty .appVersion in $CHART" >&2; exit 1; }
 
           # 1) Always bump chart versions
           yq -i '.version = strenv(APP_VERSION) | .appVersion = strenv(APP_VERSION)' "$CHART"
