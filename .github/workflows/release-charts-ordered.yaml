@@ -90,7 +90,7 @@ jobs:
             fi
           done
 
-      # (Optional) Build deps for any other non-library repos you might depend on
+      # (Optional) Build deps for any other repos you might depend on
       - name: Build chart dependencies (apps)
         run: |
           set -euo pipefail
@@ -101,7 +101,7 @@ jobs:
             helm dependency build "$d"
           done
 
-      # Package app charts ourselves (pre-package) so CR only uploads/indexes
+      # Package app charts ourselves (pre-package) so we can upload/index manually
       - name: Package app charts (pre-package)
         run: |
           set -euo pipefail
@@ -114,7 +114,7 @@ jobs:
           done
           ls -la .cr-release-packages
 
-      # Install the chart-releaser CLI only (avoid action's packaging/index bug)
+      # Install the chart-releaser CLI only (we'll run cr ourselves)
       - name: Install chart-releaser CLI
         uses: helm/chart-releaser-action@v1.6.0
         with:
@@ -122,27 +122,32 @@ jobs:
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Upload prebuilt packages and push gh-pages index
-      - name: Upload packages & update index (manual cr)
+      # Upload prebuilt packages and push gh-pages index (clean worktree + stable TMPDIR)
+      - name: Upload packages & update index (manual cr with clean worktree)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
-          # Upload all .tgz from .cr-release-packages to GitHub Releases (idempotent)
+          echo "==> cr upload (idempotent)"
           cr upload \
             --owner "${GITHUB_REPOSITORY_OWNER}" \
             --git-repo "${GITHUB_REPOSITORY#*/}" \
             --skip-existing \
             --token "${GH_TOKEN}"
 
-          # Rebuild and push gh-pages index from releases
+          echo "==> prepare clean index worktree and stable TMPDIR"
+          rm -rf .cr-index .tmp
+          mkdir -p .tmp
+          export TMPDIR="$PWD/.tmp"
+
+          echo "==> cr index --pages-branch gh-pages --push"
           cr index \
             --owner "${GITHUB_REPOSITORY_OWNER}" \
             --git-repo "${GITHUB_REPOSITORY#*/}" \
-            --charts-repo "https://bcit-ltc.github.io/helm-charts" \
             --pages-branch "gh-pages" \
             --push \
+            --index-path ".cr-index/index.yaml" \
             --token "${GH_TOKEN}"
 
 
