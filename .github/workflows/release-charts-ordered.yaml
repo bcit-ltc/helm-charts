@@ -40,7 +40,7 @@ jobs:
         uses: helm/chart-releaser-action@v1.6.0
         with:
           charts_dir: charts/apps-common   # only the library folder
-          skip_existing: true              # do not fail if the release tag already exists
+          skip_existing: true
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -60,21 +60,17 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      # Helm needed for dep build and packaging
       - uses: azure/setup-helm@v4
         with: { version: v3.14.4 }
 
-      # Add gh-pages repo so deps resolve
       - name: Add chart repos for dependencies
         run: |
           set -euo pipefail
           helm repo add bcit-ltc https://bcit-ltc.github.io/helm-charts || true
           helm repo update
 
-      # Install yq for parsing Chart.yaml
       - uses: mikefarah/yq@v4.44.3
 
-      # Pre-vendor library deps (apps-common) into each app's charts/ dir
       - name: Pre-vendor library dependencies (apps-common)
         run: |
           set -euo pipefail
@@ -90,7 +86,6 @@ jobs:
             fi
           done
 
-      # (Optional) Build deps for any other repos you might depend on
       - name: Build chart dependencies (apps)
         run: |
           set -euo pipefail
@@ -101,7 +96,6 @@ jobs:
             helm dependency build "$d"
           done
 
-      # Package app charts ourselves (pre-package)
       - name: Package app charts (pre-package)
         run: |
           set -euo pipefail
@@ -114,7 +108,6 @@ jobs:
           done
           ls -la .cr-release-packages
 
-      # Install the chart-releaser CLI only (we'll run cr ourselves)
       - name: Install chart-releaser CLI
         uses: helm/chart-releaser-action@v1.6.0
         with:
@@ -122,7 +115,6 @@ jobs:
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Upload prebuilt packages to Releases (idempotent)
       - name: Upload packages to Releases (cr upload)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -134,29 +126,24 @@ jobs:
             --skip-existing \
             --token "${GH_TOKEN}"
 
-      # Rebuild gh-pages index using helm repo index (avoids cr index bug)
       - name: Rebuild gh-pages index (helm repo index)
         env:
           REPO_URL: https://bcit-ltc.github.io/helm-charts
         run: |
           set -euo pipefail
 
-          # Prepare a clean gh-pages worktree
           git fetch origin gh-pages:gh-pages || true
           rm -rf .gh-pages
           if git show-ref --verify --quiet refs/heads/gh-pages; then
             git worktree add .gh-pages gh-pages
           else
-            # Create orphan gh-pages if it doesn't exist
             git worktree add .gh-pages -b gh-pages
             (cd .gh-pages && git commit --allow-empty -m "init gh-pages")
           fi
 
-          # Copy newly built packages into the pages dir
           mkdir -p .gh-pages
           cp -f .cr-release-packages/*.tgz .gh-pages/ || true
 
-          # Merge/update index.yaml
           if [[ -f .gh-pages/index.yaml ]]; then
             echo "Merging into existing index.yaml"
             helm repo index .gh-pages --url "${REPO_URL}" --merge .gh-pages/index.yaml
@@ -165,7 +152,6 @@ jobs:
             helm repo index .gh-pages --url "${REPO_URL}"
           fi
 
-          # Commit and push the updated index and packages
           git -C .gh-pages add -A
           if ! git -C .gh-pages diff --cached --quiet; then
             git -C .gh-pages commit -m "index: update Helm chart repo"
@@ -210,17 +196,14 @@ jobs:
           set -euo pipefail
           mkdir -p dist
 
-          # Fetch up to 100 recent releases, drop drafts, and select only names that look like <chart>-<version>.
-          # Derive the chart name by stripping the trailing "-<version>" segment, then group by chart
-          # and pick the most recently published release for each chart.
           mapfile -t LATEST_PER_CHART < <(
             gh release list --limit 100 --json name,publishedAt,isDraft |
             jq -r '
-              map(select(.isDraft == false))                                       # ignore drafts
-              | map(select(.name | test(".+-[0-9]")))                              # must look like "<chart>-<version>"
-              | map(.chart = (.name | sub("-[0-9].*$"; "")))                       # derive chart name
-              | group_by(.chart)                                                   # group releases per chart
-              | map(max_by(.publishedAt))                                          # pick most recent per chart
+              map(select(.isDraft == false))
+              | map(select(.name | test(".+-[0-9]")))
+              | map(.chart = (.name | sub("-[0-9].*$"; "")))
+              | group_by(.chart)
+              | map(max_by(.publishedAt))
               | .[].name
             '
           )
@@ -231,7 +214,6 @@ jobs:
             printf 'Latest releases per chart:\n%s\n' "$(printf '%s\n' "${LATEST_PER_CHART[@]}")"
           fi
 
-          # Download only the selected releases' chart packages (*.tgz)
           for rel in "${LATEST_PER_CHART[@]}"; do
             echo "==> Downloading assets for release: $rel"
             gh release download "$rel" --pattern '*.tgz' --dir dist || true
@@ -252,42 +234,63 @@ jobs:
       - uses: imjasonh/setup-crane@v0.4
         with: { version: v0.20.1 }
 
-      - name: Push & sign charts to GHCR by digest
+      - name: Push & sign charts to GHCR only if missing
         if: ${{ steps.tags.outputs.list != '' && steps.tags.outputs.list != '[]' }}
         env:
           OWNER: ${{ github.repository_owner }}
           LIB_NAME: ${{ env.LIB_NAME }}
         run: |
           set -euo pipefail
+          shopt -s nullglob
           repo="oci://ghcr.io/${OWNER}/oci"
 
-          # Sanitize workflow name for Cosign annotation (alnum + . _ - only)
+          # Sanitize for annotation
           WORKFLOW_SAFE="$(printf '%s' "${GITHUB_WORKFLOW:-}" | tr -c '[:alnum:]._-' '_')"
 
           for pkg in dist/*.tgz; do
-            name="$(helm show chart "$pkg" | awk -F': ' '/^name:/{print $2; exit}')"
-            version="$(helm show chart "$pkg" | awk -F': ' '/^version:/{print $2; exit}')"
+            name="$(helm show chart "$pkg"   | awk -F': ' '/^name:/{print $2; exit}')"
+            version="$(helm show chart "$pkg"| awk -F': ' '/^version:/{print $2; exit}')"
 
-            # Skip pushing the library chart to OCI (optional)
+            # Skip the library chart for OCI publish
             if [[ "$name" == "${LIB_NAME}" ]]; then
               echo "Skipping OCI publish for library chart: $name"
               continue
             fi
 
+            REF_BASE="ghcr.io/${OWNER}/oci/${name}"
+            TAG_REF="${REF_BASE}:${version}"
+
+            echo "==> Checking remote for ${TAG_REF}"
+            # If the version tag already exists, skip push/sign; still ensure 'latest' points to it.
+            if digest_remote="$(crane digest "${TAG_REF}" 2>/dev/null)"; then
+              echo "Found existing ${TAG_REF} with digest ${digest_remote}; skipping push and sign."
+
+              # Keep 'latest' pointing at the same digest if needed.
+              latest_digest="$(crane digest "${REF_BASE}:latest" 2>/dev/null || true)"
+              if [[ -z "${latest_digest}" || "${latest_digest}" != "${digest_remote}" ]]; then
+                echo "Updating 'latest' to point at ${digest_remote}"
+                crane tag "${REF_BASE}@${digest_remote}" latest
+              else
+                echo "'latest' already points at the same digest; no change."
+              fi
+              continue
+            fi
+
+            # Not present remotely — push, parse digest, sign, and tag latest
+            echo "Pushing ${name}-${version} to ${repo}"
             PUSH_OUT="$(helm push "$pkg" "${repo}" 2>&1 | tee /dev/stderr)"
             DGST="$(printf '%s\n' "$PUSH_OUT" | tr -d '\r' | awk 'tolower($1)=="digest:" {print $2; exit}')"
             [[ -n "$DGST" && "$DGST" =~ ^sha256:[0-9A-Fa-f]{64}$ ]] || { echo "Failed to parse digest"; exit 1; }
 
-            REF="ghcr.io/${OWNER}/oci/${name}"
-            echo "Signing ${REF}@${DGST} with Cosign (keyless)…"
+            echo "Signing ${REF_BASE}@${DGST} with Cosign (keyless)…"
             cosign sign --yes \
               -a "chart.name=${name}" \
               -a "chart.version=${version}" \
               -a "repo=${GITHUB_REPOSITORY}" \
               -a "workflow=${WORKFLOW_SAFE}" \
               -a "sha=${GITHUB_SHA}" \
-              "${REF}@${DGST}"
+              "${REF_BASE}@${DGST}"
 
-            # Add 'latest' tag
-            crane tag "${REF}@${DGST}" latest
+            echo "Tagging 'latest' -> ${DGST}"
+            crane tag "${REF_BASE}@${DGST}" latest
           done
