@@ -114,15 +114,37 @@ jobs:
           done
           ls -la .cr-release-packages
 
-      # Upload & index ONLY (skip packaging inside chart-releaser)
-      - name: Upload & index pre-packaged charts
+      # Install the chart-releaser CLI only (avoid action's packaging/index bug)
+      - name: Install chart-releaser CLI
         uses: helm/chart-releaser-action@v1.6.0
         with:
-          charts_dir: charts          # used for changed chart detection / metadata
-          skip_existing: true
-          skip_packaging: true        # use pre-built .tgz files in .cr-release-packages
+          install_only: true
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Upload prebuilt packages and push gh-pages index
+      - name: Upload packages & update index (manual cr)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Upload all .tgz from .cr-release-packages to GitHub Releases (idempotent)
+          cr upload \
+            --owner "${GITHUB_REPOSITORY_OWNER}" \
+            --git-repo "${GITHUB_REPOSITORY#*/}" \
+            --skip-existing \
+            --token "${GH_TOKEN}"
+
+          # Rebuild and push gh-pages index from releases
+          cr index \
+            --owner "${GITHUB_REPOSITORY_OWNER}" \
+            --git-repo "${GITHUB_REPOSITORY#*/}" \
+            --charts-repo "https://bcit-ltc.github.io/helm-charts" \
+            --pages-branch "gh-pages" \
+            --push \
+            --token "${GH_TOKEN}"
+
 
 
   # 3) Publish packaged charts to GHCR
