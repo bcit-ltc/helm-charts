@@ -174,9 +174,6 @@ jobs:
             echo "No changes to gh-pages."
           fi
 
-
-
-
   # 3) Publish packaged charts to GHCR
   publish-oci:
     name: Publish OCI charts to GHCR
@@ -205,7 +202,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Gather packaged chart assets from releases
+      - name: Gather latest packaged chart assets (one release per chart)
         id: tags
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -213,10 +210,31 @@ jobs:
           set -euo pipefail
           mkdir -p dist
 
-          # Download .tgz assets from recent releases (broad net; harmless if no new packages)
-          mapfile -t rels < <(gh release list --limit 30 --json name | jq -r '.[].name')
-          for r in "${rels[@]}"; do
-            gh release download "$r" --pattern '*.tgz' --dir dist || true
+          # Fetch up to 100 recent releases, drop drafts, and select only names that look like <chart>-<version>.
+          # Derive the chart name by stripping the trailing "-<version>" segment, then group by chart
+          # and pick the most recently published release for each chart.
+          mapfile -t LATEST_PER_CHART < <(
+            gh release list --limit 100 --json name,publishedAt,isDraft |
+            jq -r '
+              map(select(.isDraft == false))                                       # ignore drafts
+              | map(select(.name | test(".+-[0-9]")))                              # must look like "<chart>-<version>"
+              | map(.chart = (.name | sub("-[0-9].*$"; "")))                       # derive chart name
+              | group_by(.chart)                                                   # group releases per chart
+              | map(max_by(.publishedAt))                                          # pick most recent per chart
+              | .[].name
+            '
+          )
+
+          if (( ${#LATEST_PER_CHART[@]} == 0 )); then
+            echo "No matching releases found."
+          else
+            printf 'Latest releases per chart:\n%s\n' "$(printf '%s\n' "${LATEST_PER_CHART[@]}")"
+          fi
+
+          # Download only the selected releases' chart packages (*.tgz)
+          for rel in "${LATEST_PER_CHART[@]}"; do
+            echo "==> Downloading assets for release: $rel"
+            gh release download "$rel" --pattern '*.tgz' --dir dist || true
           done
 
           shopt -s nullglob

@@ -40,43 +40,58 @@ jobs:
           APP_VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
-          VALUES="$CHART_DIR/values.yaml"; CHART="$CHART_DIR/Chart.yaml"
-          [[ -f "$VALUES" && -f "$CHART" ]] || { echo "Chart not found at $CHART_DIR" >&2; echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
-          # Ensure required keys exist
-          yq -e '.version' "$CHART"  > /dev/null || { echo "Missing key .version in $CHART" >&2; exit 1; }
-          yq -e '.appVersion' "$CHART" > /dev/null || { echo "Missing key .appVersion in $CHART" >&2; exit 1; }
-          yq -e '.processor.enabled' "$VALUES" > /dev/null || { echo "Missing key .processor.enabled in $VALUES" >&2; exit 1; }
-          if [[ -f "$VALUES" ]]; then
-            # App charts: update image tag
-            if yq -e '.processor.enabled' "$VALUES" > /dev/null; then
-              if [[ "$(yq -e '.processor.enabled' "$VALUES")" == "true" ]]; then
-                yq -e '.processor.image.tag' "$VALUES" > /dev/null
-                echo "Processor enabled — updating .processor.image.tag"
-               yq -i '.processor.image.tag = strenv(APP_VERSION)' "$VALUES"
-             else
-               yq -e '.frontend.image.tag' "$VALUES" > /dev/null
-               echo "Processor disabled — updating .frontend.image.tag"
-               yq -i '.frontend.image.tag = strenv(APP_VERSION)' "$VALUES"
-             fi
-           fi
-          fi
+          VALUES="$CHART_DIR/values.yaml"
+          CHART="$CHART_DIR/Chart.yaml"
 
-          # Decide which image tag to update
-          if [[ "$(yq -e '.processor.enabled' "$VALUES")" == "true" ]]; then
-            yq -e '.processor.image.tag' "$VALUES" > /dev/null || { echo "Missing key .processor.image.tag in $VALUES" >&2; exit 1; }
-            echo "Processor enabled — updating .processor.image.tag"
-            yq -i '.processor.image.tag = strenv(APP_VERSION)' "$VALUES"
-          else
-            yq -e '.frontend.image.tag' "$VALUES" > /dev/null || { echo "Missing key .frontend.image.tag in $VALUES" >&2; exit 1; }
-            echo "Processor disabled — updating .frontend.image.tag"
-            yq -i '.frontend.image.tag = strenv(APP_VERSION)' "$VALUES"
-          fi
+          # Must have Chart.yaml
+          [[ -f "$CHART" ]] || { echo "Chart not found at $CHART_DIR" >&2; echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
-          # Always bump chart versions
+          # Ensure Chart.yaml has the required keys (treat empty as error)
+          yq -e '.version        | select(type=="string" and length>0)' "$CHART" > /dev/null
+          yq -e '.appVersion     | select(type=="string" and length>0)' "$CHART" > /dev/null
+
+          # 1) Always bump chart versions
           yq -i '.version = strenv(APP_VERSION) | .appVersion = strenv(APP_VERSION)' "$CHART"
 
-          git status --porcelain | grep -q . && echo "changed=true" >> "$GITHUB_OUTPUT" || echo "changed=false" >> "$GITHUB_OUTPUT"
+          # 2) Optionally bump values.yaml image tag (only if values.yaml exists and looks like an app)
+          if [[ -f "$VALUES" ]]; then
+            # Detect whether this chart uses frontend/processor images (so we don’t mutate library-only charts)
+            HAS_FRONTEND_REPO="$(yq -r '(.frontend.image.repository // "") != ""' "$VALUES")"
+            HAS_PROCESSOR_REPO="$(yq -r '(.processor.image.repository // "") != ""' "$VALUES")"
+
+            if [[ "$HAS_FRONTEND_REPO" == "true" || "$HAS_PROCESSOR_REPO" == "true" ]]; then
+              # Read processor.enabled with a safe default (false if missing)
+              PROC_ENABLED="$(yq -r '(.processor.enabled // false) | (if . then "true" else "false" end)' "$VALUES")"
+
+              if [[ "$PROC_ENABLED" == "true" ]]; then
+                echo "Processor enabled — setting .processor.image.tag to ${APP_VERSION}"
+                yq -i '
+                  .processor       = (.processor       // {}) |
+                  .processor.image = (.processor.image // {}) |
+                  .processor.image.tag = strenv(APP_VERSION)
+                ' "$VALUES"
+              else
+                echo "Processor disabled — setting .frontend.image.tag to ${APP_VERSION}"
+                yq -i '
+                  .frontend       = (.frontend       // {}) |
+                  .frontend.image = (.frontend.image // {}) |
+                  .frontend.image.tag = strenv(APP_VERSION)
+                ' "$VALUES"
+              fi
+            else
+              echo "No frontend/processor image repository configured; skipping values.yaml tag bump."
+            fi
+          else
+            echo "No values.yaml; only Chart.yaml bumped."
+          fi
+
+          # Output "changed" if anything changed
+          if git status --porcelain | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Commit & push
         if: steps.update.outputs.changed == 'true'
