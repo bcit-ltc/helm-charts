@@ -101,7 +101,7 @@ jobs:
             helm dependency build "$d"
           done
 
-      # Package app charts ourselves (pre-package) so we can upload/index manually
+      # Package app charts ourselves (pre-package)
       - name: Package app charts (pre-package)
         run: |
           set -euo pipefail
@@ -122,33 +122,58 @@ jobs:
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Upload prebuilt packages and push gh-pages index (clean worktree + stable TMPDIR)
-      - name: Upload packages & update index (manual cr with clean worktree)
+      # Upload prebuilt packages to Releases (idempotent)
+      - name: Upload packages to Releases (cr upload)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-
-          echo "==> cr upload (idempotent)"
           cr upload \
             --owner "${GITHUB_REPOSITORY_OWNER}" \
             --git-repo "${GITHUB_REPOSITORY#*/}" \
             --skip-existing \
             --token "${GH_TOKEN}"
 
-          echo "==> prepare clean index worktree and stable TMPDIR"
-          rm -rf .cr-index .tmp
-          mkdir -p .tmp
-          export TMPDIR="$PWD/.tmp"
+      # Rebuild gh-pages index using helm repo index (avoids cr index bug)
+      - name: Rebuild gh-pages index (helm repo index)
+        env:
+          REPO_URL: https://bcit-ltc.github.io/helm-charts
+        run: |
+          set -euo pipefail
 
-          echo "==> cr index --pages-branch gh-pages --push"
-          cr index \
-            --owner "${GITHUB_REPOSITORY_OWNER}" \
-            --git-repo "${GITHUB_REPOSITORY#*/}" \
-            --pages-branch "gh-pages" \
-            --push \
-            --index-path ".cr-index/index.yaml" \
-            --token "${GH_TOKEN}"
+          # Prepare a clean gh-pages worktree
+          git fetch origin gh-pages:gh-pages || true
+          rm -rf .gh-pages
+          if git show-ref --verify --quiet refs/heads/gh-pages; then
+            git worktree add .gh-pages gh-pages
+          else
+            # Create orphan gh-pages if it doesn't exist
+            git worktree add .gh-pages -b gh-pages
+            (cd .gh-pages && git commit --allow-empty -m "init gh-pages")
+          fi
+
+          # Copy newly built packages into the pages dir
+          mkdir -p .gh-pages
+          cp -f .cr-release-packages/*.tgz .gh-pages/ || true
+
+          # Merge/update index.yaml
+          if [[ -f .gh-pages/index.yaml ]]; then
+            echo "Merging into existing index.yaml"
+            helm repo index .gh-pages --url "${REPO_URL}" --merge .gh-pages/index.yaml
+          else
+            echo "Creating new index.yaml"
+            helm repo index .gh-pages --url "${REPO_URL}"
+          fi
+
+          # Commit and push the updated index and packages
+          git -C .gh-pages add -A
+          if ! git -C .gh-pages diff --cached --quiet; then
+            git -C .gh-pages commit -m "index: update Helm chart repo"
+            git -C .gh-pages push origin gh-pages
+          else
+            echo "No changes to gh-pages."
+          fi
+
 
 
 
