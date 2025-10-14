@@ -1,0 +1,184 @@
+name: Release charts (library first, then apps)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_run:
+    workflows: [ "Remotely-triggered chart bump & commit" ]
+    branches:   [ main ]
+    types: [ completed ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  GH_PAGES_URL: https://bcit-ltc.github.io/helm-charts
+  LIB_NAME: apps-common
+  CHARTS_DIR: charts
+
+jobs:
+  # 1) Package and release ONLY the library chart to gh-pages first
+  release-lib:
+    name: Release library chart
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Configure Git identity
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Create a temporary .cr.yaml that points ONLY to charts/apps-common
+      - name: Create temporary .cr.yaml (library only)
+        run: |
+          cat > .cr.yaml <<'YAML'
+          owner: ${{ github.repository_owner }}
+          git-repo: ${{ github.event.repository.name }}
+          charts_dir: charts/apps-common
+          packages_with_index: true
+          skip_existing: true
+          YAML
+          cat .cr.yaml
+
+      - name: Run chart-releaser for library
+        uses: helm/chart-releaser-action@v1.6.0
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 2) Package and release ALL app charts
+  release-apps:
+    name: Release app charts
+    needs: release-lib
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # outputs:
+    #   tags_json: ${{ steps.tags.outputs.list }}   # e.g., ["app-0.2.0","nginx-unprivileged-1.3.4"]
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Configure Git identity
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Create a .cr.yaml that points to the whole charts/ dir
+      - name: Create .cr.yaml (all charts)
+        run: |
+          cat > .cr.yaml <<'YAML'
+          owner: ${{ github.repository_owner }}
+          git-repo: ${{ github.event.repository.name }}
+          charts_dir: charts
+          packages_with_index: true
+          skip_existing: true
+          YAML
+          cat .cr.yaml
+
+      - name: Run chart-releaser for all charts
+        uses: helm/chart-releaser-action@v1.6.0
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 3) Publish packaged charts to GHCR
+  publish-oci:
+    name: Publish OCI charts to GHCR
+    needs: release-apps
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: azure/setup-helm@v4
+        with: { version: v3.14.4 }
+
+      - name: Login to GHCR (Helm)
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io \
+            -u "${{ github.actor }}" --password-stdin
+
+      - name: Login to GHCR (Cosign)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Gather packaged chart assets from releases
+        id: tags
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          # Download all .tgz assets from the most recent releases created in this run.
+          # We fetch the last 30 releases and filter by created date in this workflow run window.
+          mapfile -t rels < <(gh release list --limit 30 --json name,createdAt | jq -r '.[].name')
+          if ((${#rels[@]}==0)); then
+            echo "No releases found"; exit 0
+          fi
+          for r in "${rels[@]}"; do
+            gh release download "$r" --pattern '*.tgz' --dir dist || true
+          done
+          shopt -s nullglob
+          files=(dist/*.tgz)
+          if (( ${#files[@]} )); then
+            tags=$(printf '%s\n' "${files[@]}" | sed -E 's,.*/(.*)\.tgz$,\1,' | jq -R . | jq -sc .)
+          else
+            tags="[]"
+          fi
+          echo "list=$tags" >> "$GITHUB_OUTPUT"
+          echo "Packaged tags: $tags"
+
+      - uses: sigstore/cosign-installer@v3
+
+      - uses: imjasonh/setup-crane@v0.4
+        with: { version: v0.20.1 }
+
+      - name: Push & sign charts to GHCR by digest
+        if: ${{ steps.tags.outputs.list != '' && steps.tags.outputs.list != '[]' }}
+        env:
+          OWNER: ${{ github.repository_owner }}
+          TAGS_JSON: ${{ steps.tags.outputs.list }}
+        run: |
+          set -euo pipefail
+          repo="oci://ghcr.io/${OWNER}/oci"
+          for pkg in dist/*.tgz; do
+            name="$(helm show chart "$pkg" | awk -F': ' '/^name:/{print $2; exit}')"
+            version="$(helm show chart "$pkg" | awk -F': ' '/^version:/{print $2; exit}')"
+
+            # Optional: don't push the library to OCI (comment out to include it)
+            if [[ "$name" == "${LIB_NAME}" ]]; then
+              echo "Skipping OCI publish for library chart: $name"
+              continue
+            fi
+
+            PUSH_OUT="$(helm push "$pkg" "${repo}" 2>&1 | tee /dev/stderr)"
+            DGST="$(printf '%s\n' "$PUSH_OUT" | tr -d '\r' | awk 'tolower($1)=="digest:" {print $2; exit}')"
+            [[ -n "$DGST" && "$DGST" =~ ^sha256:[0-9A-Fa-f]{64}$ ]] || { echo "Failed to parse digest"; exit 1; }
+
+            REF="ghcr.io/${OWNER}/oci/${name}"
+            echo "Signing ${REF}@${DGST} with Cosign (keyless)…"
+            cosign sign --yes \
+              -a "chart.name=${name}" \
+              -a "chart.version=${version}" \
+              -a "repo=${GITHUB_REPOSITORY}" \
+              -a "workflow=${GITHUB_WORKFLOW}" \
+              -a "sha=${GITHUB_SHA}" \
+              "${REF}@${DGST}"
+
+            # Add 'latest' tag for convenience
+            crane tag "${REF}@${DGST}" latest
+          done

@@ -47,6 +47,20 @@ jobs:
           yq -e '.version' "$CHART"  > /dev/null || { echo "Missing key .version in $CHART" >&2; exit 1; }
           yq -e '.appVersion' "$CHART" > /dev/null || { echo "Missing key .appVersion in $CHART" >&2; exit 1; }
           yq -e '.processor.enabled' "$VALUES" > /dev/null || { echo "Missing key .processor.enabled in $VALUES" >&2; exit 1; }
+          if [[ -f "$VALUES" ]]; then
+            # App charts: update image tag
+            if yq -e '.processor.enabled' "$VALUES" > /dev/null; then
+              if [[ "$(yq -e '.processor.enabled' "$VALUES")" == "true" ]]; then
+                yq -e '.processor.image.tag' "$VALUES" > /dev/null
+                echo "Processor enabled — updating .processor.image.tag"
+               yq -i '.processor.image.tag = strenv(APP_VERSION)' "$VALUES"
+             else
+               yq -e '.frontend.image.tag' "$VALUES" > /dev/null
+               echo "Processor disabled — updating .frontend.image.tag"
+               yq -i '.frontend.image.tag = strenv(APP_VERSION)' "$VALUES"
+             fi
+           fi
+          fi
 
           # Decide which image tag to update
           if [[ "$(yq -e '.processor.enabled' "$VALUES")" == "true" ]]; then
