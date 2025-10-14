@@ -30,16 +30,23 @@ jobs:
       - uses: mikefarah/yq@v4.44.3
 
       - name: Validate input
+        shell: bash
         run: |
-          [[ "${{ inputs.chart_name }}" =~ ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$ ]] || { echo "Invalid chart_name" >&2; exit 1; }
+          set -euo pipefail
+          set -f  # disable pathname expansion to avoid "no matches found"
+          name='${{ inputs.chart_name }}'
+          # must be DNS-1123 label (same as Kubernetes name)
+          echo -n "$name" | grep -Eq '^[a-z0-9]([-a-z0-9]*[a-z0-9])?$' || { echo "Invalid chart_name: $name" >&2; exit 1; }
 
       - name: Update files
         id: update
         env:
           CHART_DIR: charts/${{ inputs.chart_name }}
           APP_VERSION: ${{ inputs.version }}
+        shell: bash
         run: |
           set -euo pipefail
+          set -f
 
           VALUES="$CHART_DIR/values.yaml"
           CHART="$CHART_DIR/Chart.yaml"
@@ -95,7 +102,9 @@ jobs:
 
       - name: Commit & push
         if: steps.update.outputs.changed == 'true'
+        shell: bash
         run: |
+          set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
