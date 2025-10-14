@@ -2,85 +2,62 @@
 
 # Global configuration settings
 global:
-
   # -- Authoritative name
   name: "qcon-guide"
   imagePullSecrets: []
   revisionHistoryLimit: 3
   progressDeadlineSeconds: 600
-
 # -- Configuration for the service account
 # @default -- `{}`
 serviceAccount:
-
   # -- Enable or disable service account creation.
   create: true
-
   # -- Name of the service account to create. If empty uses global.name
   name: ""
-
   # Prior to v1.24.0, Kubernetes used to generate a secret for each service account by default.
   # Kubernetes now recommends using short-lived tokens from the TokenRequest API or projected volumes instead if possible.
   # For more details, see https://kubernetes.io/docs/concepts/configuration/secret/#service-account-token-secrets
   # -- Create a Secret API object to store a non-expiring token for the service account.
   createSecret: true
-
   # -- Extra labels to attach to the service account.
   #    Should be a YAML map of the labels to apply to the serviceAccount
   extraLabels: {}
-
   # Extra annotations to attach to the service account
   annotations: {}
-
 # -- Enables a service for the app
 # @default -- `{}`
 service:
-
   # -- Enable or disable service components.
   enabled: true
-
   # -- Service type: by default, connect to the app using an internal cluster IP
   type: ClusterIP
-
   # -- Port on which the app is listening
   port: 8080
-
   # -- Target port to which the service should be mapped to
   targetPort: 8080
-
   # Extra annotations to attach to the service
   annotations: {}
-
 # -- Configuration for the "frontend"
 # @default -- `{}`
 frontend:
-
   # -- Enable or disable frontend components.
   enabled: true
-
   # -- The name of the frontend container to create. If empty uses "frontend"
   name: qcon-guide
   image:
-
     # -- Frontend image pull policy
     pullPolicy: IfNotPresent
-
     # -- Image default registry
     registry: "ghcr.io"
-
     # -- Image default repository
     repository: "bcit-ltc/qcon-guide"
-
     # -- Image default tag
-    tag: "1.0.2"
-
+    tag: "1.1.7-rc.a2c0fac.20251014215313"
   # Extra annotations to attach to the frontend
   annotations: {}
-
   # -- Add a checksum annotation to the server pods that is a hash
   #    of the configuration. Can be used to identify configuration changes.
   includeConfigAnnotation: false
-
   # -- Security context for the pod template and the app container<br>
   # @default -- 
   # Pod-level defaults:<br>
@@ -98,48 +75,37 @@ frontend:
   securityContext:
     pod: {}
     container: {}
-
   resources:
-
     # -- Resource requests mapped directly to the value of
     #    the resources field for a PodSpec.
     requests:
       memory: 64Mi
       cpu: 100m
-
     # -- Resource limits mapped directly to the value of
     #    the resources field for a PodSpec.
     limits:
       memory: 256Mi
       cpu: 250m
-
   # -- Port on which the frontend is listening
   port: 8080
-
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars: []
-
   # -- configEnvs create ConfigMaps that are passed to containers using envFrom
   # @default -- `[]`
   configEnvs: []
-
   # -- Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts.
   # @default -- `[]`
   configs: []
-
   # -- volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod.
   # @default -- `[]`
   volumeMounts: []
-
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []
-
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts: []
-
   # Defines custom livenessProbe settings
   livenessProbe:
     # -- Enables livenessProbe
@@ -163,7 +129,6 @@ frontend:
     successThreshold: 1
     # Number of seconds after which the probe times out.
     timeoutSeconds: 5
-
   # Defines custom readinessProbe settings
   readinessProbe:
     # -- Enables readinessProbe
@@ -182,7 +147,6 @@ frontend:
     successThreshold: 1
     # Number of seconds after which the probe times out.
     timeoutSeconds: 5
-
   # Defines custom startupProbe settings
   startupProbe:
     # -- Enables startupProbe
@@ -197,41 +161,29 @@ frontend:
     successThreshold: 1
     # Number of seconds after which the probe times out.
     timeoutSeconds: 5
-
-
 # -- Main "backend" configuration
 # @default -- `{}`
 processor:
-
   # -- Enable or disable processor components.
   enabled: false
   image:
-
     # -- Image default pull policy
     pullPolicy: IfNotPresent
-
     # -- Image default registry
     registry: ""
-
     # -- Image default repository
     repository: ""
-
     # -- Image default tag
     tag: ""
-
   # -- Number of replicas for the processor
   replicas: 1
-
   # -- Extra labels to attach to the processor pods
   #    Should be a YAML map of the labels to apply to the deployment template
   extraLabels: {}
-
   # Extra annotations to attach to the processor deployment
   annotations: {}
-
   # -- Port on which processor is listening
   port: 8000
-
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars: []
@@ -240,70 +192,55 @@ processor:
   # -- Create `ConfigMap` resources that are passed to containers using envFrom
   # @default -- `[]`
   configEnvs: []
-
   # -- Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts.
   # @default -- `[]`
   configs: []
-
   # -- volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod.
   # @default -- `[]`
   volumeMounts: []
-    # - name: shared-data
-    #   mountPath: /var/www/html
+  # - name: shared-data
+  #   mountPath: /var/www/html
 
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []
-
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts: []
-
-
 # -- Creates an ingress for external access
 # @default -- `{}`
 ingress:
-
-  # -- Enable or disable ingress components.
   enabled: true
 
-  # -- Extra labels to attach to the processor pods
-  #    Should be a YAML map of the labels to apply to the deployment template
-  extraLabels: {}
+  defaultDomain: ltc.bcit.ca
 
-  # -- Extra annotations to attach to the ingress resource
-  annotations: {}
-
-  # -- Default IngressClass to use. If empty, use the cluster's default
+  # Optional: "nginx", "traefik", etc. If empty, cluster default is used.
   ingressClassName: ""
 
-  # As of Kubernetes 1.19, all Ingress Paths must have a pathType configured. The default value below should be sufficient in most cases.
-  # See: https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types for other possible values.
-  # -- Ingress pathType
-  pathType: Prefix
+  # Host to expose. If empty, defaults to "<global.name>.<defaultDomain>"
+  host: ""
 
-  # -- Ingress host definitions
-  # @default -- `[]`
-  hosts:
-    - host: "ltc.bcit.ca"
-      paths: []
+  # Annotations applied to the Ingress
+  annotations: {}
 
-  # -- Extra paths to include in the ingress
-  extraPaths: []
+  # TLS secret to use. If empty, defaults to "star-ltc-bcit-ca"
+  # and the host defaults to "<global.name>.<defaultDomain>" if not set.
+  tlsSecret: ""
+
+  # Advanced use: extra path rules to render verbatim BEFORE the default "/".
+  # Example:
+  # extraPaths:
   #   - path: /api
+  #     pathType: Prefix
   #     backend:
   #       service:
-  #         name: api-service
+  #         name: my-api
   #         port:
   #           number: 3000
+  extraPaths: []
 
-  # -- TLS configuration for the ingress
-  # @default -- `[]`
-  tls:
-    - secretName: "star-ltc-bcit-ca"
-      hosts:
-        - "ltc.bcit.ca"
-
+  # Optional: path type for the default route ("/")
+  pathType: Prefix
 
 # Configuration for persistent volume claims
 dataStorage:
@@ -322,7 +259,6 @@ dataStorage:
   annotations: {}
   # -- Labels to apply to the PVC
   labels: {}
-
 # Unconfigured options
 #
 # autoscaling:

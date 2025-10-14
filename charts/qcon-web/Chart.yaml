@@ -1,19 +1,18 @@
 apiVersion: v2
 appVersion: 1.0.0
-description: Backend API for the Qcon application. It provides a websocket endpoint
-  for converting documents from word to SCORM format.
-home: https://qcon-api.ltc.bcit.ca
+description: Frontend of the Qcon service. Requires the qcon-api processor engine to work correctly.
+home: https://qcon-web.ltc.bcit.ca
 icon: https://course-production.ltc.bcit.ca/favicon.ico
 maintainers:
-- email: ltc_techops@bcit.ca
-  name: BCIT LTC
-  url: https://www.bcit.ca/learning-teaching-centre/
-name: qcon-api
+  - email: ltc_techops@bcit.ca
+    name: BCIT LTC
+    url: https://www.bcit.ca/learning-teaching-centre/
+name: qcon-web
 sources:
-- https://github.com/bcit-ltc/
-- https://github.com/bcit-ltc/qcon-api
+  - https://github.com/bcit-ltc/
+  - https://github.com/bcit-ltc/qcon-web
 version: 1.0.0
 dependencies:
-- name: apps-common
-  version: 0.1.0
-  repository: https://bcit-ltc.github.io/helm-charts
+  - name: apps-common
+    version: 0.1.0
+    repository: https://bcit-ltc.github.io/helm-charts

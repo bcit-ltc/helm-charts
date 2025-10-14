@@ -1,6 +1,6 @@
 apiVersion: v2
 appVersion: 1.0.1
-description: A reference for anyone preparing Word documents to be converted into HTML.
+description: Public landing page to course production services and resources.
 home: https://course-production-site.ltc.bcit.ca
 icon: https://course-production.ltc.bcit.ca/favicon.ico
 maintainers:
@@ -12,3 +12,7 @@ sources:
   - https://github.com/bcit-ltc/
   - https://github.com/bcit-ltc/course-production-site
 version: 1.0.1
+dependencies:
+  - name: apps-common
+    version: 0.1.0
+    repository: https://bcit-ltc.github.io/helm-charts

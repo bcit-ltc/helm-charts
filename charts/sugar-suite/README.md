@@ -1,8 +1,8 @@
 # sugar-suite
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-0.0.0--rc.01a9cdd.20250902234251-informational?style=flat-square) ![AppVersion: 1.0.1](https://img.shields.io/badge/AppVersion-0.0.0--rc.01a9cdd.20250902234251-informational?style=flat-square)
+![Version: 1.1.7-rc.a2c0fac.20251014215313](https://img.shields.io/badge/Version-1.1.7--rc.a2c0fac.20251014215313-informational?style=flat-square) ![AppVersion: 1.1.7-rc.a2c0fac.20251014215313](https://img.shields.io/badge/AppVersion-1.1.7--rc.a2c0fac.20251014215313-informational?style=flat-square)
 
-Sugar-Suite is a "Framework Factory" used to produce customized stylesheets designed for building online courses in HTML.
+Information about the architecture and makeup of the LTC's server infrastructure.
 
 **Homepage:** <https://sugar-suite.ltc.bcit.ca>
 
@@ -19,101 +19,115 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 
 1. Create a [GitHub personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) and set it in your terminal shell:
 
-        rexport CR_PAT=YOUR_TOKEN
+    ```console
+    export CR_PAT=YOUR_TOKEN
+    ```
 
-2. Install [Helm](https://helm.sh/docs/intro/install) and [jq](https://jqlang.org/download/).
+1. Install [Helm](https://helm.sh/docs/intro/install) and [jq](https://jqlang.org/download/).
 
-3. Login to the global GitHub registry service:
+1. Login to the global GitHub registry service:
 
-        echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
+    ```console
+    echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
+    ```
 
-4. List the available registry tags
+1. List the available registry tags
 
-        curl -L \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer $CR_PAT" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        https://api.github.com/orgs/bcit-ltc/packages/container/sugar-suite/versions \
-        | jq '.[].metadata.container.tags.[]'
+    ```console
+    curl -L \
+    -H "Accept: application/vnd.github+json" \
+    -H "Authorization: Bearer $CR_PAT" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    https://api.github.com/orgs/bcit-ltc/packages/container/sugar-suite/versions \
+    | jq '.[].metadata.container.tags.[]'
+    ```
 
-5. Pull and inspect the helm chart:
+1. Pull and inspect the helm chart:
 
-        helm pull --untar oci://ghcr.io/bcit-ltc/sugar-suite --version {VERSION}
+    ```console
+    helm pull --untar oci://ghcr.io/bcit-ltc/sugar-suite --version {VERSION}
+    ```
 
-6. Install the chart:
+1. Install the chart:
 
-        helm install sugar-suite .
+    ```console
+    helm install sugar-suite .
+    ```
+
+## Requirements
+
+| Repository | Name | Version |
+|------------|------|---------|
+| https://bcit-ltc.github.io/helm-charts | apps-common | 0.1.0 |
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| affinity | object | `{}` |  |
-| autoscaling.enabled | bool | `false` |  |
-| autoscaling.maxReplicas | int | `5` |  |
-| autoscaling.minReplicas | int | `2` |  |
-| autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
-| container.port | int | `8080` |  |
-| defaultDomain | string | `"ltc.bcit.ca"` |  |
-| extraEnv | list | `[]` |  |
-| extraEnvFrom | list | `[]` |  |
-| extraVolumeMounts[0].mountPath | string | `"/tmp"` |  |
-| extraVolumeMounts[0].name | string | `"tmp"` |  |
-| extraVolumes[0].emptyDir | object | `{}` |  |
-| extraVolumes[0].name | string | `"tmp"` |  |
-| image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.registry | string | `"ghcr.io"` |  |
-| image.repository | string | `"bcit-ltc/sugar-suite"` |  |
-| image.tag | string | `"1.0.1"` |  |
-| imagePullSecrets | list | `[]` |  |
-| ingress.annotations | object | `{}` |  |
-| ingress.enabled | bool | `true` |  |
-| ingress.extraPaths | list | `[]` |  |
-| ingress.host | string | `""` |  |
-| ingress.ingressClassName | string | `""` |  |
-| ingress.tlsSecret | string | `"star-ltc-bcit-ca"` |  |
-| livenessProbe.httpGet.path | string | `"/"` |  |
-| livenessProbe.httpGet.port | int | `8080` |  |
-| livenessProbe.initialDelaySeconds | int | `10` |  |
-| livenessProbe.periodSeconds | int | `10` |  |
-| name | string | `"sugar-suite"` |  |
-| networkPolicy.enabled | bool | `false` |  |
-| nodeSelector | object | `{}` |  |
-| pdb.enabled | bool | `false` |  |
-| pdb.minAvailable | int | `1` |  |
-| podAnnotations | object | `{}` |  |
-| podLabels | object | `{}` |  |
-| podSecurityContext.runAsNonRoot | bool | `true` |  |
-| podSecurityContext.seccompProfile.type | string | `"RuntimeDefault"` |  |
-| progressDeadlineSeconds | int | `600` |  |
-| readinessProbe.httpGet.path | string | `"/"` |  |
-| readinessProbe.httpGet.port | int | `8080` |  |
-| readinessProbe.initialDelaySeconds | int | `3` |  |
-| readinessProbe.periodSeconds | int | `10` |  |
-| replicaCount | int | `1` |  |
-| resources | object | `{}` |  |
-| revisionHistoryLimit | int | `3` |  |
-| securityContext.allowPrivilegeEscalation | bool | `false` |  |
-| securityContext.capabilities.drop[0] | string | `"ALL"` |  |
-| securityContext.readOnlyRootFilesystem | bool | `true` |  |
-| securityContext.runAsGroup | int | `101` |  |
-| securityContext.runAsUser | int | `101` |  |
-| service.annotations | object | `{}` |  |
-| service.port | int | `8080` |  |
-| service.type | string | `"ClusterIP"` |  |
-| serviceAccount.automount | bool | `true` |  |
-| serviceAccount.create | bool | `true` |  |
-| serviceAccount.name | string | `""` |  |
-| startupProbe.failureThreshold | int | `30` |  |
-| startupProbe.httpGet.path | string | `"/"` |  |
-| startupProbe.httpGet.port | int | `8080` |  |
-| startupProbe.periodSeconds | int | `2` |  |
-| tolerations | list | `[]` |  |
-| useDefaultNginxConfig | bool | `true` |  |
+| dataStorage.accessMode | string | `"ReadWriteOnce"` | Access Mode of the storage device being used for the PVC |
+| dataStorage.annotations | object | `{}` | Annotations to apply to the PVC |
+| dataStorage.enabled | bool | `false` | Enable or disable data storage components. |
+| dataStorage.labels | object | `{}` | Labels to apply to the PVC |
+| dataStorage.mountPath | string | `"/app/data"` | Location where the PVC will be mounted. |
+| dataStorage.size | string | `"10Gi"` | Size of the PVC created |
+| dataStorage.storageClass | string | `nil` | Name of the storage class to use. If null it will use the configured default Storage Class. |
+| frontend | object | `{}` | Configuration for the "frontend" |
+| frontend.configEnvs | list | `[]` | configEnvs create ConfigMaps that are passed to containers using envFrom |
+| frontend.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
+| frontend.configs | list | `[]` | Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts. |
+| frontend.enabled | bool | `true` | Enable or disable frontend components. |
+| frontend.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
+| frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image pull policy |
+| frontend.image.registry | string | `"ghcr.io"` | Image default registry |
+| frontend.image.repository | string | `"bcit-ltc/sugar-suite"` | Image default repository |
+| frontend.image.tag | string | `"1.1.7-rc.a2c0fac.20251014215313"` | Image default tag |
+| frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
+| frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
+| frontend.name | string | `"sugar-suite"` | The name of the frontend container to create. If empty uses "frontend" |
+| frontend.port | int | `8080` | Port on which the frontend is listening |
+| frontend.readinessProbe.enabled | bool | `false` | Enables readinessProbe |
+| frontend.resources.limits | object | `{"cpu":"250m","memory":"256Mi"}` | Resource limits mapped directly to the value of    the resources field for a PodSpec. |
+| frontend.resources.requests | object | `{"cpu":"100m","memory":"64Mi"}` | Resource requests mapped directly to the value of    the resources field for a PodSpec. |
+| frontend.secretMounts | list | `[]` | volumeMounts to be added as secrets |
+| frontend.securityContext | object | `{"container":{},"pod":{}}` | Security context for the pod template and the app container<br> Pod-level defaults:<br>   &nbsp;&nbsp;runAsNonRoot: true<br>   &nbsp;&nbsp;runAsGroup: 101<br>   &nbsp;&nbsp;runAsUser: 101<br>   &nbsp;&nbsp;fsGroup: 101<br>   &nbsp;&nbsp;readOnlyRootFilesystem: true<br>   &nbsp;&nbsp;allowPrivilegeEscalation: false<br>  Container-level defaults:<br> &nbsp;&nbsp;capabilities:<br> &nbsp;&nbsp;&nbsp;&nbsp;drop:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ALL<br> |
+| frontend.startupProbe.enabled | bool | `false` | Enables startupProbe |
+| frontend.volumeMounts | list | `[]` | volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod. |
+| global.imagePullSecrets | list | `[]` |  |
+| global.name | string | `"sugar-suite"` | Authoritative name |
+| global.progressDeadlineSeconds | int | `600` |  |
+| global.revisionHistoryLimit | int | `3` |  |
+| ingress | object | `{}` | Creates an ingress for external access |
+| processor | object | `{}` | Main "backend" configuration |
+| processor.configEnvs | list | `[]` | Create `ConfigMap` resources that are passed to containers using envFrom |
+| processor.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
+| processor.configs | list | `[]` | Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts. |
+| processor.enabled | bool | `false` | Enable or disable processor components. |
+| processor.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
+| processor.extraLabels | object | `{}` | Extra labels to attach to the processor pods    Should be a YAML map of the labels to apply to the deployment template |
+| processor.image.pullPolicy | string | `"IfNotPresent"` | Image default pull policy |
+| processor.image.registry | string | `""` | Image default registry |
+| processor.image.repository | string | `""` | Image default repository |
+| processor.image.tag | string | `""` | Image default tag |
+| processor.port | int | `8000` | Port on which processor is listening |
+| processor.replicas | int | `1` | Number of replicas for the processor |
+| processor.secretMounts | list | `[]` | volumeMounts to be added as secrets |
+| processor.volumeMounts | list | `[]` | volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod. |
+| service | object | `{}` | Enables a service for the app |
+| service.enabled | bool | `true` | Enable or disable service components. |
+| service.port | int | `8080` | Port on which the app is listening |
+| service.targetPort | int | `8080` | Target port to which the service should be mapped to |
+| service.type | string | `"ClusterIP"` | Service type: by default, connect to the app using an internal cluster IP |
+| serviceAccount | object | `{}` | Configuration for the service account |
+| serviceAccount.create | bool | `true` | Enable or disable service account creation. |
+| serviceAccount.createSecret | bool | `true` | Create a Secret API object to store a non-expiring token for the service account. |
+| serviceAccount.extraLabels | object | `{}` | Extra labels to attach to the service account.    Should be a YAML map of the labels to apply to the serviceAccount |
+| serviceAccount.name | string | `""` | Name of the service account to create. If empty uses global.name |
 
-## Building this README.md
+## Building/updating README.md
 
-        docker run -it --volume "$(pwd):/helm-docs" -u $(id -u) jnorwood/helm-docs:latest helm-docs --template-files=./files/_README.md.gotmpl
+```console
+docker run -it --volume "$(pwd):/helm-docs" -u $(id -u) jnorwood/helm-docs:latest helm-docs --template-files=./files/_README.md.gotmpl
+```
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

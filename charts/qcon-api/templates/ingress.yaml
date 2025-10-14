@@ -3,10 +3,14 @@ SPDX-License-Identifier: MPL-2.0
 */}}
 
 {{- if .Values.ingress.enabled -}}
-{{- $extraPaths   := .Values.ingress.extraPaths -}}
-{{- $serviceName  := include "app.name" . -}}
-{{- $servicePort  := .Values.service.port -}}
-{{- $pathType     := .Values.ingress.pathType | default "Prefix" -}}
+{{- $svcName     := include "app.name" . -}}
+{{- $svcPort     := .Values.service.port -}}
+{{- $pathType    := (.Values.ingress.pathType | default "Prefix") -}}
+{{- $defaultHost := printf "%s.%s" (include "app.name" .) (.Values.ingress.defaultDomain | default "example.com") -}}
+{{- $host        := (ternary .Values.ingress.host $defaultHost (ne .Values.ingress.host "")) -}}
+{{- $tlsSecret   := (ternary .Values.ingress.tlsSecret "star-ltc-bcit-ca" (ne .Values.ingress.tlsSecret "")) -}}
+{{- $extraPaths  := .Values.ingress.extraPaths -}}
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -17,40 +21,30 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
-    {{- with .Values.ingress.extraLabels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
 {{- template "app.ingress.annotations" . }}
 spec:
-  {{- if .Values.ingress.tls }}
-  tls:
-    {{- range .Values.ingress.tls }}
-    - hosts:
-        {{- range .hosts }}
-        - {{ . | quote }}
-        {{- end }}
-      secretName: {{ .secretName | quote }}
-    {{- end }}
-  {{- end }}
   {{- if .Values.ingress.ingressClassName }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   {{- end }}
+
+  # TLS: always rendered with sane defaults unless overridden
+  tls:
+    - hosts:
+        - {{ $host | quote }}
+      secretName: {{ $tlsSecret | quote }}
+
   rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
+    - host: {{ $host | quote }}
       http:
         paths:
           {{- if $extraPaths }}
 {{ toYaml $extraPaths | indent 10 }}
           {{- end }}
-          {{- range (.paths | default (list "/")) }}
-          - path: {{ . }}
+          - path: /
             pathType: {{ $pathType }}
             backend:
               service:
-                name: {{ $serviceName }}
+                name: {{ $svcName }}
                 port:
-                  number: {{ $servicePort }}
-          {{- end }}
-    {{- end }}
+                  number: {{ $svcPort }}
 {{- end }}
