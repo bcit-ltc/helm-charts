@@ -1,3 +1,21 @@
-.DS_Store
+# --- Helm: keep lockfiles tracked (pin deps)
+!**/Chart.lock
 
-archive/
+# --- Vendored subcharts (DO NOT COMMIT)
+charts/*/charts/*
+charts/*/charts/*.tgz
+
+# --- Local packaging outputs (chart-releaser & manual builds)
+.cr-release-packages/
+.cr-index/
+dist/
+
+# --- Local gh-pages worktree (if you use one)
+.gh-pages/
+
+# --- Helm provenance files created by signing
+**/*.prov
+
+# --- Common editor/OS noise
+.DS_Store
+Thumbs.db

@@ -59,20 +59,20 @@ frontend:
   enabled: true
 
   # -- The name of the frontend container to create. If empty uses "frontend"
-  name: nginx
+  name: qcon-guide
   image:
 
     # -- Frontend image pull policy
     pullPolicy: IfNotPresent
 
     # -- Image default registry
-    registry: "docker.io"
+    registry: "ghcr.io"
 
     # -- Image default repository
-    repository: "nginxinc/nginx-unprivileged"
+    repository: "bcit-ltc/qcon-guide"
 
     # -- Image default tag
-    tag: "1.25-alpine"
+    tag: "1.0.2"
 
   # Extra annotations to attach to the frontend
   annotations: {}
