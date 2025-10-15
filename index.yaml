@@ -3,9 +3,9 @@ entries:
   apps-common:
   - apiVersion: v2
     appVersion: 0.1.4
-    created: "2025-10-15T05:23:39.563065336Z"
+    created: "2025-10-15T05:38:35.446153239Z"
     description: Common helpers and partials for LTC Helm charts (library chart).
-    digest: 0520a371348badd0c5759de1f6da6e5196268eff6e9d750f0a11891ebfde736c
+    digest: b561efe193e886caed4ce7d30105d2a6c612437bc2e0174d941302026bd68443
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     keywords:
     - library
@@ -18,7 +18,7 @@ entries:
     version: 0.1.4
   - apiVersion: v2
     appVersion: 0.1.3
-    created: "2025-10-15T05:23:39.56291747Z"
+    created: "2025-10-15T05:38:35.445993401Z"
     description: Common helpers and partials for LTC Helm charts (library chart).
     digest: d61443a7d0dee2fcc2132ce2b07391abb35ef4c0ca896d8ccfb3b74925c87429
     icon: https://course-production.ltc.bcit.ca/favicon.ico
@@ -33,7 +33,7 @@ entries:
     version: 0.1.3
   - apiVersion: v2
     appVersion: 0.1.2
-    created: "2025-10-15T05:23:39.562754987Z"
+    created: "2025-10-15T05:38:35.445827703Z"
     description: Common helpers and partials for LTC Helm charts (library chart).
     digest: a9c635c0c3e6b2c39f8f7bac4959d23cb1daaac31365c3911ac3c29af9de432e
     icon: https://course-production.ltc.bcit.ca/favicon.ico
@@ -48,7 +48,7 @@ entries:
     version: 0.1.2
   - apiVersion: v2
     appVersion: 0.1.1
-    created: "2025-10-15T05:23:39.562587435Z"
+    created: "2025-10-15T05:38:35.445657877Z"
     description: Common helpers and partials for LTC Helm charts (library chart).
     digest: 1b28e4d5777582d303ec485e255917e9280785be0987105497474974634a58af
     icon: https://course-production.ltc.bcit.ca/favicon.ico
@@ -63,7 +63,7 @@ entries:
     version: 0.1.1
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2025-10-15T05:23:39.562422798Z"
+    created: "2025-10-15T05:38:35.445456742Z"
     description: Common helpers and partials for LTC Helm charts (library chart).
     digest: fb8addfce14c304e049f89ab9454be0b13dcbaec0f7a631c7b2070bc558bc5a0
     icon: https://course-production.ltc.bcit.ca/favicon.ico
@@ -79,14 +79,14 @@ entries:
   conversion-guide:
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2025-10-15T05:23:39.56474604Z"
+    created: "2025-10-15T05:38:35.447816374Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
       version: '>=0.1.2'
     description: A reference for anyone preparing Word documents to be converted into
       HTML.
-    digest: c8f0805f99d915d9b5d98fa0902a7f2674ce2b64116bf1455f75b4f4650fd065
+    digest: f1a487ac984662c8db2a3838303f44c1c3d387867a159586874b5700d126ef6a
     home: https://conversion-guide.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -102,7 +102,7 @@ entries:
     version: 1.0.1
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.563749823Z"
+    created: "2025-10-15T05:38:35.446851678Z"
     description: A reference for anyone preparing Word documents to be converted into
       HTML.
     digest: 11f9673b17e48839fc6950c9ec393f802cb390e9c291ad5aaeafee548ee22300
@@ -122,13 +122,13 @@ entries:
   course-production-site:
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2025-10-15T05:23:39.565744592Z"
+    created: "2025-10-15T05:38:35.448755401Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
       version: '>=0.1.2'
     description: Public landing page to course production services and resources.
-    digest: 5edbb6840a4e691289c5f00a0d1473a8b03f33e8762361611bc9d571de2d7d25
+    digest: 5abb43630c45ab8bc1cc63990691a9a205e0ec4631967a923e6e3cc4bcf80aff
     home: https://course-production-site.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -163,14 +163,14 @@ entries:
   course-workload-estimator:
   - apiVersion: v2
     appVersion: 1.0.2
-    created: "2025-10-15T05:23:39.56752784Z"
+    created: "2025-10-15T05:38:35.450444064Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
       version: '>=0.1.2'
     description: A time calculator to estimate the number of hours of work students
       might be expected to spend completing coursework.
-    digest: 78ce31e62d218de423b5eab00b832590b75d786f04a601e2754ecce80625997a
+    digest: 85b21b8c536ae744c066410c59e23f9fc462e4f6e2b881d1f4d51abde40734c3
     home: https://course-workload-estimator.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -295,7 +295,7 @@ entries:
   infrastructure-documentation:
   - apiVersion: v2
     appVersion: 1.1.7-rc.b05def9.20251015030631
-    created: "2025-10-15T05:23:39.573536343Z"
+    created: "2025-10-15T05:38:35.455913743Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -318,7 +318,7 @@ entries:
     version: 1.1.7-rc.b05def9.20251015030631
   - apiVersion: v2
     appVersion: 1.1.7-rc.a2c0fac.20251014215313
-    created: "2025-10-15T05:23:39.572470716Z"
+    created: "2025-10-15T05:38:35.455010903Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -341,7 +341,7 @@ entries:
     version: 1.1.7-rc.a2c0fac.20251014215313
   - apiVersion: v2
     appVersion: 1.1.7-rc.8f0cfc7.20251014230010
-    created: "2025-10-15T05:23:39.57151284Z"
+    created: "2025-10-15T05:38:35.454091722Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -364,14 +364,14 @@ entries:
     version: 1.1.7-rc.8f0cfc7.20251014230010
   - apiVersion: v2
     appVersion: 1.1.7-rc.8d92ace.20251015031819
-    created: "2025-10-15T05:23:39.57059587Z"
+    created: "2025-10-15T05:38:35.453197739Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
       version: '>=0.1.2'
     description: Information about the architecture and makeup of the LTC's server
       infrastructure.
-    digest: 3d0999000d68b7bbbbb86c7743e7d058fca1d93a06c7269254f0a2c7bf309f90
+    digest: 6f62792ebf07052947bc9946da147fa5f1bb4b125c9d10ab74307d8ec81a7975
     home: https://infrastructure-documentation.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -387,7 +387,7 @@ entries:
     version: 1.1.7-rc.8d92ace.20251015031819
   - apiVersion: v2
     appVersion: 1.1.7-rc.33cabc0.20251015025144
-    created: "2025-10-15T05:23:39.569651339Z"
+    created: "2025-10-15T05:38:35.452274871Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -410,7 +410,7 @@ entries:
     version: 1.1.7-rc.33cabc0.20251015025144
   - apiVersion: v2
     appVersion: 1.1.5
-    created: "2025-10-15T05:23:39.568468303Z"
+    created: "2025-10-15T05:38:35.451359588Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -798,13 +798,13 @@ entries:
     version: 1.0.0
   - apiVersion: v2
     appVersion: 0.0.0-rc.1971dbe.20250911203415
-    created: "2025-10-15T05:23:39.574979402Z"
+    created: "2025-10-15T05:38:35.457355374Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
       version: '>=0.1.2'
     description: legacy-html is a legacy multimedia application.
-    digest: 48f907674662b84b314c7dab68c7fd824b52ff9a880d6480cf8e83266329a8cb
+    digest: 3b11403b4f93232bc3734ef0c38a5a6884fba1168792c1022f87e75a3553ccce
     home: https://legacy-html.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -821,13 +821,13 @@ entries:
   legacy-ltc:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.575979166Z"
+    created: "2025-10-15T05:38:35.458283641Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
       version: '>=0.1.2'
     description: legacy-ltc is a legacy multimedia application.
-    digest: dc168fe65dddcfe03373fe6a3907130a32b3c37d5c86b4809325d380199715e5
+    digest: 140a4256cd5fd5360fcfbf26ea7aa5e4e431373ca0f725abf8f6ab683a76b337
     home: https://legacy-ltc.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -844,9 +844,9 @@ entries:
   legacy-multimedia:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.576625862Z"
+    created: "2025-10-15T05:38:35.458915256Z"
     description: legacy-multimedia is a legacy multimedia application.
-    digest: e891012ce27177f2a78525627617a0ccbf0d6d5c7304f93ed0ef5383b17eec3e
+    digest: 2ec0e8bcf67d6226731edc3396689c450e059666a9f90379462fd10320e64aa0
     home: https://legacy-multimedia.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -863,9 +863,9 @@ entries:
   legacy-sob:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.577251799Z"
+    created: "2025-10-15T05:38:35.45953487Z"
     description: legacy-sob is a legacy multimedia application.
-    digest: e20b8d160528ba44dc172cb1f7faf12449e8e9e4af2d1fae3b03ad8e26670fbd
+    digest: 6b716b092ac94d0e4682cfc2c00552c141c51642d458fe37377318bb0808e7f4
     home: https://legacy-sob.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -882,9 +882,9 @@ entries:
   legacy-soc:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.577859031Z"
+    created: "2025-10-15T05:38:35.460142811Z"
     description: legacy-soc is a legacy multimedia application.
-    digest: edbc910fbb46212b2ee553cb2ed8d85eeeca11ace6e14ca64e52d856420d0f0d
+    digest: 8d0131a45497ea09ae331274204b810735dd6cb50ac34f14914bb88d54ab5f7d
     home: https://legacy-soc.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -901,9 +901,9 @@ entries:
   legacy-soc-royaloak:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.578482434Z"
+    created: "2025-10-15T05:38:35.460756142Z"
     description: legacy-soc-royaloak is a legacy multimedia application.
-    digest: e89fcb7cd1812ac5b4a9e890dcdd63ca01a7d1c3efa3522673a3b4acb6f1d3e5
+    digest: 8aebb2dac6176af7ffddddced0b7e1ccc3453820dac7e8f6105a3345ecfac8ba
     home: https://legacy-soc-royaloak.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -920,9 +920,9 @@ entries:
   legacy-socas:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.579115314Z"
+    created: "2025-10-15T05:38:35.461350869Z"
     description: legacy-socas is a legacy multimedia application.
-    digest: 44c4b679341fadcbe1631666dfa597d9adb5a9b81f05058a3836e2b2751db1dd
+    digest: a7de8966c16213e8376b20d8d202b9861a9e38231385e416f758427d0f7ab935
     home: https://legacy-socas.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -939,9 +939,9 @@ entries:
   legacy-soe:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.579765056Z"
+    created: "2025-10-15T05:38:35.461960985Z"
     description: legacy-soe is a legacy multimedia application.
-    digest: 16c30fe61b5ba76024cb97eb5840d8ed8f34f0cdf9600fe0c4520ff52f8bedf0
+    digest: 8c593e5ff1af03a396386b869716ea22cc5f4da6cfe63c7fae1cb47c4965632f
     home: https://legacy-soe.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -958,9 +958,9 @@ entries:
   legacy-soh:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.580549699Z"
+    created: "2025-10-15T05:38:35.462607608Z"
     description: legacy-soh is a legacy multimedia application.
-    digest: 2bdcd8d8a9c1c02e43c8ca193d7884ab69d4b5d7aa60afcbca9a93cbef2b06f7
+    digest: 8e7e8c6d3ae096631fc62445fe38bb7e06d72aa2480e19f76014d8d4c1d3fa7c
     home: https://legacy-soh.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -977,9 +977,9 @@ entries:
   legacy-soh-3dbirth:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.58176283Z"
+    created: "2025-10-15T05:38:35.463673592Z"
     description: legacy-soh-3dbirth is a legacy multimedia application.
-    digest: 678a2b2bbe95e3cb212bd69bef02c66ea0ae1998b8fa30102030a812fe85f7d1
+    digest: 434714d96a881f4aa5e8df567ab461ec15168ecacc16182daf2a4996a0bccec7
     home: https://legacy-soh-3dbirth.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -996,9 +996,9 @@ entries:
   legacy-soh-3dheart:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.582442117Z"
+    created: "2025-10-15T05:38:35.464535138Z"
     description: legacy-soh-3dheart is a legacy multimedia application.
-    digest: 18f8939c27e7aa77bef7a3aabd250f3b812e4be5720093d4a3cfe2b28d6acb9e
+    digest: 919e3b443b1b740f3eacb7dfcba3d4577aa45a86edf47bd4442eb37bbee77185
     home: https://legacy-soh-3dheart.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -1357,9 +1357,9 @@ entries:
     version: 1.0.1-rc.f28a4cf.20250919204823
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.583165656Z"
+    created: "2025-10-15T05:38:35.465164679Z"
     description: legacy-soh-sonography is a legacy multimedia application.
-    digest: c603f5e3a3764e77abc2e4fc9e8ccf7291bf963a94ab594cc923a76abafcc88e
+    digest: f0177810b10c4a9926110daa0af48743f9a5585dba537cfddf66db1a2c7dd8ed
     home: https://legacy-soh-sonography.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -1448,9 +1448,9 @@ entries:
   legacy-sot:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.583806922Z"
+    created: "2025-10-15T05:38:35.465784222Z"
     description: legacy-sot is a legacy multimedia application.
-    digest: 196263ce0e27427a21f8cd9b922c760af1d7558c3a2c1c63c5c3143da982a247
+    digest: c075d825596c04541dfefb0d6815eab2de9f9a7afe91b0d6bb6f411eb26cb519
     home: https://legacy-sot.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -1532,9 +1532,9 @@ entries:
   nginx-unprivileged:
   - apiVersion: v2
     appVersion: alpine3.22
-    created: "2025-10-15T05:23:39.584168647Z"
+    created: "2025-10-15T05:38:35.466136999Z"
     description: Minimal, standardized chart for running nginx-unprivileged
-    digest: d9438362070e20334c96fa7d713c727581f753bb1333604c9e1590e67d2592ac
+    digest: 189d5f39b8c624621549127bfff026ac7c4f8be620de1d4f95a5fe6aac3cb9c5
     name: nginx-unprivileged
     type: application
     urls:
@@ -1573,7 +1573,7 @@ entries:
   qcon-api:
   - apiVersion: v2
     appVersion: 1.1.0
-    created: "2025-10-15T05:23:39.587275029Z"
+    created: "2025-10-15T05:38:35.469135348Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1596,14 +1596,14 @@ entries:
     version: 1.1.0
   - apiVersion: v2
     appVersion: 1.0.3
-    created: "2025-10-15T05:23:39.586361726Z"
+    created: "2025-10-15T05:38:35.468240553Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
       version: '>=0.1.2'
     description: Backend API for the Qcon application. It provides a websocket endpoint
       for converting documents from word to SCORM format.
-    digest: 0d3a30f9626c4c77c53b773b4b812fede3caabff44eb9850f98f17866d3df437
+    digest: cb4c663936a2e8dc11ef479948bb69cd19053747edfc3bb35e25b474e5ebe12d
     home: https://qcon-api.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -1657,7 +1657,7 @@ entries:
     version: 1.0.1
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.585301339Z"
+    created: "2025-10-15T05:38:35.467211188Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1699,13 +1699,13 @@ entries:
   qcon-guide:
   - apiVersion: v2
     appVersion: 1.0.2
-    created: "2025-10-15T05:23:39.588992583Z"
+    created: "2025-10-15T05:38:35.470479861Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
       version: '>=0.1.2'
     description: Information about how to use [Qcon](https://qcon.ltc.bcit.ca).
-    digest: 697e6d1a2c61e0b9834a197572c7ee3a96c250b39b7edb9f60cad9fda9350e63
+    digest: e74a9b52a29fea8ae22c11e41ae4b18619aa4901d7cc3c537e14e2f88ce54b09
     home: https://qcon-guide.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -1758,14 +1758,14 @@ entries:
   qcon-web:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-10-15T05:23:39.589946502Z"
+    created: "2025-10-15T05:38:35.471669953Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
       version: '>=0.1.2'
     description: Frontend of the Qcon service. Requires the qcon-api processor engine
       to work correctly.
-    digest: bdde3fdb942e7be0f2e14fde3be4b2dcf3a77c6f0a1761d6e484bdbe8b8d9f38
+    digest: 41ca66ee01c0a994b6a0613436221f0bb2aa24845cf658869a6d4ebb20c20dea
     home: https://qcon-web.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -1802,14 +1802,14 @@ entries:
   sugar-suite:
   - apiVersion: v2
     appVersion: 1.0.2
-    created: "2025-10-15T05:23:39.59091604Z"
+    created: "2025-10-15T05:38:35.472597249Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
       version: '>=0.1.2'
     description: Sugar-Suite is a "Framework Factory" used to produce customized stylesheets
       designed for building online courses in HTML.
-    digest: 30212c06a4390cbb58f79979ccd0706dfd7e0f13955c2c95c888cb19533d492c
+    digest: db283d24af0dc395d395c14fda61ee05ae57c43c6a7eb64bd5f42b5a9c75b156
     home: https://sugar-suite.ltc.bcit.ca
     icon: https://course-production.ltc.bcit.ca/favicon.ico
     maintainers:
@@ -1911,4 +1911,4 @@ entries:
     urls:
     - https://github.com/bcit-ltc/helm-charts/releases/download/vault-secrets-operator-0.10.0/vault-secrets-operator-0.10.0.tgz
     version: 0.10.0
-generated: "2025-10-15T05:23:39.562121116Z"
+generated: "2025-10-15T05:38:35.445188042Z"
