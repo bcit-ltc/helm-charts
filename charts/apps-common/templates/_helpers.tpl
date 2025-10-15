@@ -64,12 +64,20 @@ annotations:
 {{- $hasChecks := or $p $f -}}
 {{- if or $hasChecks .Values.frontend.annotations }}
 annotations:
-  {{- with .Values.frontend.annotations }}
+{{ with .Values.frontend.annotations }}
   {{- $tp := typeOf . }}
-  {{- if eq $tp "string" }}{{ tpl . $ | nindent 2 }}{{ else }}{{ toYaml . | nindent 2 }}{{ end }}
+  {{- if eq $tp "string" }}
+{{ tpl . $ | nindent 2 }}
+  {{- else }}
+{{ toYaml . | nindent 2 }}
   {{- end }}
-  {{- if $p }}checksum/processor-config: {{ $p | quote }}{{- end }}
-  {{- if $f }}checksum/frontend-config:  {{ $f | quote }}{{- end }}
+{{ end }}
+{{- if $p }}
+  checksum/processor-config: {{ $p | quote }}
+{{- end }}
+{{- if $f }}
+  checksum/frontend-config: {{ $f | quote }}
+{{- end }}
 {{- end }}
 {{- end -}}
 
@@ -109,10 +117,6 @@ annotations:
 
 {{- define "app.componentEnvFrom" -}}
 {{- $c := . -}}
-{{- range $cfg := ($c.configs | default list) }}
-- configMapRef:
-    name: {{ $cfg.name | quote }}
-{{- end }}
 {{- range $cfg := ($c.configEnvs | default list) }}
 - configMapRef:
     name: {{ $cfg.name | quote }}
@@ -249,22 +253,40 @@ imagePullSecrets:
 {{- if gt (len $parts) 0 -}}{{- join "\n---\n" $parts | sha256sum -}}{{- end -}}
 {{- end -}}
 
-{{/* Frontend defaults volumes (collision-safe) */}}
+{{/* Frontend default volumes:
+     - Always add a tmp emptyDir when NO user-defined volumeMounts/mounts named "tmp" exist.
+     - Add default nginx-config configMap volume ONLY when both components have:
+         * no configMounts AND
+         * no configs
+*/}}
 {{- define "app.defaultFrontendVolumes" -}}
 {{- $present := dict "tmp" false "nginx-config" false -}}
+
+{{- /* mark any pre-declared mounts by name so we don't duplicate */ -}}
 {{- range $m := (default (list) .Values.frontend.volumeMounts) }}{{- if eq $m.name "tmp" }}{{- $_ := set $present "tmp" true }}{{- end }}{{- if eq $m.name "nginx-config" }}{{- $_ := set $present "nginx-config" true }}{{- end }}{{- end }}
 {{- range $m := (default (list) .Values.frontend.configMounts) }}{{- if eq $m.name "tmp" }}{{- $_ := set $present "tmp" true }}{{- end }}{{- if eq $m.name "nginx-config" }}{{- $_ := set $present "nginx-config" true }}{{- end }}{{- end }}
 {{- range $s := (default (list) .Values.frontend.secretMounts) }}{{- if eq $s.name "tmp" }}{{- $_ := set $present "tmp" true }}{{- end }}{{- if eq $s.name "nginx-config" }}{{- $_ := set $present "nginx-config" true }}{{- end }}{{- end }}
+
+{{- /* detect user-provided configs/mounts across BOTH components */ -}}
+{{- $hasCfgMounts := or (gt (len (default (list) .Values.frontend.configMounts)) 0)
+                        (gt (len (default (list) .Values.processor.configMounts)) 0) -}}
+{{- $hasConfigs   := or (gt (len (default (list) .Values.frontend.configs)) 0)
+                        (gt (len (default (list) .Values.processor.configs)) 0) -}}
+
+{{- /* Default tmp volume if the user didn't supply one via mounts */ -}}
 {{- if and (eq (len (default (list) .Values.frontend.volumeMounts)) 0) (not (get $present "tmp")) }}
 - name: tmp
   emptyDir: {}
 {{- end }}
-{{- if and (eq (len (default (list) .Values.frontend.configMounts)) 0) (not (get $present "nginx-config")) }}
+
+{{- /* Default nginx-config volume ONLY when there are no user configs and no user configMounts anywhere */ -}}
+{{- if and (not $hasCfgMounts) (not $hasConfigs) (not (get $present "nginx-config")) }}
 - name: nginx-config
   configMap:
     name: nginx-config
 {{- end }}
 {{- end -}}
+
 
 {{/* =============================
      SecurityContext (defaults + overrides)

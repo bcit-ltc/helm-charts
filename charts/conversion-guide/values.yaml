@@ -74,7 +74,8 @@ frontend:
   # &nbsp;&nbsp;&nbsp;&nbsp;drop:<br>
   # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ALL<br>
   securityContext:
-    container: {}
+    container:
+      readOnlyRootFilesystem: false
   resources:
     # -- Resource requests mapped directly to the value of
     #    the resources field for a PodSpec.
@@ -96,13 +97,52 @@ frontend:
   configEnvs: []
   # -- Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts.
   # @default -- `[]`
-  configs: []
+  configs:
+    - name: default-nginx
+      data:
+        nginx.conf: |-
+          server {
+            listen 8080 default_server;
+            server_name _;
+            root /usr/share/nginx/html;
+
+            location / {
+              index /pages/home.html;
+              try_files $uri $uri/ @redirect;
+            }
+
+            location @redirect {
+              rewrite ^/pages/(.*).html$ /$1 redirect;
+            }
+
+            location ~ ^/([^/]+)$ {
+              try_files /pages/$1.html =404;
+            }
+
+            location /pages/ {
+            }
+
+            location /assets/ {
+            }
+
+            location /partials/ {
+            }
+
+            location /css/ {
+            }
+
+            location /js/ {
+            }
+          }
+
   # -- volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod.
   # @default -- `[]`
   volumeMounts: []
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
-  configMounts: []
+  configMounts: 
+  - name: default-nginx
+    mountPath: /etc/nginx/conf.d
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts: []
