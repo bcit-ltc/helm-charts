@@ -22,7 +22,7 @@ env:
 
 jobs:
   release-all:
-    name: Release library, then apps
+    name: Release library then apps (single job)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -43,8 +43,7 @@ jobs:
       # Install the chart-releaser CLI ('cr') but don't run packaging yet
       - name: Install chart-releaser CLI
         uses: helm/chart-releaser-action@v1.7.0
-        with:
-          install_only: true
+        with: { install_only: true }
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -69,19 +68,24 @@ jobs:
             --skip-existing \
             --token "${GH_TOKEN}"
 
-      - name: Rebuild gh-pages index (include library)
+      - name: Update gh-pages (include library)
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
           REPO_URL: https://bcit-ltc.github.io/helm-charts
         run: |
           set -euo pipefail
-
-          git fetch origin gh-pages:gh-pages || true
           rm -rf .gh-pages
-          if git show-ref --verify --quiet refs/heads/gh-pages; then
-            git worktree add .gh-pages gh-pages
+          if git ls-remote --exit-code --heads "https://github.com/${REPO}.git" gh-pages >/dev/null 2>&1; then
+            git clone --depth 1 --branch gh-pages "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" .gh-pages
           else
-            git worktree add .gh-pages -b gh-pages
-            (cd .gh-pages && git commit --allow-empty -m "init gh-pages")
+            git init .gh-pages
+            pushd .gh-pages
+            git checkout -b gh-pages
+            git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+            git commit --allow-empty -m "init gh-pages"
+            git push -u origin gh-pages
+            popd
           fi
 
           mkdir -p .gh-pages
@@ -93,13 +97,15 @@ jobs:
             helm repo index .gh-pages --url "${REPO_URL}"
           fi
 
-          git -C .gh-pages add -A
-          if ! git -C .gh-pages diff --cached --quiet; then
-            git -C .gh-pages commit -m "index: update Helm chart repo (library)"
-            git -C .gh-pages push origin gh-pages
+          pushd .gh-pages
+          git add -A
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "index: update Helm chart repo (library)"
+            git push origin gh-pages
           else
             echo "No changes to gh-pages."
           fi
+          popd
 
       # ----------------------------
       # APPS NEXT
@@ -112,7 +118,7 @@ jobs:
           helm repo add bcit-ltc https://bcit-ltc.github.io/helm-charts || true
           helm repo update
 
-      # Prefer vendoring the library from the freshly packaged local artifact to avoid GH Pages/CDN lag.
+      # Vendor the library from the freshly packaged local artifact to avoid GH Pages/CDN lag.
       - name: Pre-vendor library into each app (prefer local .tgz; fallback to repo)
         env:
           LIB_NAME: ${{ env.LIB_NAME }}
@@ -147,7 +153,7 @@ jobs:
             helm dependency build "$d"
           done
 
-      - name: Package app charts (pre-package)
+      - name: Package app charts
         run: |
           set -euo pipefail
           mkdir -p .cr-release-packages
@@ -170,13 +176,121 @@ jobs:
             --skip-existing \
             --token "${GH_TOKEN}"
 
-      - name: Rebuild gh-pages index (include apps)
+      - name: Update gh-pages (include apps)
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
           REPO_URL: https://bcit-ltc.github.io/helm-charts
         run: |
           set -euo pipefail
-          git fetch origin gh-pages:gh-pages || true
           rm -rf .gh-pages
-          if git show-ref --verify --quiet refs/heads/gh-pages; then
-            git worktree add .gh-pages gh-pages
-          els
+          git clone --depth 1 --branch gh-pages "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" .gh-pages || (
+            git init .gh-pages
+            pushd .gh-pages
+            git checkout -b gh-pages
+            git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+            git commit --allow-empty -m "init gh-pages"
+            git push -u origin gh-pages
+            popd
+          )
+
+          mkdir -p .gh-pages
+          cp -f .cr-release-packages/*.tgz .gh-pages/ || true
+
+          if [[ -f .gh-pages/index.yaml ]]; then
+            helm repo index .gh-pages --url "${REPO_URL}" --merge .gh-pages/index.yaml
+          else
+            helm repo index .gh-pages --url "${REPO_URL}"
+          fi
+
+          pushd .gh-pages
+          git add -A
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "index: update Helm chart repo (apps)"
+            git push origin gh-pages
+          else
+            echo "No changes to gh-pages."
+          fi
+          popd
+
+      # ----------------------------
+      # PUBLISH TO GHCR (OCI) — only if missing
+      # ----------------------------
+      - name: Login to GHCR (Helm)
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io \
+            -u "${{ github.actor }}" --password-stdin
+
+      - name: Login to GHCR (Cosign)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: sigstore/cosign-installer@v3
+
+      - uses: imjasonh/setup-crane@v0.4
+        with: { version: v0.20.1 }
+
+      - name: Push & sign charts to GHCR only if missing (from local packages)
+        env:
+          OWNER: ${{ github.repository_owner }}
+          LIB_NAME: ${{ env.LIB_NAME }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          repo="oci://ghcr.io/${OWNER}/oci"
+
+          WORKFLOW_SAFE="$(printf '%s' "${GITHUB_WORKFLOW:-}" | tr -c '[:alnum:]._-' '_')"
+
+          pkgs=(.cr-release-packages/*.tgz)
+          if (( ${#pkgs[@]} == 0 )); then
+            echo "No local packages to publish."
+            exit 0
+          fi
+
+          for pkg in "${pkgs[@]}"; do
+            name="$(helm show chart "$pkg"   | awk -F': ' '/^name:/{print $2; exit}')"
+            version="$(helm show chart "$pkg"| awk -F': ' '/^version:/{print $2; exit}')"
+
+            # Skip publishing the library chart to OCI (optional)
+            if [[ "$name" == "${LIB_NAME}" ]]; then
+              echo "Skipping OCI publish for library chart: $name"
+              continue
+            fi
+
+            REF_BASE="ghcr.io/${OWNER}/oci/${name}"
+            TAG_REF="${REF_BASE}:${version}"
+
+            echo "==> Checking remote for ${TAG_REF}"
+            if digest_remote="$(crane digest "${TAG_REF}" 2>/dev/null)"; then
+              echo "Found existing ${TAG_REF} with digest ${digest_remote}; skipping push and sign."
+
+              latest_digest="$(crane digest "${REF_BASE}:latest" 2>/dev/null || true)"
+              if [[ -z "${latest_digest}" || "${latest_digest}" != "${digest_remote}" ]]; then
+                echo "Updating 'latest' to point at ${digest_remote}"
+                crane tag "${REF_BASE}@${digest_remote}" latest
+              else
+                echo "'latest' already points at the same digest; no change."
+              fi
+              continue
+            fi
+
+            echo "Pushing ${name}-${version} to ${repo}"
+            PUSH_OUT="$(helm push "$pkg" "${repo}" 2>&1 | tee /dev/stderr)"
+            DGST="$(printf '%s\n' "$PUSH_OUT" | tr -d '\r' | awk 'tolower($1)=="digest:" {print $2; exit}')"
+            [[ -n "$DGST" && "$DGST" =~ ^sha256:[0-9A-Fa-f]{64}$ ]] || { echo "Failed to parse digest"; exit 1; }
+
+            echo "Signing ${REF_BASE}@${DGST} with Cosign (keyless)…"
+            cosign sign --yes \
+              -a "chart.name=${name}" \
+              -a "chart.version=${version}" \
+              -a "repo=${GITHUB_REPOSITORY}" \
+              -a "workflow=${WORKFLOW_SAFE}" \
+              -a "sha=${GITHUB_SHA}" \
+              "${REF_BASE}@${DGST}"
+
+            echo "Tagging 'latest' -> ${DGST}"
+            crane tag "${REF_BASE}@${DGST}" latest
+          done
