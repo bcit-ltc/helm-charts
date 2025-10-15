@@ -28,7 +28,7 @@ spec:
         {{- end }}
       {{ include "app.pod.annotations" . | nindent 6 }}
     spec:
-      serviceAccountName: {{ include "app.serviceAccount.name" . }}
+      serviceAccountName: {{ include "app.name" . }}
       {{- with .Values.frontend.securityContext.pod }}
       securityContext:
 {{ toYaml . | nindent 8 }}

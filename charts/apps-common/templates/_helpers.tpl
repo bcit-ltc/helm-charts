@@ -30,36 +30,12 @@ app.kubernetes.io/version: {{ .Chart.AppVersion }}
 {{/* ----------------------------
      ServiceAccount helpers
    ---------------------------- */}}
-{{- define "app.processorServiceAccountEnabled" -}}
-{{- $create := ternary .Values.serviceAccount.create true (hasKey .Values.serviceAccount "create") -}}
-{{- $_ := set . "processorServiceAccountEnabled" $create -}}
-{{- end -}}
-
-{{- define "app.processorServiceAccountSecretCreationEnabled" -}}
-{{- $create := ternary .Values.serviceAccount.create true (hasKey .Values.serviceAccount "create") -}}
-{{- $createSecret := ternary .Values.serviceAccount.createSecret false (hasKey .Values.serviceAccount "createSecret") -}}
-{{- $_ := set . "processorServiceAccountSecretCreationEnabled" (and $create $createSecret) -}}
-{{- end -}}
-
 {{- define "app.serviceAccount.name" -}}
 {{- if .Values.serviceAccount.create -}}
 {{ default (include "app.name" .) .Values.serviceAccount.name }}
 {{- else -}}
 {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
-{{- end -}}
-
-{{/* Enablement flags */}}
-{{- define "app.processorEnabled" -}}
-{{- $_ := set . "processorEnabled" (default false .Values.processor.enabled) -}}
-{{- end -}}
-
-{{- define "app.serviceEnabled" -}}
-{{- $_ := set . "serviceEnabled" (default false .Values.service.enabled) -}}
-{{- end -}}
-
-{{- define "app.frontendEnabled" -}}
-{{- $_ := set . "frontendEnabled" (default false .Values.frontend.enabled) -}}
 {{- end -}}
 
 {{/* ----------------------------

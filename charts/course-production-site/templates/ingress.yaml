@@ -1,0 +1,50 @@
+{{/*
+SPDX-License-Identifier: MPL-2.0
+*/}}
+
+{{- if .Values.ingress.enabled -}}
+{{- $svcName     := include "app.name" . -}}
+{{- $svcPort     := .Values.service.port -}}
+{{- $pathType    := (.Values.ingress.pathType | default "Prefix") -}}
+{{- $defaultHost := printf "%s.%s" (include "app.name" .) (.Values.ingress.defaultDomain | default "example.com") -}}
+{{- $host        := (ternary .Values.ingress.host $defaultHost (ne .Values.ingress.host "")) -}}
+{{- $tlsSecret   := (ternary .Values.ingress.tlsSecret "star-ltc-bcit-ca" (ne .Values.ingress.tlsSecret "")) -}}
+{{- $extraPaths  := .Values.ingress.extraPaths -}}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "app.name" . }}
+  labels:
+    helm.sh/chart: {{ include "app.chart" . }}
+    app.kubernetes.io/name: {{ include "app.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+{{- template "app.ingress.annotations" . }}
+spec:
+  {{- if .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  {{- end }}
+
+  # TLS: always rendered with sane defaults unless overridden
+  tls:
+    - hosts:
+        - {{ $host | quote }}
+      secretName: {{ $tlsSecret | quote }}
+
+  rules:
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          {{- if $extraPaths }}
+{{ toYaml $extraPaths | indent 10 }}
+          {{- end }}
+          - path: /
+            pathType: {{ $pathType }}
+            backend:
+              service:
+                name: {{ $svcName }}
+                port:
+                  number: {{ $svcPort }}
+{{- end }}
