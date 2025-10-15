@@ -268,36 +268,44 @@ imagePullSecrets:
 
 {{/* =============================
      SecurityContext (defaults + overrides)
-     Values shape:
-       securityContext:
-         pod: {}
-         container: {}
-     Optional per-component override:
-       processor.securityContext.container
-       frontend.securityContext.container
    ============================= */}}
 
 {{- define "app.pod.securityContext" -}}
-{{- $user := (default dict .Values.securityContext.pod) -}}
+{{- /* Safely unwrap values.securityContext.pod (may be nil) */ -}}
+{{- $sc  := (default dict .Values.securityContext) -}}
+{{- $pod := (default dict (get $sc "pod")) -}}
+
 {{- $base := dict
       "runAsNonRoot" true
       "runAsUser"    101
       "runAsGroup"   101
       "fsGroup"      101
 -}}
-{{- toYaml (mergeOverwrite $base $user) -}}
+{{- toYaml (mergeOverwrite $base $pod) -}}
 {{- end -}}
 
 {{- define "app.container.securityContext" -}}
+{{- /* Inputs:
+      - root: the top-level dot (.)
+      - component: a component values map (e.g., .Values.processor)
+   */ -}}
 {{- $root := index . "root" -}}
 {{- $comp := (index . "component" | default dict) -}}
+
+{{- /* Safely unwrap globals: values.securityContext.container */ -}}
+{{- $scGlobal := (default dict $root.Values.securityContext) -}}
+{{- $global   := (default dict (get $scGlobal "container")) -}}
+
+{{- /* Safely unwrap component override: component.securityContext.container */ -}}
+{{- $scComp := (default dict (get $comp "securityContext")) -}}
+{{- $compC  := (default dict (get $scComp "container")) -}}
+
 {{- $base := dict
       "allowPrivilegeEscalation" false
       "readOnlyRootFilesystem"   true
       "capabilities" (dict "drop" (list "ALL"))
 -}}
-{{- $global := (default dict $root.Values.securityContext.container) -}}
-{{- $component := (default dict $comp.securityContext.container) -}}
-{{- toYaml (mergeOverwrite $base $global $component) -}}
+{{- toYaml (mergeOverwrite $base $global $compC) -}}
 {{- end -}}
+
 
