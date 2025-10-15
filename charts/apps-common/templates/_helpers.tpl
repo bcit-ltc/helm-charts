@@ -124,21 +124,32 @@ annotations:
 {{- range $m := ($c.secretMounts | default list) }}
 - name: {{ $m.name | quote }}
   mountPath: {{ $m.mountPath | quote }}
-  {{- if hasKey $m "readOnly" }}readOnly: {{ $m.readOnly }}{{- end }}
-  {{- if hasKey $m "subPath"  }}subPath: {{ $m.subPath }}{{- end }}
+{{- if hasKey $m "readOnly" }}
+  readOnly: {{ $m.readOnly }}
+{{- end }}
+{{- if hasKey $m "subPath" }}
+  subPath: {{ $m.subPath }}
+{{- end }}
 {{- end }}
 {{- range $m := ($c.configMounts | default list) }}
 - name: {{ $m.name | quote }}
   mountPath: {{ $m.mountPath | quote }}
-  {{- if hasKey $m "subPath" }}subPath: {{ $m.subPath }}{{- end }}
+{{- if hasKey $m "subPath" }}
+  subPath: {{ $m.subPath }}
+{{- end }}
 {{- end }}
 {{- range $m := ($c.volumeMounts | default list) }}
 - name: {{ $m.name | quote }}
   mountPath: {{ $m.mountPath | quote }}
-  {{- if hasKey $m "readOnly" }}readOnly: {{ $m.readOnly }}{{- end }}
-  {{- if hasKey $m "subPath"  }}subPath: {{ $m.subPath }}{{- end }}
+{{- if hasKey $m "readOnly" }}
+  readOnly: {{ $m.readOnly }}
+{{- end }}
+{{- if hasKey $m "subPath" }}
+  subPath: {{ $m.subPath }}
+{{- end }}
 {{- end }}
 {{- end -}}
+
 
 {{/* ----------------------------
      Volumes (dedup by name)
