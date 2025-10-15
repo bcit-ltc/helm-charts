@@ -139,7 +139,6 @@ frontend:
               }
 
           }
-
   # -- volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod.
   # @default -- `[]`
   volumeMounts: []
@@ -217,7 +216,7 @@ processor:
     # -- Image default repository
     repository: "bcit-ltc/qcon-api"
     # -- Image default tag
-    tag: "1.1.0"
+    tag: "1.1.0-rc.3ce2ede.20251015064152"
   # -- Number of replicas for the processor
   replicas: 1
   # -- Extra labels to attach to the processor pods
@@ -268,8 +267,7 @@ processor:
         - key: ADMIN_PASSWORD
           path: ADMIN_PASSWORD
         - key: DJANGO_SECRET_KEY
-          path: DJANGO_SECRET_KEY 
-
+          path: DJANGO_SECRET_KEY
     - name: db-credentials # volume name (must be DNS-1123 compliant)
       secretName: db-credentials # existing Secret in the same namespace
       mountPath: /etc/secrets/db-credentials
@@ -284,7 +282,6 @@ processor:
           path: POSTGRES_PASSWORD
         - key: POSTGRES_HOST
           path: POSTGRES_HOST
-
     - name: api-key
       secretName: api-key
       mountPath: /etc/secrets/api-key
@@ -292,27 +289,20 @@ processor:
       items: # optional: map specific keys to paths (and per-file mode)
         - key: API_KEY
           path: API_KEY
-          
 # -- Creates an ingress for external access
 # @default -- `{}`
 ingress:
   enabled: true
-
   defaultDomain: ltc.bcit.ca
-
   # Optional: "nginx", "traefik", etc. If empty, cluster default is used.
   ingressClassName: ""
-
   # Host to expose. If empty, defaults to "<global.name>.<defaultDomain>"
   host: ""
-
   # Annotations applied to the Ingress
   annotations: {}
-
   # TLS secret to use. If empty, defaults to "star-ltc-bcit-ca"
   # and the host defaults to "<global.name>.<defaultDomain>" if not set.
   tlsSecret: ""
-
   # Advanced use: extra path rules to render verbatim BEFORE the default "/".
   # Example:
   # extraPaths:
@@ -324,10 +314,8 @@ ingress:
   #         port:
   #           number: 3000
   extraPaths: []
-
   # Optional: path type for the default route ("/")
   pathType: Prefix
-
 # Configuration for persistent volume claims
 dataStorage:
   # -- Enable or disable data storage components.

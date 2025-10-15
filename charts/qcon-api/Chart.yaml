@@ -1,7 +1,6 @@
 apiVersion: v2
-appVersion: 1.0.3
-description: Backend API for the Qcon application. It provides a websocket endpoint
-  for converting documents from word to SCORM format.
+appVersion: 1.1.0-rc.3ce2ede.20251015064152
+description: Backend API for the Qcon application. It provides a websocket endpoint for converting documents from word to SCORM format.
 home: https://qcon-api.ltc.bcit.ca
 icon: https://course-production.ltc.bcit.ca/favicon.ico
 maintainers:
@@ -12,7 +11,7 @@ name: qcon-api
 sources:
   - https://github.com/bcit-ltc/
   - https://github.com/bcit-ltc/qcon-api
-version: 1.0.3
+version: 1.1.0-rc.3ce2ede.20251015064152
 dependencies:
   - name: apps-common
     version: ">=0.1.2"
