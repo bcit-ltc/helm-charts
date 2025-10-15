@@ -3,6 +3,8 @@ name: Release charts
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'charts/**'
   workflow_run:
     workflows: [ "Remotely-triggered chart bump" ]
     branches:   [ main ]
