@@ -4,11 +4,15 @@ description: legacy-ltc is a legacy multimedia application.
 home: https://legacy-ltc.ltc.bcit.ca
 icon: https://course-production.ltc.bcit.ca/favicon.ico
 maintainers:
-  - email: ltc_techops@bcit.ca
-    name: BCIT LTC
-    url: https://www.bcit.ca/learning-teaching-centre/
+- email: ltc_techops@bcit.ca
+  name: BCIT LTC
+  url: https://www.bcit.ca/learning-teaching-centre/
 name: legacy-ltc
 sources:
-  - https://github.com/bcit-ltc/
-  - https://github.com/bcit-ltc/legacy-ltc
+- https://github.com/bcit-ltc/
+- https://github.com/bcit-ltc/legacy-ltc
 version: 1.0.0
+dependencies:
+- name: apps-common
+  version: ">=0.1.2"
+  repository: https://bcit-ltc.github.io/helm-charts
