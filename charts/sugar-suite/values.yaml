@@ -37,6 +37,14 @@ service:
   targetPort: 8080
   # Extra annotations to attach to the service
   annotations: {}
+# -- Security context for the pod template<br>
+# @default -- 
+#   &nbsp;&nbsp;runAsNonRoot: true<br>
+#   &nbsp;&nbsp;runAsGroup: 101<br>
+#   &nbsp;&nbsp;runAsUser: 101<br>
+#   &nbsp;&nbsp;fsGroup: 101<br>
+securityContext:
+  pod: {}
 # -- Configuration for the "frontend"
 # @default -- `{}`
 frontend:
@@ -58,22 +66,14 @@ frontend:
   # -- Add a checksum annotation to the server pods that is a hash
   #    of the configuration. Can be used to identify configuration changes.
   includeConfigAnnotation: false
-  # -- Security context for the pod template and the app container<br>
+  # -- Security context for the container<br>
   # @default -- 
-  # Pod-level defaults:<br>
-  #   &nbsp;&nbsp;runAsNonRoot: true<br>
-  #   &nbsp;&nbsp;runAsGroup: 101<br>
-  #   &nbsp;&nbsp;runAsUser: 101<br>
-  #   &nbsp;&nbsp;fsGroup: 101<br>
-  #   &nbsp;&nbsp;readOnlyRootFilesystem: true<br>
-  #   &nbsp;&nbsp;allowPrivilegeEscalation: false<br>
-  #
-  # Container-level defaults:<br>
+#   &nbsp;&nbsp;readOnlyRootFilesystem: true<br>
+#   &nbsp;&nbsp;allowPrivilegeEscalation: false<br>
   # &nbsp;&nbsp;capabilities:<br>
   # &nbsp;&nbsp;&nbsp;&nbsp;drop:<br>
   # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ALL<br>
   securityContext:
-    pod: {}
     container: {}
   resources:
     # -- Resource requests mapped directly to the value of
@@ -200,7 +200,15 @@ processor:
   volumeMounts: []
   # - name: shared-data
   #   mountPath: /var/www/html
-
+  # -- Security context for the container<br>
+  # @default -- 
+  # &nbsp;&nbsp;readOnlyRootFilesystem: true<br>
+  # &nbsp;&nbsp;allowPrivilegeEscalation: false<br>
+  # &nbsp;&nbsp;capabilities:<br>
+  # &nbsp;&nbsp;&nbsp;&nbsp;drop:<br>
+  # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ALL<br>
+  securityContext:
+    container: {}
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []

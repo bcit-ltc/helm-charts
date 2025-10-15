@@ -4,7 +4,9 @@ metadata:
   name: {{ include "app.name" . }}
   labels:
 {{ include "app.labels" . | nindent 4 }}
-  {{ include "app.deployment.annotations" . | nindent 2 }}
+  {{- with (include "app.deployment.annotations" .) }}
+{{ . | nindent 2 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.processor.replicas | default 1 }}
   revisionHistoryLimit: {{ .Values.global.revisionHistoryLimit | default 3 }}
@@ -26,16 +28,21 @@ spec:
         {{- with .Values.processor.extraLabels }}
 {{ toYaml . | nindent 8 }}
         {{- end }}
-      {{ include "app.pod.annotations" . | nindent 6 }}
+      {{- with (include "app.pod.annotations" .) }}
+{{ . | nindent 6 }}
+      {{- end }}
     spec:
       serviceAccountName: {{ include "app.serviceAccount.name" . }}
-      {{- with .Values.frontend.securityContext.pod }}
-      securityContext:
-{{ toYaml . | nindent 8 }}
-      {{- end }}
 
+      # Pod-level securityContext (defaults merged with .Values.securityContext.pod)
+      securityContext:
+{{ include "app.pod.securityContext" . | nindent 8 }}
+
+      {{- $hasProc := (default false .Values.processor.enabled) -}}
+      {{- $hasFE   := (default false .Values.frontend.enabled) -}}
+      {{- if or $hasProc $hasFE }}
       containers:
-        {{- if (default false .Values.processor.enabled) }}
+{{- if $hasProc }}
         - name: {{ include "app.name" . }}
           image: "{{ .Values.processor.image.registry }}/{{ .Values.processor.image.repository }}:{{ .Values.processor.image.tag }}"
           imagePullPolicy: {{ .Values.processor.image.pullPolicy | default "IfNotPresent" }}
@@ -52,6 +59,9 @@ spec:
                 fieldRef:
                   fieldPath: metadata.labels['app.kubernetes.io/version']
 {{- include "app.extraEnvironmentVars" .Values.processor | nindent 12 }}
+          securityContext:
+{{ include "app.container.securityContext" (dict "root" . "component" .Values.processor) | nindent 12 }}
+
           {{- $pm := include "app.componentVolumeMounts" .Values.processor -}}
           {{- $pd := include "app.dataStorage.processorVolumeMount" . -}}
           {{- if or $pm $pd }}
@@ -59,9 +69,9 @@ spec:
 {{- if $pm }}{{ $pm | nindent 12 }}{{- end }}
 {{- if $pd }}{{ $pd | nindent 12 }}{{- end }}
           {{- end }}
-        {{- end }}
+{{- end }}
 
-        {{- if (default false .Values.frontend.enabled) }}
+{{- if $hasFE }}
         - name: {{ default "frontend" .Values.frontend.name }}
           image: "{{ .Values.frontend.image.registry }}/{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
           imagePullPolicy: {{ .Values.frontend.image.pullPolicy | default "IfNotPresent" }}
@@ -78,10 +88,9 @@ spec:
                 fieldRef:
                   fieldPath: metadata.labels['app.kubernetes.io/version']
 {{- include "app.extraEnvironmentVars" .Values.frontend | nindent 12 }}
-          {{- with .Values.frontend.securityContext.container }}
           securityContext:
-{{ toYaml . | nindent 12 }}
-          {{- end }}
+{{ include "app.container.securityContext" (dict "root" . "component" .Values.frontend) | nindent 12 }}
+
           {{- with .Values.frontend.resources }}
           resources:
 {{ toYaml . | nindent 12 }}
@@ -99,11 +108,19 @@ spec:
             - name: nginx-config
               mountPath: /etc/nginx/conf.d
           {{- end }}
-        {{- end }}
+{{- end }}
+      {{- else }}
+      {{- fail "No containers would be rendered: set at least one of processor.enabled or frontend.enabled to true." }}
+      {{- end }}
 
+      {{- $pv := (include "app.podVolumes" .) | trim -}}
+      {{- $pvc := (include "app.dataStorage.podVolume" .) | trim -}}
+      {{- $def := (include "app.defaultFrontendVolumes" .) | trim -}}
+      {{- if or $pv $pvc $def }}
       volumes:
-{{ include "app.podVolumes" . | nindent 8 }}
-{{ include "app.dataStorage.podVolume" . | nindent 8 }}
-{{ include "app.defaultFrontendVolumes" . | nindent 8 }}
+        {{- if $pv  }}{{ $pv  | nindent 8 }}{{- end }}
+        {{- if $pvc }}{{ $pvc | nindent 8 }}{{- end }}
+        {{- if $def }}{{ $def | nindent 8 }}{{- end }}
+      {{- end }}
 
       {{- include "imagePullSecrets" . | nindent 6 }}
