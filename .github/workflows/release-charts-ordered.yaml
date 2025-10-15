@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   workflow_run:
-    workflows: [ "Remotely-triggered chart bump & commit" ]
+    workflows: [ "Remotely-triggered chart bump" ]
     branches:   [ main ]
     types: [ completed ]
 
