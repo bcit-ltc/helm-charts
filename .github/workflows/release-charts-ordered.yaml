@@ -22,7 +22,7 @@ env:
 
 jobs:
   release-all:
-    name: Release library then apps (single job)
+    name: Release library, apps
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -47,7 +47,7 @@ jobs:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # ----------------------------
-      # LIBRARY FIRST (apps-common)
+      # LIBRARY
       # ----------------------------
       - name: Package library (apps-common)
         run: |
@@ -67,10 +67,8 @@ jobs:
             --skip-existing \
             --token "${GH_TOKEN}"
 
-      # NOTE: no gh-pages push here — we’ll publish once at the end.
-
       # ----------------------------
-      # APPS NEXT
+      # APPS
       # ----------------------------
       - uses: mikefarah/yq@v4.44.3
 
@@ -138,9 +136,9 @@ jobs:
             --token "${GH_TOKEN}"
 
       # ----------------------------
-      # SINGLE gh-pages PUSH (lib + apps)
+      # gh-pages
       # ----------------------------
-      - name: Update gh-pages once (publish library + apps)
+      - name: Update gh-pages (publish library + apps)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}

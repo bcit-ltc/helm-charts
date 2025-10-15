@@ -105,5 +105,5 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "chore(${{ inputs.chart_name }}): bump chart/app to ${{ inputs.version }}"
+          git commit -m "chore(${{ inputs.chart_name }}) -> ${{ inputs.version }}"
           git push
