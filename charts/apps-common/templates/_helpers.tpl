@@ -265,3 +265,38 @@ imagePullSecrets:
     name: nginx-config
 {{- end }}
 {{- end -}}
+
+{{/* =============================
+     Security Context (defaults)
+   ============================= */}}
+
+{{/* Pod-level security context with defaults, overridable by:
+     .Values.podSecurityContext OR .Values.frontend.securityContext.pod (for back-compat)
+*/}}
+{{- define "app.securityContext.pod" -}}
+{{- $defaults := dict
+      "runAsNonRoot" true
+      "runAsUser"    101
+      "runAsGroup"   101
+      "fsGroup"      101
+-}}
+{{- $override := coalesce .Values.podSecurityContext .Values.frontend.securityContext.pod | default dict -}}
+{{- $merged := mustMergeOverwrite (deepCopy $defaults) $override -}}
+{{- if gt (len $merged) 0 -}}
+{{ toYaml $merged }}
+{{- end -}}
+{{- end -}}
+
+{{/* Container-level security context with defaults, overridable by passing a dict:
+     include "app.securityContext.container" (dict "override" .Values.frontend.securityContext.container)
+*/}}
+{{- define "app.securityContext.container" -}}
+{{- $defaults := dict
+      "allowPrivilegeEscalation" false
+      "readOnlyRootFilesystem"   true
+      "capabilities" (dict "drop" (list "ALL"))
+-}}
+{{- $override := (.override | default dict) -}}
+{{- $merged := mustMergeOverwrite (deepCopy $defaults) $override -}}
+{{ toYaml $merged }}
+{{- end -}}
