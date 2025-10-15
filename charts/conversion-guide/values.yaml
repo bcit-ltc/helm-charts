@@ -60,7 +60,7 @@ frontend:
     # -- Image default repository
     repository: "bcit-ltc/conversion-guide"
     # -- Image default tag
-    tag: "1.0.3"
+    tag: "1.0.3-rc.fb517e7.20251015175918"
   # Extra annotations to attach to the frontend
   annotations: {}
   # -- Add a checksum annotation to the server pods that is a hash
@@ -134,15 +134,14 @@ frontend:
             location /js/ {
             }
           }
-
   # -- volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod.
   # @default -- `[]`
   volumeMounts: []
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
-  configMounts: 
-  - name: default-nginx
-    mountPath: /etc/nginx/conf.d
+  configMounts:
+    - name: default-nginx
+      mountPath: /etc/nginx/conf.d
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts: []
