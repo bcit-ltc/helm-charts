@@ -267,36 +267,37 @@ imagePullSecrets:
 {{- end -}}
 
 {{/* =============================
-     Security Context (defaults)
+     SecurityContext (defaults + overrides)
+     Values shape:
+       securityContext:
+         pod: {}
+         container: {}
+     Optional per-component override:
+       processor.securityContext.container
+       frontend.securityContext.container
    ============================= */}}
 
-{{/* Pod-level security context with defaults, overridable by:
-     .Values.podSecurityContext OR .Values.frontend.securityContext.pod (for back-compat)
-*/}}
-{{- define "app.securityContext.pod" -}}
-{{- $defaults := dict
+{{- define "app.pod.securityContext" -}}
+{{- $user := (default dict .Values.securityContext.pod) -}}
+{{- $base := dict
       "runAsNonRoot" true
       "runAsUser"    101
       "runAsGroup"   101
       "fsGroup"      101
 -}}
-{{- $override := coalesce .Values.podSecurityContext .Values.frontend.securityContext.pod | default dict -}}
-{{- $merged := mustMergeOverwrite (deepCopy $defaults) $override -}}
-{{- if gt (len $merged) 0 -}}
-{{ toYaml $merged }}
-{{- end -}}
+{{- toYaml (mergeOverwrite $base $user) -}}
 {{- end -}}
 
-{{/* Container-level security context with defaults, overridable by passing a dict:
-     include "app.securityContext.container" (dict "override" .Values.frontend.securityContext.container)
-*/}}
-{{- define "app.securityContext.container" -}}
-{{- $defaults := dict
+{{- define "app.container.securityContext" -}}
+{{- $root := index . "root" -}}
+{{- $comp := (index . "component" | default dict) -}}
+{{- $base := dict
       "allowPrivilegeEscalation" false
       "readOnlyRootFilesystem"   true
       "capabilities" (dict "drop" (list "ALL"))
 -}}
-{{- $override := (.override | default dict) -}}
-{{- $merged := mustMergeOverwrite (deepCopy $defaults) $override -}}
-{{ toYaml $merged }}
+{{- $global := (default dict $root.Values.securityContext.container) -}}
+{{- $component := (default dict $comp.securityContext.container) -}}
+{{- toYaml (mergeOverwrite $base $global $component) -}}
 {{- end -}}
+
