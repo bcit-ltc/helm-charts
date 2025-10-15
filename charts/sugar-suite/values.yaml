@@ -60,7 +60,7 @@ frontend:
     # -- Image default repository
     repository: "bcit-ltc/sugar-suite"
     # -- Image default tag
-    tag: "1.1.7-rc.a2c0fac.20251014215313"
+    tag: "1.0.4"
   # Extra annotations to attach to the frontend
   annotations: {}
   # -- Add a checksum annotation to the server pods that is a hash
@@ -68,8 +68,9 @@ frontend:
   includeConfigAnnotation: false
   # -- Security context for the container<br>
   # @default -- 
-#   &nbsp;&nbsp;readOnlyRootFilesystem: true<br>
-#   &nbsp;&nbsp;allowPrivilegeEscalation: false<br>
+
+  #   &nbsp;&nbsp;readOnlyRootFilesystem: true<br>
+  #   &nbsp;&nbsp;allowPrivilegeEscalation: false<br>
   # &nbsp;&nbsp;capabilities:<br>
   # &nbsp;&nbsp;&nbsp;&nbsp;drop:<br>
   # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ALL<br>
@@ -219,22 +220,16 @@ processor:
 # @default -- `{}`
 ingress:
   enabled: true
-
   defaultDomain: ltc.bcit.ca
-
   # Optional: "nginx", "traefik", etc. If empty, cluster default is used.
   ingressClassName: ""
-
   # Host to expose. If empty, defaults to "<global.name>.<defaultDomain>"
   host: ""
-
   # Annotations applied to the Ingress
   annotations: {}
-
   # TLS secret to use. If empty, defaults to "star-ltc-bcit-ca"
   # and the host defaults to "<global.name>.<defaultDomain>" if not set.
   tlsSecret: ""
-
   # Advanced use: extra path rules to render verbatim BEFORE the default "/".
   # Example:
   # extraPaths:
@@ -246,10 +241,8 @@ ingress:
   #         port:
   #           number: 3000
   extraPaths: []
-
   # Optional: path type for the default route ("/")
   pathType: Prefix
-
 # Configuration for persistent volume claims
 dataStorage:
   # -- Enable or disable data storage components.
