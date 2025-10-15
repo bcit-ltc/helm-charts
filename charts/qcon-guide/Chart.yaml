@@ -4,15 +4,15 @@ description: Information about how to use [Qcon](https://qcon.ltc.bcit.ca).
 home: https://qcon-guide.ltc.bcit.ca
 icon: https://course-production.ltc.bcit.ca/favicon.ico
 maintainers:
-  - email: ltc_techops@bcit.ca
-    name: BCIT LTC
-    url: https://www.bcit.ca/learning-teaching-centre/
+- email: ltc_techops@bcit.ca
+  name: BCIT LTC
+  url: https://www.bcit.ca/learning-teaching-centre/
 name: qcon-guide
 sources:
-  - https://github.com/bcit-ltc/
-  - https://github.com/bcit-ltc/qcon-guide
+- https://github.com/bcit-ltc/
+- https://github.com/bcit-ltc/qcon-guide
 version: 1.0.2
 dependencies:
-  - name: apps-common
-    version: 0.1.0
-    repository: https://bcit-ltc.github.io/helm-charts
+- name: apps-common
+  version: ">=0.1.2"
+  repository: https://bcit-ltc.github.io/helm-charts
