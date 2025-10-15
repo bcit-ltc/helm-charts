@@ -40,7 +40,6 @@ jobs:
       - uses: azure/setup-helm@v4
         with: { version: v3.14.4 }
 
-      # Install the chart-releaser CLI ('cr') but don't run packaging yet
       - name: Install chart-releaser CLI
         uses: helm/chart-releaser-action@v1.7.0
         with: { install_only: true }
@@ -68,44 +67,7 @@ jobs:
             --skip-existing \
             --token "${GH_TOKEN}"
 
-      - name: Update gh-pages (include library)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-          REPO_URL: https://bcit-ltc.github.io/helm-charts
-        run: |
-          set -euo pipefail
-          rm -rf .gh-pages
-          if git ls-remote --exit-code --heads "https://github.com/${REPO}.git" gh-pages >/dev/null 2>&1; then
-            git clone --depth 1 --branch gh-pages "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" .gh-pages
-          else
-            git init .gh-pages
-            pushd .gh-pages
-            git checkout -b gh-pages
-            git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
-            git commit --allow-empty -m "init gh-pages"
-            git push -u origin gh-pages
-            popd
-          fi
-
-          mkdir -p .gh-pages
-          cp -f .cr-release-packages/*.tgz .gh-pages/ || true
-
-          if [[ -f .gh-pages/index.yaml ]]; then
-            helm repo index .gh-pages --url "${REPO_URL}" --merge .gh-pages/index.yaml
-          else
-            helm repo index .gh-pages --url "${REPO_URL}"
-          fi
-
-          pushd .gh-pages
-          git add -A
-          if ! git diff --cached --quiet; then
-            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "index: update Helm chart repo (library)"
-            git push origin gh-pages
-          else
-            echo "No changes to gh-pages."
-          fi
-          popd
+      # NOTE: no gh-pages push here — we’ll publish once at the end.
 
       # ----------------------------
       # APPS NEXT
@@ -118,7 +80,6 @@ jobs:
           helm repo add bcit-ltc https://bcit-ltc.github.io/helm-charts || true
           helm repo update
 
-      # Vendor the library from the freshly packaged local artifact to avoid GH Pages/CDN lag.
       - name: Pre-vendor library into each app (prefer local .tgz; fallback to repo)
         env:
           LIB_NAME: ${{ env.LIB_NAME }}
@@ -149,33 +110,9 @@ jobs:
           for d in charts/*; do
             [[ -f "$d/Chart.yaml" ]] || continue
             [[ "$(basename "$d")" == "apps-common" ]] && continue
-            echo "==> deps for $d"
-
-            needs_update=false
-            if [[ -f "$d/Chart.lock" ]]; then
-              # Compare name:version pairs between Chart.yaml and Chart.lock
-              yaml_deps="$(yq -r '.dependencies[]? | "\(.name):\(.version)"' "$d/Chart.yaml" | sort || true)"
-              lock_deps="$(yq -r '.dependencies[]? | "\(.name):\(.version)"' "$d/Chart.lock" | sort || true)"
-              if [[ "$yaml_deps" != "$lock_deps" ]]; then
-                needs_update=true
-              fi
-            else
-              needs_update=true
-            fi
-
-            if $needs_update; then
-              echo "Lock out of sync — running 'helm dependency update' for $d"
-              helm dependency update "$d"
-            fi
-
-            # Build vendor dir (idempotent); retry with update if needed
-            if ! helm dependency build "$d"; then
-              echo "build failed, retrying with update..."
-              helm dependency update "$d"
-              helm dependency build "$d"
-            fi
+            echo "==> helm dependency update $d"
+            helm dependency update "$d"
           done
-
 
       - name: Package app charts
         run: |
@@ -200,7 +137,10 @@ jobs:
             --skip-existing \
             --token "${GH_TOKEN}"
 
-      - name: Update gh-pages (include apps)
+      # ----------------------------
+      # SINGLE gh-pages PUSH (lib + apps)
+      # ----------------------------
+      - name: Update gh-pages once (publish library + apps)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
@@ -230,7 +170,7 @@ jobs:
           pushd .gh-pages
           git add -A
           if ! git diff --cached --quiet; then
-            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "index: update Helm chart repo (apps)"
+            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "index: update Helm chart repo"
             git push origin gh-pages
           else
             echo "No changes to gh-pages."
@@ -265,7 +205,6 @@ jobs:
           set -euo pipefail
           shopt -s nullglob
           repo="oci://ghcr.io/${OWNER}/oci"
-
           WORKFLOW_SAFE="$(printf '%s' "${GITHUB_WORKFLOW:-}" | tr -c '[:alnum:]._-' '_')"
 
           pkgs=(.cr-release-packages/*.tgz)
