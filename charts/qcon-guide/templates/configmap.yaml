@@ -3,24 +3,20 @@ SPDX-License-Identifier: MPL-2.0
 */}}
 
 {{- $seen := dict -}}
-{{- /* Tag components so we can detect 'frontend' */ -}}
-{{- $components := list (dict "name" "processor" "cfg" .Values.processor) (dict "name" "frontend" "cfg" .Values.frontend) -}}
+{{- $hasFEConfigs := gt (len (default (list) .Values.frontend.configs)) 0 -}}
+{{- $hasPRConfigs := gt (len (default (list) .Values.processor.configs)) 0 -}}
+{{- $anyConfigs := or $hasFEConfigs $hasPRConfigs -}}
 
-{{- range $comp := $components }}
-  {{- $c := index $comp "cfg" -}}
-  {{- $isFrontend := eq (index $comp "name") "frontend" -}}
+{{- /* If user provided ANY configs, render ONLY those. Otherwise render a single default nginx-config. */ -}}
 
-  {{/* Prepare the list of ConfigMaps for this component. If it's the frontend and .configs is empty, inject a default nginx-config. */}}
-  {{- $cfgList := (default list $c.configs) -}}
-  {{- if and $isFrontend (eq (len $cfgList) 0) }}
-    {{- $defaultNginx := printf "server {\n  listen 8080 default_server;\n  server_name _;\n  location / {\n    root /usr/share/nginx/html;\n    index index.html index.htm;\n    try_files $uri $uri/ =404;\n  }\n  error_page 500 502 503 504 /50x.html;\n  location = /50x.html { root /usr/share/nginx/html; }\n}\n" -}}
-    {{- $cfgList = list (dict "name" "nginx-config" "data" (dict "default.conf" $defaultNginx)) -}}
-  {{- end }}
-
-  {{/* ----- ConfigMaps from `configs`: [{ name, data: {...} }] ----- */}}
-  {{- range $cfg := $cfgList }}
-    {{- $name := $cfg.name | default "" -}}
-    {{- if and $name (not (hasKey $seen $name)) }}
+{{- if $anyConfigs }}
+  {{- /* Render component configs (frontend + processor) */ -}}
+  {{- $components := list (dict "name" "processor" "cfg" .Values.processor) (dict "name" "frontend" "cfg" .Values.frontend) -}}
+  {{- range $comp := $components }}
+    {{- $c := index $comp "cfg" -}}
+    {{- range $cfg := (default (list) $c.configs) }}
+      {{- $name := $cfg.name | default "" -}}
+      {{- if and $name (not (hasKey $seen $name)) }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -34,14 +30,14 @@ metadata:
     app.kubernetes.io/version: {{ $.Chart.AppVersion }}
 data:
 {{ toYaml ($cfg.data | default dict) | nindent 2 }}
-    {{- $_ := set $seen $name true }}
+        {{- $_ := set $seen $name true }}
+      {{- end }}
     {{- end }}
-  {{- end }}
 
-  {{/* ----- ConfigMaps from `configEnvs`: [{ name, <KVs...> }] ----- */}}
-  {{- range $cfg := ($c.configEnvs | default list) }}
-    {{- $name := $cfg.name | default "" -}}
-    {{- if and $name (not (hasKey $seen $name)) }}
+    {{- /* configEnvs are still rendered as configmaps when present */ -}}
+    {{- range $cfg := (default (list) $c.configEnvs) }}
+      {{- $name := $cfg.name | default "" -}}
+      {{- if and $name (not (hasKey $seen $name)) }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -55,8 +51,34 @@ metadata:
     app.kubernetes.io/version: {{ $.Chart.AppVersion }}
 data:
 {{ toYaml (omit $cfg "name") | nindent 2 }}
-    {{- $_ := set $seen $name true }}
+        {{- $_ := set $seen $name true }}
+      {{- end }}
     {{- end }}
   {{- end }}
-
+{{- else }}
+  {{- /* No user configs anywhere: render the single default nginx-config */ -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  labels:
+    helm.sh/chart: {{ include "app.chart" . }}
+    app.kubernetes.io/name: {{ include "app.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+data:
+  default.conf: |
+    server {
+      listen 8080 default_server;
+      server_name _;
+      location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        try_files $uri $uri/ =404;
+      }
+      error_page 500 502 503 504 /50x.html;
+      location = /50x.html { root /usr/share/nginx/html; }
+    }
 {{- end }}

@@ -95,6 +95,7 @@ spec:
           resources:
 {{ toYaml . | nindent 12 }}
           {{- end }}
+
           {{- $fm := include "app.componentVolumeMounts" .Values.frontend | trim -}}
           {{- $fd := include "app.dataStorage.frontendVolumeMount" . -}}
           {{- if or $fm $fd }}
@@ -102,6 +103,7 @@ spec:
 {{- if $fm }}{{ $fm | nindent 12 }}{{- end }}
 {{- if $fd }}{{ $fd | nindent 12 }}{{- end }}
           {{- else }}
+          # Fallback defaults only if the user didn't define any mounts for the frontend
           volumeMounts:
             - name: tmp
               mountPath: /tmp
