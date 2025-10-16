@@ -98,50 +98,17 @@ frontend:
   # -- Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts.
   # @default -- `[]`
   configs:
-    - name: default-nginx
+    - name: dummy-config
       data:
-        nginx.conf: |-
-          server {
-            listen 8080 default_server;
-            server_name _;
-            root /usr/share/nginx/html;
-
-            location / {
-              index /pages/home.html;
-              try_files $uri $uri/ @redirect;
-            }
-
-            location @redirect {
-              rewrite ^/pages/(.*).html$ /$1 redirect;
-            }
-
-            location ~ ^/([^/]+)$ {
-              try_files /pages/$1.html =404;
-            }
-
-            location /pages/ {
-            }
-
-            location /assets/ {
-            }
-
-            location /partials/ {
-            }
-
-            location /css/ {
-            }
-
-            location /js/ {
-            }
-          }
+        dummy.txt: "This prevents the default nginx config from being created"
   # -- volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod.
   # @default -- `[]`
-  volumeMounts: []
+  volumeMounts:
+    - name: tmp
+      mountPath: /tmp
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
-  configMounts:
-    - name: default-nginx
-      mountPath: /etc/nginx/conf.d
+  configMounts: []
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts: []
