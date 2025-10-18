@@ -260,7 +260,7 @@ processor:
 # -- Creates an ingress for external access
 # @default -- `{}`
 ingress:
-  enabled: true
+  enabled: false
   # -- Default domain for the ingress
   # @default -- `""`
   defaultDomain: ""
