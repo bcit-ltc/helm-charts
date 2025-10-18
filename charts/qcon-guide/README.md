@@ -1,9 +1,9 @@
 <!-- markdownlint-disable MD033 MD034 -->
 # qcon-guide
 
-![Version: 1.1.7-rc.66e9d66.20251015063838](https://img.shields.io/badge/Version-1.1.7--rc.66e9d66.20251015063838-informational?style=flat-square) ![AppVersion: 1.1.7-rc.66e9d66.20251015063838](https://img.shields.io/badge/AppVersion-1.1.7--rc.66e9d66.20251015063838-informational?style=flat-square)
+![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square) ![AppVersion: 1.0.2](https://img.shields.io/badge/AppVersion-1.0.2-informational?style=flat-square)
 
-Information about the architecture and makeup of the LTC's server infrastructure.
+Information about how to use [Qcon](https://qcon.ltc.bcit.ca).
 
 **Homepage:** <https://qcon-guide.ltc.bcit.ca>
 
@@ -59,7 +59,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://bcit-ltc.github.io/helm-charts | apps-common | >=0.1.2 |
+| https://bcit-ltc.github.io/helm-charts | apps-common | >=0.3.0 |
 
 ## Values
 
@@ -74,7 +74,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image default pull policy |
 | frontend.image.registry | string | `"ghcr.io"` | Frontend image registry |
 | frontend.image.repository | string | `"bcit-ltc/qcon-guide"` | Frontend image repository |
-| frontend.image.tag | string | `"1.1.7-rc.66e9d66.20251015063838"` | Frontend image tag |
+| frontend.image.tag | string | `"1.0.2"` | Frontend image tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"qcon-guide"` | The name of the frontend container to create. If empty uses "frontend" |

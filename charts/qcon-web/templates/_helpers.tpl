@@ -1,4 +1,4 @@
 {{/*
-This chart uses shared helpers from the 'app-common' library chart.
-Define app-specific helpers here if needed.
+SPDX-License-Identifier: MPL-2.0
+Local chart helpers
 */}}
