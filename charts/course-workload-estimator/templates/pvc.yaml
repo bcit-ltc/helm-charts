@@ -1,32 +1,36 @@
-{{/*
-SPDX-License-Identifier: MPL-2.0
-*/}}
+{{- /*
+Renders PVCs for:
+  - .Values.frontend.storageMounts
+  - .Values.processor.storageMounts
 
-{{- if and .Values.dataStorage .Values.dataStorage.enabled }}
+Each item:
+  - name: <pvc-name> (required)
+  - size: <e.g., 10Gi> (required)
+  - accessMode: <ReadWriteOnce|ReadOnlyMany|ReadWriteMany> (default: ReadWriteOnce)
+  - storageClass: <string|null> (optional, omitted if null/empty)
+  - mountPath: <string> (ignored here; used by deployment mounts)
+*/ -}}
+
+{{- $root := . -}}
+{{- $components := list .Values.frontend .Values.processor -}}
+
+{{- range $c := $components }}
+  {{- range $m := ($c.storageMounts | default list) }}
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "app.dataStorage.claimName" . }}
+  name: {{ $m.name | quote }}
   labels:
-    helm.sh/chart: {{ include "app.chart" . }}
-    app.kubernetes.io/name: {{ include "app.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion }}
-  {{- with .Values.dataStorage.labels }}
-{{ toYaml . | nindent 2 }}
-  {{- end }}
-  {{- with .Values.dataStorage.annotations }}
-  annotations:
-{{ toYaml . | nindent 4 }}
-  {{- end }}
+{{ include "app.labels" $root | nindent 4 }}
 spec:
   accessModes:
-    - {{ .Values.dataStorage.accessMode | default "ReadWriteOnce" }}
+    - {{ ($m.accessMode | default "ReadWriteOnce") | quote }}
   resources:
     requests:
-      storage: {{ .Values.dataStorage.size | default "10Gi" }}
-  {{- with .Values.dataStorage.storageClass }}
+      storage: {{ $m.size | quote }}
+  {{- with $m.storageClass }}
   storageClassName: {{ . | quote }}
+  {{- end }}
   {{- end }}
 {{- end }}

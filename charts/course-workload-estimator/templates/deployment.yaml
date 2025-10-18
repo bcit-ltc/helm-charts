@@ -34,9 +34,12 @@ spec:
     spec:
       serviceAccountName: {{ include "app.serviceAccount.name" . }}
 
+      {{- $podSC := include "app.pod.securityContext" . | trim -}}
+      {{- if $podSC }}
       # Pod-level securityContext (defaults merged with .Values.securityContext.pod)
       securityContext:
-{{ include "app.pod.securityContext" . | nindent 8 }}
+{{ $podSC | nindent 8 }}
+      {{- end }}
 
       {{- $hasProc := (default false .Values.processor.enabled) -}}
       {{- $hasFE   := (default false .Values.frontend.enabled) -}}
@@ -59,15 +62,16 @@ spec:
                 fieldRef:
                   fieldPath: metadata.labels['app.kubernetes.io/version']
 {{- include "app.extraEnvironmentVars" .Values.processor | nindent 12 }}
+          {{- $procCSC := include "app.container.securityContext" (dict "root" . "component" .Values.processor) | trim -}}
+          {{- if $procCSC }}
           securityContext:
-{{ include "app.container.securityContext" (dict "root" . "component" .Values.processor) | nindent 12 }}
+{{ $procCSC | nindent 12 }}
+          {{- end }}
 
-          {{- $pm := include "app.componentVolumeMounts" .Values.processor -}}
-          {{- $pd := include "app.dataStorage.processorVolumeMount" . -}}
-          {{- if or $pm $pd }}
+          {{- $pm := include "app.componentVolumeMounts" (dict "root" . "component" .Values.processor "componentKey" "processor") | trim -}}
+          {{- if $pm }}
           volumeMounts:
-{{- if $pm }}{{ $pm | nindent 12 }}{{- end }}
-{{- if $pd }}{{ $pd | nindent 12 }}{{- end }}
+{{ $pm | nindent 12 }}
           {{- end }}
 {{- end }}
 
@@ -88,41 +92,31 @@ spec:
                 fieldRef:
                   fieldPath: metadata.labels['app.kubernetes.io/version']
 {{- include "app.extraEnvironmentVars" .Values.frontend | nindent 12 }}
+          {{- $feCSC := include "app.container.securityContext" (dict "root" . "component" .Values.frontend) | trim -}}
+          {{- if $feCSC }}
           securityContext:
-{{ include "app.container.securityContext" (dict "root" . "component" .Values.frontend) | nindent 12 }}
+{{ $feCSC | nindent 12 }}
+          {{- end }}
 
           {{- with .Values.frontend.resources }}
           resources:
 {{ toYaml . | nindent 12 }}
           {{- end }}
 
-          {{- $fm := include "app.componentVolumeMounts" .Values.frontend | trim -}}
-          {{- $fd := include "app.dataStorage.frontendVolumeMount" . -}}
-          {{- if or $fm $fd }}
+          {{- $fm := include "app.componentVolumeMounts" (dict "root" . "component" .Values.frontend "componentKey" "frontend") | trim -}}
+          {{- if $fm }}
           volumeMounts:
-{{- if $fm }}{{ $fm | nindent 12 }}{{- end }}
-{{- if $fd }}{{ $fd | nindent 12 }}{{- end }}
-          {{- else }}
-          # Fallback defaults only if the user didn't define any mounts for the frontend
-          volumeMounts:
-            - name: tmp
-              mountPath: /tmp
-            - name: nginx-config
-              mountPath: /etc/nginx/conf.d
+{{ $fm | nindent 12 }}
           {{- end }}
 {{- end }}
       {{- else }}
       {{- fail "No containers would be rendered: set at least one of processor.enabled or frontend.enabled to true." }}
       {{- end }}
 
-      {{- $pv := (include "app.podVolumes" .) | trim -}}
-      {{- $pvc := (include "app.dataStorage.podVolume" .) | trim -}}
-      {{- $def := (include "app.defaultFrontendVolumes" .) | trim -}}
-      {{- if or $pv $pvc $def }}
+      {{- $volAll := (include "app.volumes" .) | trim -}}
+      {{- if $volAll }}
       volumes:
-        {{- if $pv  }}{{ $pv  | nindent 8 }}{{- end }}
-        {{- if $pvc }}{{ $pvc | nindent 8 }}{{- end }}
-        {{- if $def }}{{ $def | nindent 8 }}{{- end }}
+{{ $volAll | nindent 8 }}
       {{- end }}
 
       {{- include "imagePullSecrets" . | nindent 6 }}

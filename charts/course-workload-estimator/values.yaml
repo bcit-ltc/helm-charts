@@ -18,10 +18,7 @@ serviceAccount:
   # Kubernetes now recommends using short-lived tokens from the TokenRequest API or projected volumes instead if possible.
   # For more details, see https://kubernetes.io/docs/concepts/configuration/secret/#service-account-token-secrets
   # -- Create a Secret API object to store a non-expiring token for the service account.
-  createSecret: true
-  # -- Extra labels to attach to the service account.
-  #    Should be a YAML map of the labels to apply to the serviceAccount
-  extraLabels: {}
+  createSecret: false
   # Extra annotations to attach to the service account
   annotations: {}
 # -- Enables a service for the app
@@ -43,8 +40,9 @@ service:
 #   &nbsp;&nbsp;runAsGroup: 101<br>
 #   &nbsp;&nbsp;runAsUser: 101<br>
 #   &nbsp;&nbsp;fsGroup: 101<br>
+# - Set to `null` to disable
 securityContext:
-  pod: {}
+  pod: null
 # -- Configuration for the "frontend"
 # @default -- `{}`
 frontend:
@@ -62,6 +60,7 @@ frontend:
     # -- Image default tag
     tag: "1.0.3"
   # Extra annotations to attach to the frontend
+  # @default -- `{}`
   annotations: {}
   # -- Add a checksum annotation to the server pods that is a hash
   #    of the configuration. Can be used to identify configuration changes.
@@ -73,6 +72,7 @@ frontend:
   # &nbsp;&nbsp;capabilities:<br>
   # &nbsp;&nbsp;&nbsp;&nbsp;drop:<br>
   # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ALL<br>
+  # - Set to `null` to disable
   securityContext:
     container: {}
   resources:
@@ -94,12 +94,13 @@ frontend:
   # -- configEnvs create ConfigMaps that are passed to containers using envFrom
   # @default -- `[]`
   configEnvs: []
-  # -- Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts.
-  # @default -- `[]`
-  configs: []
   # -- volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod.
   # @default -- `[]`
-  volumeMounts: []
+  emptyDirMounts: []
+  # - name: tmp
+  #   mountPath: /tmp
+  # - name: shared-data
+  #   mountPath: /var/www/html
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []
@@ -170,34 +171,28 @@ processor:
     # -- Image default pull policy
     pullPolicy: IfNotPresent
     # -- Image default registry
-    registry: ""
+    registry: "ghcr.io"
     # -- Image default repository
     repository: ""
     # -- Image default tag
     tag: ""
   # -- Number of replicas for the processor
   replicas: 1
-  # -- Extra labels to attach to the processor pods
-  #    Should be a YAML map of the labels to apply to the deployment template
-  extraLabels: {}
-  # Extra annotations to attach to the processor deployment
-  annotations: {}
   # -- Port on which processor is listening
   port: 8000
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars: []
   # - API_URL: "https://app.ltc.bcit.ca/api"
-
+  # Extra annotations to attach to the processor
+  # @default -- `{}`
+  annotations: {}
   # -- Create `ConfigMap` resources that are passed to containers using envFrom
   # @default -- `[]`
   configEnvs: []
-  # -- Create `ConfigMap` resources that are projected through volumes. Must set matching configMounts.
-  # @default -- `[]`
-  configs: []
   # -- volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod.
   # @default -- `[]`
-  volumeMounts: []
+  emptyDirMounts: []
   # - name: shared-data
   #   mountPath: /var/www/html
   # -- Security context for the container<br>
@@ -208,28 +203,33 @@ processor:
   # &nbsp;&nbsp;&nbsp;&nbsp;drop:<br>
   # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- ALL<br>
   securityContext:
-    container: {}
+    container: null
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []
+  # Configuration for persistent volume claims
+  # @default -- `[]`
+  storageMounts: []
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts: []
 # -- Creates an ingress for external access
 # @default -- `{}`
 ingress:
-  enabled: true
-  defaultDomain: ltc.bcit.ca
+  enabled: false
+  # -- Default domain for the ingress
+  # @default -- `example.com`
+  defaultDomain: ""
   # Optional: "nginx", "traefik", etc. If empty, cluster default is used.
   ingressClassName: ""
   # Host to expose. If empty, defaults to "<global.name>.<defaultDomain>"
   host: ""
   # Annotations applied to the Ingress
   annotations: {}
-  # TLS secret to use. If empty, defaults to "star-ltc-bcit-ca"
-  # and the host defaults to "<global.name>.<defaultDomain>" if not set.
+  # -- TLS secret to use. Sets `<spec.tls.hosts>` to `<global.name>.<defaultDomain>`
+  # @default -- `""`
   tlsSecret: ""
-  # Advanced use: extra path rules to render verbatim BEFORE the default "/".
+  # Extra path rules to render verbatim before the default "/".
   # Example:
   # extraPaths:
   #   - path: /api
@@ -242,23 +242,7 @@ ingress:
   extraPaths: []
   # Optional: path type for the default route ("/")
   pathType: Prefix
-# Configuration for persistent volume claims
-dataStorage:
-  # -- Enable or disable data storage components.
-  enabled: false
-  # -- Size of the PVC created
-  size: 10Gi
-  # -- Location where the PVC will be mounted.
-  mountPath: "/app/data"
-  # -- Name of the storage class to use. If null it will use the
-  # configured default Storage Class.
-  storageClass: null
-  # -- Access Mode of the storage device being used for the PVC
-  accessMode: ReadWriteOnce
-  # -- Annotations to apply to the PVC
-  annotations: {}
-  # -- Labels to apply to the PVC
-  labels: {}
+
 # Unconfigured options
 #
 # autoscaling:
