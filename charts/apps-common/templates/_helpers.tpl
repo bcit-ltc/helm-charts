@@ -60,6 +60,69 @@ imagePullSecrets:
 
 
 {{/* ---------------------------------
+     Probes (liveness/readiness/startup)
+   --------------------------------- */}}
+{{/*
+  apps-common.app.probe
+  Input: a probe map (e.g., .Values.frontend.livenessProbe)
+  Behavior:
+    - If .enabled is false or empty -> emit nothing
+    - If .execCommand has entries  -> use exec
+    - Else                         -> use httpGet with .path and .port
+    - Applies sane defaults if fields are missing
+*/}}
+{{- define "apps-common.app.probe" -}}
+{{- $p := (default dict .) -}}
+{{- if $p.enabled }}
+  {{- if gt (len ($p.execCommand | default list)) 0 }}
+exec:
+  command:
+  {{- range $p.execCommand }}
+  - {{ . | quote }}
+  {{- end }}
+  {{- else }}
+httpGet:
+  path: {{ $p.path | default "/" | quote }}
+  port: {{ $p.port | default 8080 }}
+  {{- /* add scheme/headers here if you ever need them */ -}}
+  {{- end }}
+failureThreshold: {{ $p.failureThreshold     | default 3 }}
+initialDelaySeconds: {{ $p.initialDelaySeconds | default 0 }}
+periodSeconds: {{ $p.periodSeconds          | default 10 }}
+successThreshold: {{ $p.successThreshold     | default 1 }}
+timeoutSeconds: {{ $p.timeoutSeconds        | default 1 }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+  apps-common.app.containerProbes
+  Input: dict{"component": <.Values.frontend|.Values.processor>}
+  Emits the three probe blocks if enabled.
+*/}}
+{{- define "apps-common.app.containerProbes" -}}
+{{- $c := (get . "component") | default dict -}}
+{{- with $c.livenessProbe }}
+  {{- if .enabled }}
+livenessProbe:
+{{ include "apps-common.app.probe" . | nindent 2 }}
+  {{- end }}
+{{- end }}
+{{- with $c.readinessProbe }}
+  {{- if .enabled }}
+readinessProbe:
+{{ include "apps-common.app.probe" . | nindent 2 }}
+  {{- end }}
+{{- end }}
+{{- with $c.startupProbe }}
+  {{- if .enabled }}
+startupProbe:
+{{ include "apps-common.app.probe" . | nindent 2 }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+
+{{/* ---------------------------------
      Annotations passthroughs
    --------------------------------- */}}
 {{- define "apps-common.app.annotations.block" -}}
