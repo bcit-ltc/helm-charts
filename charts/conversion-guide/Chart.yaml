@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 1.0.13
+appVersion: 1.0.13-rc.5b4c557.20251018070925
 description: A reference for anyone preparing Word documents to be converted into HTML.
 home: https://conversion-guide.ltc.bcit.ca
 icon: https://course-production.ltc.bcit.ca/favicon.ico
@@ -11,9 +11,8 @@ name: conversion-guide
 sources:
   - https://github.com/bcit-ltc/
   - https://github.com/bcit-ltc/conversion-guide
-version: 1.0.13
+version: 1.0.13-rc.5b4c557.20251018070925
 dependencies:
   - name: apps-common
     version: ">=0.3.0"
     repository: https://bcit-ltc.github.io/helm-charts
-
