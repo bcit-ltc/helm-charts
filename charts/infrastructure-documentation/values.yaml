@@ -91,7 +91,7 @@ frontend:
   configEnvs: []
   # - name: "special-config"
   # -- volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod.
-  # @default -- `[]`
+  # @default -- `[{name: tmp, mountPath: /tmp}]`
   emptyDirMounts:
     - name: tmp
       mountPath: /tmp
