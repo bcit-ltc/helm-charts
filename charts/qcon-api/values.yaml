@@ -51,9 +51,9 @@ frontend:
     # -- Frontend image registry
     registry: "docker.io"
     # -- Frontend image repository
-    repository: "nginxinc/nginx-unprivileged"
+    repository: "nginxinc/nginx"
     # -- Frontend image tag
-    tag: "1.2.0-rc.4f81512.20251021215449"
+    tag: "mainline-alpine3.22-perl"
   # Extra annotations to attach to the frontend
   # @default -- `{}`
   annotations: {}
@@ -68,7 +68,7 @@ frontend:
   # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br>
   # - Set to `null` to disable
   securityContext:
-    container: {}
+    container: null
   resources:
     # -- Resource requests mapped directly to the value of
     #    the resources field for a PodSpec.
@@ -95,8 +95,8 @@ frontend:
   emptyDirMounts:
     - name: tmp
       mountPath: /tmp
-  # - name: shared-data
-  #   mountPath: /var/www/html
+    - name: shared-data
+      mountPath: /var/www/html
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts:
@@ -222,7 +222,7 @@ frontend:
 # @default -- `{}`
 processor:
   # -- Enable or disable processor components.
-  enabled: false
+  enabled: true
   image:
     # -- Processor image default pull policy
     pullPolicy: IfNotPresent
@@ -231,7 +231,7 @@ processor:
     # -- Processor image repository
     repository: "bcit-ltc/qcon-api"
     # -- Processor image tag
-    tag: "1.1.2"
+    tag: "1.2.0"
   # -- Number of replicas for the processor
   replicas: 1
   # -- Port on which processor is listening
