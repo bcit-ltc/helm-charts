@@ -53,7 +53,7 @@ frontend:
     # -- Frontend image repository
     repository: "bcit-ltc/conversion-guide"
     # -- Frontend image tag
-    tag: "1.0.13-rc.5b4c557.20251018070925"
+    tag: "1.0.14"
   # Extra annotations to attach to the frontend
   # @default -- `{}`
   annotations: {}
@@ -93,8 +93,8 @@ frontend:
   # -- volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod.
   # @default -- `[{name: tmp, mountPath: /tmp}]`
   emptyDirMounts:
-  - name: tmp
-    mountPath: /tmp
+    - name: tmp
+      mountPath: /tmp
   # - name: shared-data
   #   mountPath: /var/www/html
   # -- volumeMounts to be added as configMaps. Requires matching configs.
