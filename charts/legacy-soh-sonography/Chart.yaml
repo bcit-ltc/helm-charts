@@ -1,18 +1,18 @@
 apiVersion: v2
-appVersion: 1.1.7-rc.66e9d66.20251015063838
-description: Information about the architecture and makeup of the LTC's server infrastructure.
-home: https://legacy-soh-sonography.ltc.bcit.ca
+appVersion: 1.0.0
+description: legacy-soh-sonography is a legacy multimedia application.
+home: https://legacy-html.ltc.bcit.ca
 icon: https://course-production.ltc.bcit.ca/favicon.ico
 maintainers:
   - email: ltc_techops@bcit.ca
     name: BCIT LTC
     url: https://www.bcit.ca/learning-teaching-centre/
-name: legacy-soh-sonography
+name: legacy-html
 sources:
   - https://github.com/bcit-ltc/
-  - https://github.com/bcit-ltc/legacy-soh-sonography
-version: 1.1.7-rc.66e9d66.20251015063838
+  - https://github.com/bcit-ltc/legacy-html
+version: 1.0.0
 dependencies:
   - name: apps-common
-    version: ">=0.1.2"
+    version: ">=0.3.0"
     repository: https://bcit-ltc.github.io/helm-charts

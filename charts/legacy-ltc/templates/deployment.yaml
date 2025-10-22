@@ -1,17 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "app.name" . }}
+  name: {{ include "apps-common.app.name" . }}
   labels:
-{{ include "app.labels" . | nindent 4 }}
-  {{ include "app.deployment.annotations" . | nindent 2 }}
+{{ include "apps-common.app.labels" . | nindent 4 }}
+  {{- with (include "apps-common.app.deployment.annotations" .) }}
+{{ . | nindent 2 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.processor.replicas | default 1 }}
   revisionHistoryLimit: {{ .Values.global.revisionHistoryLimit | default 3 }}
   progressDeadlineSeconds: {{ .Values.global.progressDeadlineSeconds | default 600 }}
   selector:
     matchLabels:
-{{ include "app.selectorLabels" . | nindent 6 }}
+{{ include "apps-common.app.selectorLabels" . | nindent 6 }}
 
   strategy:
     type: RollingUpdate
@@ -22,26 +24,35 @@ spec:
   template:
     metadata:
       labels:
-{{ include "app.labels" . | nindent 8 }}
+{{ include "apps-common.app.labels" . | nindent 8 }}
         {{- with .Values.processor.extraLabels }}
 {{ toYaml . | nindent 8 }}
         {{- end }}
-      {{ include "app.pod.annotations" . | nindent 6 }}
+      {{- with (include "apps-common.app.pod.annotations" .) }}
+{{ . | nindent 6 }}
+      {{- end }}
     spec:
-      serviceAccountName: {{ include "app.serviceAccount.name" . }}
-      {{- with .Values.frontend.securityContext.pod }}
+      serviceAccountName: {{ include "apps-common.app.serviceAccount.name" . }}
+
+      {{- $podSC := include "apps-common.app.pod.securityContext" . | trim -}}
+      {{- if $podSC }}
+      # Pod-level securityContext (defaults merged with .Values.securityContext.pod)
       securityContext:
-{{ toYaml . | nindent 8 }}
+{{ $podSC | nindent 8 }}
       {{- end }}
 
+      {{- $hasProc := (default false .Values.processor.enabled) -}}
+      {{- $hasFE   := (default false .Values.frontend.enabled) -}}
+      {{- if or $hasProc $hasFE }}
       containers:
-        {{- if (default false .Values.processor.enabled) }}
-        - name: {{ include "app.name" . }}
+{{- if $hasProc }}
+        - name: {{ include "apps-common.app.name" . }}
           image: "{{ .Values.processor.image.registry }}/{{ .Values.processor.image.repository }}:{{ .Values.processor.image.tag }}"
           imagePullPolicy: {{ .Values.processor.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ .Values.processor.port | default 8000 }}
-          {{- $procEnvFrom := include "app.componentEnvFrom" .Values.processor }}
+          {{- include "apps-common.app.containerProbes" (dict "component" .Values.processor) | nindent 10 }}
+          {{- $procEnvFrom := include "apps-common.app.componentEnvFrom" .Values.processor }}
           {{- if $procEnvFrom }}
           envFrom:
 {{ $procEnvFrom | nindent 12 }}
@@ -51,23 +62,28 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.labels['app.kubernetes.io/version']
-{{- include "app.extraEnvironmentVars" .Values.processor | nindent 12 }}
-          {{- $pm := include "app.componentVolumeMounts" .Values.processor -}}
-          {{- $pd := include "app.dataStorage.processorVolumeMount" . -}}
-          {{- if or $pm $pd }}
-          volumeMounts:
-{{- if $pm }}{{ $pm | nindent 12 }}{{- end }}
-{{- if $pd }}{{ $pd | nindent 12 }}{{- end }}
+{{- include "apps-common.app.extraEnvironmentVars" .Values.processor | nindent 12 }}
+          {{- $procCSC := include "apps-common.app.container.securityContext" (dict "root" . "component" .Values.processor) | trim -}}
+          {{- if $procCSC }}
+          securityContext:
+{{ $procCSC | nindent 12 }}
           {{- end }}
-        {{- end }}
 
-        {{- if (default false .Values.frontend.enabled) }}
+          {{- $pm := include "apps-common.app.componentVolumeMounts" (dict "root" . "component" .Values.processor "componentKey" "processor") | trim -}}
+          {{- if $pm }}
+          volumeMounts:
+{{ $pm | nindent 12 }}
+          {{- end }}
+{{- end }}
+
+{{- if $hasFE }}
         - name: {{ default "frontend" .Values.frontend.name }}
           image: "{{ .Values.frontend.image.registry }}/{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
           imagePullPolicy: {{ .Values.frontend.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ .Values.frontend.port | default 8080 }}
-          {{- $feEnvFrom := include "app.componentEnvFrom" .Values.frontend }}
+          {{- include "apps-common.app.containerProbes" (dict "component" .Values.frontend) | nindent 10 }}
+          {{- $feEnvFrom := include "apps-common.app.componentEnvFrom" .Values.frontend }}
           {{- if $feEnvFrom }}
           envFrom:
 {{ $feEnvFrom | nindent 12 }}
@@ -77,33 +93,32 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.labels['app.kubernetes.io/version']
-{{- include "app.extraEnvironmentVars" .Values.frontend | nindent 12 }}
-          {{- with .Values.frontend.securityContext.container }}
+{{- include "apps-common.app.extraEnvironmentVars" .Values.frontend | nindent 12 }}
+          {{- $feCSC := include "apps-common.app.container.securityContext" (dict "root" . "component" .Values.frontend) | trim -}}
+          {{- if $feCSC }}
           securityContext:
-{{ toYaml . | nindent 12 }}
+{{ $feCSC | nindent 12 }}
           {{- end }}
+
           {{- with .Values.frontend.resources }}
           resources:
 {{ toYaml . | nindent 12 }}
           {{- end }}
-          {{- $fm := include "app.componentVolumeMounts" .Values.frontend | trim -}}
-          {{- $fd := include "app.dataStorage.frontendVolumeMount" . -}}
-          {{- if or $fm $fd }}
+
+          {{- $fm := include "apps-common.app.componentVolumeMounts" (dict "root" . "component" .Values.frontend "componentKey" "frontend") | trim -}}
+          {{- if $fm }}
           volumeMounts:
-{{- if $fm }}{{ $fm | nindent 12 }}{{- end }}
-{{- if $fd }}{{ $fd | nindent 12 }}{{- end }}
-          {{- else }}
-          volumeMounts:
-            - name: tmp
-              mountPath: /tmp
-            - name: nginx-config
-              mountPath: /etc/nginx/conf.d
+{{ $fm | nindent 12 }}
           {{- end }}
-        {{- end }}
+{{- end }}
+      {{- else }}
+      {{- fail "No containers would be rendered: set at least one of processor.enabled or frontend.enabled to true." }}
+      {{- end }}
 
+      {{- $volAll := (include "apps-common.app.volumes" .) | trim -}}
+      {{- if $volAll }}
       volumes:
-{{ include "app.podVolumes" . | nindent 8 }}
-{{ include "app.dataStorage.podVolume" . | nindent 8 }}
-{{ include "app.defaultFrontendVolumes" . | nindent 8 }}
+{{ $volAll | nindent 8 }}
+      {{- end }}
 
-      {{- include "imagePullSecrets" . | nindent 6 }}
+      {{- include "apps-common.imagePullSecrets" . | nindent 6 }}
