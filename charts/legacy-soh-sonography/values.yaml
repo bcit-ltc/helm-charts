@@ -214,6 +214,7 @@ initContainer:
   configMounts:
     - name: fetch-content-init-script
       mountPath: /usr/local/fetch-content.sh
+      # -- make script executable
       defaultMode: 0755
       fetch.sh: |-
         #!/bin/sh
