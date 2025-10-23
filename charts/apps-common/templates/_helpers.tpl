@@ -153,9 +153,11 @@ annotations:
 {{- define "apps-common.app.pod.annotations" -}}
 {{- $p := include "apps-common.app.componentConfigChecksum" .Values.processor -}}
 {{- $f := include "apps-common.app.componentConfigChecksum" .Values.frontend  -}}
+{{- $i := include "apps-common.app.componentConfigChecksum" .Values.initContainer -}}
 {{- $extra := dict -}}
 {{- if $p }}{{- $_ := set $extra "checksum/processor-config" $p -}}{{- end -}}
 {{- if $f }}{{- $_ := set $extra "checksum/frontend-config"  $f -}}{{- end -}}
+{{- if $i }}{{- $_ := set $extra "checksum/init-config"       $i -}}{{- end -}}
 {{ include "apps-common.app.annotations.block" (list .Values.frontend.annotations $extra) }}
 {{- end -}}
 
@@ -372,7 +374,7 @@ annotations:
 {{- define "apps-common.app.volumes" -}}
 {{- $seen := dict -}}
 {{- $chunks := list -}}
-{{- $components := list (dict "key" "frontend" "c" .Values.frontend) (dict "key" "processor" "c" .Values.processor) -}}
+{{- $components := list (dict "key" "frontend" "c" .Values.frontend) (dict "key" "processor" "c" .Values.processor) (dict "key" "init" "c" .Values.initContainer) -}}
 
 {{- range $e := $components }}
   {{- $c := $e.c | default dict -}}
@@ -420,7 +422,7 @@ annotations:
         {{- end }}
       {{- end }}
       {{- $chunks = append $chunks (join "\n" $buf) -}}
-    {{- end -}}
+    {{- end }}
   {{- end }}
 {{- end }}
 

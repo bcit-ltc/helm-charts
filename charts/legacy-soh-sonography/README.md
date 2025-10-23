@@ -1,11 +1,11 @@
 <!-- markdownlint-disable MD033 MD034 -->
 # legacy-soh-sonography
 
-![Version: 1.1.7-rc.66e9d66.20251015063838](https://img.shields.io/badge/Version-1.1.7--rc.66e9d66.20251015063838-informational?style=flat-square) ![AppVersion: 1.1.7-rc.66e9d66.20251015063838](https://img.shields.io/badge/AppVersion-1.1.7--rc.66e9d66.20251015063838-informational?style=flat-square)
+![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![AppVersion: 1.0.1](https://img.shields.io/badge/AppVersion-1.0.1-informational?style=flat-square)
 
-Information about the architecture and makeup of the LTC's server infrastructure.
+legacy-soh-sonography is a legacy multimedia application.
 
-**Homepage:** <https://legacy-soh-sonography.ltc.bcit.ca>
+**Homepage:** <https://legacy-html.ltc.bcit.ca>
 
 ## Maintainers
 
@@ -59,7 +59,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://bcit-ltc.github.io/helm-charts | apps-common | >=0.1.2 |
+| https://bcit-ltc.github.io/helm-charts | apps-common | >=0.3.0 |
 
 ## Values
 
@@ -68,13 +68,13 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend | object | `{}` | Main "frontend" configuration |
 | frontend.configEnvs | list | `[]` | configEnvs create ConfigMaps that are passed to containers using envFrom |
 | frontend.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
-| frontend.emptyDirMounts | list | `[]` | volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod. |
+| frontend.emptyDirMounts | list | `[{name: tmp, mountPath: /tmp}]` | volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod. |
 | frontend.enabled | bool | `true` | Enable or disable frontend components. |
 | frontend.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image default pull policy |
 | frontend.image.registry | string | `"ghcr.io"` | Frontend image registry |
 | frontend.image.repository | string | `"bcit-ltc/legacy-soh-sonography"` | Frontend image repository |
-| frontend.image.tag | string | `"1.1.7-rc.66e9d66.20251015063838"` | Frontend image tag |
+| frontend.image.tag | string | `"1.0.0"` | Frontend image tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"legacy-soh-sonography"` | The name of the frontend container to create. If empty uses "frontend" |
