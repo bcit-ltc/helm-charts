@@ -317,6 +317,7 @@ annotations:
   app.componentConfigMapVolumes
   Inputs: dict{"component": <.Values.frontend|.Values.processor>}
   - Emits one configMap volume per configMounts item.
+  - Supports per-mount defaultMode when provided (octal like 0755).
 */}}
 {{- define "apps-common.app.componentConfigMapVolumes" -}}
 {{- $c := (get . "component") | default dict -}}
@@ -324,6 +325,9 @@ annotations:
 - name: {{ $m.name | quote }}
   configMap:
     name: {{ $m.name | quote }}
+    {{- if hasKey $m "defaultMode" }}
+    defaultMode: {{ $m.defaultMode }}
+    {{- end }}
 {{- end }}
 {{- end -}}
 
@@ -383,7 +387,11 @@ annotations:
     {{- $n := toString $m.name -}}
     {{- if not (hasKey $seen $n) -}}
       {{- $_ := set $seen $n true -}}
-      {{- $chunks = append $chunks (printf "- name: %q\n  configMap:\n    name: %q" $n $n) -}}
+      {{- if hasKey $m "defaultMode" -}}
+        {{- $chunks = append $chunks (printf "- name: %q\n  configMap:\n    name: %q\n    defaultMode: %v" $n $n $m.defaultMode) -}}
+      {{- else -}}
+        {{- $chunks = append $chunks (printf "- name: %q\n  configMap:\n    name: %q" $n $n) -}}
+      {{- end -}}
     {{- end -}}
   {{- end }}
 

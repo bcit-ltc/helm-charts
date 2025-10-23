@@ -36,12 +36,10 @@ spec:
 
       {{- $podSC := include "apps-common.app.pod.securityContext" . | trim -}}
       {{- if $podSC }}
-      # Pod-level securityContext (defaults merged with .Values.securityContext.pod)
       securityContext:
 {{ $podSC | nindent 8 }}
       {{- end }}
 
-      {{- /* -------- initContainer component (patterned like frontend/processor) -------- */}}
       {{- with .Values.initContainer }}
       {{- if .enabled }}
       initContainers:
@@ -56,7 +54,6 @@ spec:
           env:
 {{ include "apps-common.app.extraEnvironmentVars" . | nindent 12 }}
           command: ["/bin/sh","-c"]
-          # Execute the mounted script; keep path consistent with configMounts.mountPath default in values.yaml
           args: ["sh /usr/local/fetch-content.sh"]
           volumeMounts:
 {{ include "apps-common.app.componentVolumeMounts" (dict "root" $ "component" . "componentKey" "init") | nindent 12 }}
