@@ -69,6 +69,43 @@ jobs:
             --skip-existing \
             --token "${GH_TOKEN}"
 
+      - name: Publish library to gh-pages (early)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          REPO_URL: https://bcit-ltc.github.io/helm-charts
+        run: |
+          set -euo pipefail
+          rm -rf .gh-pages
+          git clone --depth 1 --branch gh-pages "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" .gh-pages || (
+            git init .gh-pages
+            pushd .gh-pages
+            git checkout -b gh-pages
+            git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+            git commit --allow-empty -m "init gh-pages"
+            git push -u origin gh-pages
+            popd
+          )
+
+          # publish only the library .tgz now so apps can fetch it
+          cp -f .cr-release-packages/apps-common-*.tgz .gh-pages/ || true
+
+          if [[ -f .gh-pages/index.yaml ]]; then
+            helm repo index .gh-pages --url "${REPO_URL}" --merge .gh-pages/index.yaml
+          else
+            helm repo index .gh-pages --url "${REPO_URL}"
+          fi
+
+          pushd .gh-pages
+          git add -A
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -m "index: publish library for app deps"
+            git push origin gh-pages
+          else
+            echo "No changes to gh-pages (library already present)."
+          fi
+          popd
+
       # ----------------------------
       # APPS
       # ----------------------------
@@ -79,30 +116,6 @@ jobs:
           set -euo pipefail
           helm repo add bcit-ltc https://bcit-ltc.github.io/helm-charts || true
           helm repo update
-
-      - name: Pre-vendor library into each app (prefer local .tgz; fallback to repo)
-        env:
-          LIB_NAME: ${{ env.LIB_NAME }}
-        run: |
-          set -euo pipefail
-          lib_tgz="$(ls -1 .cr-release-packages/${LIB_NAME}-*.tgz | tail -n1 || true)"
-          for d in charts/*; do
-            [[ -f "$d/Chart.yaml" ]] || continue
-            [[ "$(basename "$d")" == "${LIB_NAME}" ]] && continue
-            if yq -e '.dependencies[] | select(.name=="'"${LIB_NAME}"'")' "$d/Chart.yaml" > /dev/null 2>&1; then
-              ver="$(yq -r '.dependencies[] | select(.name=="'"${LIB_NAME}"'") | .version' "$d/Chart.yaml")"
-              echo "==> Vendoring ${LIB_NAME}@$ver into $d/charts/"
-              mkdir -p "$d/charts"
-              if [[ -n "$lib_tgz" && "$lib_tgz" =~ ${LIB_NAME}-${ver}\.tgz$ ]]; then
-                echo "Using local artifact: $lib_tgz"
-                tar -xzf "$lib_tgz" -C "$d/charts"
-              else
-                echo "Falling back to repo pull"
-                helm pull bcit-ltc/${LIB_NAME} --version "$ver" --untar --untardir "$d/charts"
-              fi
-              ls -la "$d/charts" || true
-            fi
-          done
 
       - name: Sync & build chart dependencies (apps)
         run: |
