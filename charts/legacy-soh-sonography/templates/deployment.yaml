@@ -36,12 +36,10 @@ spec:
 
       {{- $podSC := include "apps-common.app.pod.securityContext" . | trim -}}
       {{- if $podSC }}
-      # Pod-level securityContext (defaults merged with .Values.securityContext.pod)
       securityContext:
 {{ $podSC | nindent 8 }}
       {{- end }}
 
-      {{/* -------- initContainer component (patterned like frontend/processor) -------- */}}
       {{- with .Values.initContainer }}
       {{- if .enabled }}
       initContainers:
@@ -55,7 +53,6 @@ spec:
           {{- end }}
           env:
 {{ include "apps-common.app.extraEnvironmentVars" . | nindent 12 }}
-          {{- /* Command: if provided, render array; else default to /bin/sh -lc */}}
           {{- if .command }}
           command:
 {{ toYaml .command | nindent 12 }}

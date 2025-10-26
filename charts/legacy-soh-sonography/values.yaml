@@ -214,7 +214,7 @@ initContainer:
   extraEnvVars:
     - REPO_URL: "https://github.com/bcit-ltc/legacy-soh-sonography.git"
     - DEST_PATH: "multimedia/_SOH/sonography"
-    - ROOT_DIR: "/site"
+    - SITE_DIR: "/site"
   # - API_URL: "https://app.example.com/api"
   # -- Create `ConfigMap` resources that are passed to containers using envFrom
   # @default -- `[]`
@@ -237,22 +237,25 @@ initContainer:
           #!/bin/sh
           set -eu
 
-          GITHUB_TOKEN="$(cat /etc/secrets/GITHUB_TOKEN)"
+          GITHUB_TOKEN="$(cat /etc/secrets/GITHUB_TOKEN 2>/dev/null || true)"
 
-          TARGET_DIR="${ROOT_DIR}/${DEST_PATH}"
+          TARGET_DIR="${SITE_DIR}/${DEST_PATH}"
           MARKER_FILE="${TARGET_DIR}/.fetch-complete"
           CLONE_FLAGS="--filter=blob:none --depth 1"
           TMP="$(mktemp -d)"
 
-          # If content already exists and marker is present, skip
-          if [ -d "$TARGET_DIR/.git" ] || [ -f "$MARKER_FILE" ]; then
-            echo "[fetch] Existing content detected at $TARGET_DIR"
-            echo "[fetch] Skipping clone (remove $MARKER_FILE to force refresh)"
+          # Skip if already fetched
+          if [ -d "${TARGET_DIR}/.git" ] || [ -f "${MARKER_FILE}" ]; then
+            echo "[fetch] Existing content detected at ${TARGET_DIR}"
+            echo "[fetch] Skipping clone (remove ${MARKER_FILE} to force refresh)"
             exit 0
           fi
 
+          # install dependencies
           apk add --no-cache git git-lfs rsync ca-certificates || true
 
+
+          # Retrieve content
           if [ -n "${GITHUB_TOKEN}" ]; then
             echo "[fetch] Authenticated clone"
             AUTH_B64="$(printf "x-access-token:%s" "${GITHUB_TOKEN}" | base64 | tr -d "\n")"
@@ -264,15 +267,15 @@ initContainer:
             git clone ${CLONE_FLAGS} "${REPO_URL}" "${TMP}"
           fi
 
-          # Pull LFS
+          # Pull LFS (required)
           (cd "${TMP}" && git lfs pull)
 
           # Sync content
-          mkdir -p "${ROOT_DIR}/${DEST_PATH}"
+          mkdir -p "${SITE_DIR}/${DEST_PATH}"
           rsync -a --delete --exclude=".git" \
                 --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
-                "${TMP}"/ "${ROOT_DIR}/${DEST_PATH}"/ \
-            || cp -a "${TMP}"/. "${ROOT_DIR}/${DEST_PATH}"/
+                "${TMP}"/ "${SITE_DIR}/${DEST_PATH}"/ \
+            || cp -a "${TMP}"/. "${SITE_DIR}/${DEST_PATH}"/
 
           echo "[fetch] Sync complete"
           touch "${MARKER_FILE}"
@@ -280,8 +283,8 @@ initContainer:
 
           # Place the project-root index.html at the site root so NGINX serves it at "/"
           if [ -f "${TMP}/index.html" ]; then
-            cp -f "${TMP}/index.html" "${ROOT_DIR}/index.html"
-            chmod 0644 "${ROOT_DIR}/index.html" || true
+            cp -f "${TMP}/index.html" "${SITE_DIR}/index.html"
+            chmod 0644 "${SITE_DIR}/index.html" || true
           fi
 
           rm -rf "${TMP}"
