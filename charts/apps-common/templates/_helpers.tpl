@@ -84,7 +84,6 @@ exec:
 httpGet:
   path: {{ $p.path | default "/" | quote }}
   port: {{ $p.port | default 8080 }}
-  {{- /* add scheme/headers here if you ever need them */ -}}
   {{- end }}
 failureThreshold: {{ $p.failureThreshold     | default 3 }}
 initialDelaySeconds: {{ $p.initialDelaySeconds | default 0 }}
@@ -271,7 +270,7 @@ annotations:
 
 {{/*
   app.componentVolumeMounts
-  Inputs: dict{"root": ., "component": <.Values.frontend|.Values.processor>, "componentKey": "frontend"|"processor"}
+  Inputs: dict{"root": ., "component": <.Values.frontend|.Values.processor|.Values.initContainer>, "componentKey": "frontend"|"processor"|"init"}
   Emits mounts for:
     * configMounts   -> per-item mount
     * emptyDirMounts -> per-item mount
@@ -315,9 +314,9 @@ annotations:
    --------------------------------- */}}
 {{/*
   app.componentConfigMapVolumes
-  Inputs: dict{"component": <.Values.frontend|.Values.processor>}
+  Inputs: dict{"component": <.Values.frontend|.Values.processor|.Values.initContainer>}
   - Emits one configMap volume per configMounts item.
-  - Supports per-mount defaultMode when provided (octal like 0755).
+  - Supports per-mount defaultMode when provided (octal like 0755) -> renders as decimal.
 */}}
 {{- define "apps-common.app.componentConfigMapVolumes" -}}
 {{- $c := (get . "component") | default dict -}}
@@ -333,9 +332,10 @@ annotations:
 
 {{/*
   app.componentEmptyDirVolumes
-  Inputs: dict{"component": <.Values.frontend|.Values.processor>}
+  Inputs: dict{"component": <.Values.frontend|.Values.processor|.Values.initContainer>}
   - Emits one emptyDir volume per emptyDirMounts item.
-*/}}
+*/
+}}
 {{- define "apps-common.app.componentEmptyDirVolumes" -}}
 {{- $c := (get . "component") | default dict -}}
 {{- range $m := ($c.emptyDirMounts | default list) }}
@@ -346,7 +346,7 @@ annotations:
 
 {{/*
   app.componentSecrets.volume
-  Inputs: dict{"root": ., "component": <.Values.frontend|.Values.processor>, "componentKey": "frontend"|"processor"}
+  Inputs: dict{"root": ., "component": <.Values.frontend|.Values.processor|.Values.initContainer>, "componentKey": "..."}
   - Emits a single projected volume named "<componentKey>-secrets" aggregating all secretMounts entries.
 */}}
 {{- define "apps-common.app.componentSecrets.volume" -}}
