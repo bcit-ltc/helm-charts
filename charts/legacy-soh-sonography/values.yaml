@@ -292,8 +292,8 @@ initContainer:
   # @default -- `[]`
   secretMounts:
     # Credentials to access the app internal management portal (local account)
-    - name: github-token # volume name (must be DNS-1123 compliant)
-      secretName: github-token # refers to existing Secret in the same namespace
+    - name: legacy-github-token # volume name (must be DNS-1123 compliant)
+      secretName: legacy-github-token # refers to existing Secret in the same namespace
       mountPath: /etc/secrets
       items: # optional: map specific keys to paths (and per-file mode)
         - key: GITHUB_TOKEN
