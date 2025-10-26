@@ -53,7 +53,7 @@ frontend:
     # -- Frontend image repository
     repository: "bcit-ltc/legacy-soh-sonography"
     # -- Frontend image tag
-    tag: "1.0.0"
+    tag: "1.0.1-rc.20251026175713.fd1a067"
   # Extra annotations to attach to the frontend
   # @default -- `{}`
   annotations: {}
@@ -120,13 +120,13 @@ frontend:
   # # -- Access Mode of the storage device being used for the PVC
   #   accessMode: ReadWriteOnce
   secretMounts: []
-    # # Credentials to access the app internal management portal (local account)
-    # - name: github-token # volume name (must be DNS-1123 compliant)
-    #   secretName: github-token # refers to existing Secret in the same namespace
-    #   mountPath: /etc/secrets
-    #   items: # optional: map specific keys to paths (and per-file mode)
-    #     - key: GITHUB_TOKEN
-    #       path: github-token/GITHUB_TOKEN
+  # # Credentials to access the app internal management portal (local account)
+  # - name: github-token # volume name (must be DNS-1123 compliant)
+  #   secretName: github-token # refers to existing Secret in the same namespace
+  #   mountPath: /etc/secrets
+  #   items: # optional: map specific keys to paths (and per-file mode)
+  #     - key: GITHUB_TOKEN
+  #       path: github-token/GITHUB_TOKEN
   # Defines custom livenessProbe settings
   livenessProbe:
     # -- Enables livenessProbe
