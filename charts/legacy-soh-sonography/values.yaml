@@ -68,7 +68,7 @@ frontend:
   # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br>
   # - Set to `null` to disable
   securityContext:
-    container: {}
+    container: null
   resources:
     # -- Resource requests mapped directly to the value of
     #    the resources field for a PodSpec.
@@ -95,8 +95,8 @@ frontend:
   emptyDirMounts:
     - name: tmp
       mountPath: /tmp
-  # - name: shared-data
-  #   mountPath: /var/www/html
+    - name: site
+      mountPath: /usr/share/nginx/html
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []
@@ -193,12 +193,28 @@ initContainer:
     # -- initContainer imageregistry
     registry: "docker.io"
     # -- initContainer image repository
-    repository: "alpine/git"
+    repository: "alpine"
     # -- initContainer image tag
     tag: "latest"
+  # command to run in the initContainer
+  # @default -- `["/bin/sh"]`
+  command: []
+  # Arguments to pass to the initContainer command
+  args:
+    - -c
+    - /usr/local/fetch-content.sh
+  securityContext:
+    container:
+      readOnlyRootFilesystem: false
+      runAsUser: 0
+      runAsGroup: 0
+      runAsNonRoot: false
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
-  extraEnvVars: []
+  extraEnvVars:
+    - REPO_URL: "https://github.com/bcit-ltc/legacy-soh-sonography.git"
+    - DEST_PATH: "multimedia/_SOH/sonography"
+    - ROOT_DIR: "/site"
   # - API_URL: "https://app.example.com/api"
   # -- Create `ConfigMap` resources that are passed to containers using envFrom
   # @default -- `[]`
@@ -206,51 +222,69 @@ initContainer:
   # - name: "special-config"
   # -- volumeMounts for the initContainer that also create corresponding emptyDir volumes in the pod.
   # @default -- `[]`
-  emptyDirMounts: []
-  # - name: shared-data
-  #   mountPath: /var/www/html
+  emptyDirMounts:
+    - name: site
+      mountPath: /site
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts:
-    - name: fetch-content-init-script
-      mountPath: /usr/local/fetch-content.sh
+    - name: fetch-content
+      mountPath: /usr/local
       # -- make script executable
       defaultMode: 0755
-      fetch.sh: |-
-        #!/bin/sh
-        set -eu
+      data:
+        fetch-content.sh: |-
+          #!/bin/sh
+          set -eu
 
-        REPO_URL="{{ .repoUrl }}"
-        TARGET="/site{{ .targetSubPath | default "/multimedia/_SOH/sonography" }}"
-        REF="{{ .gitRef }}"
-        mkdir -p "$TARGET"
+          GITHUB_TOKEN="$(cat /etc/secrets/GITHUB_TOKEN)"
 
-        CLONE_FLAGS="--filter=blob:none --depth 1"
-        [ -n "$REF" ] && CLONE_FLAGS="$CLONE_FLAGS --branch $REF"
+          TARGET_DIR="${ROOT_DIR}/${DEST_PATH}"
+          MARKER_FILE="${TARGET_DIR}/.fetch-complete"
+          CLONE_FLAGS="--filter=blob:none --depth 1"
+          TMP="$(mktemp -d)"
 
-        TMP="$(mktemp -d)"
-        # Prefer Authorization header (no token in URL/logs)
-        if [ -n "${GITHUB_TOKEN:-}" ]; then
-          AUTH_B64="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 | tr -d '\n')"
-          git -c http.extraHeader="Authorization: Basic ${AUTH_B64}" \
-              -c credential.helper= \
-              clone $CLONE_FLAGS "$REPO_URL" "$TMP"
-        else
-          git clone $CLONE_FLAGS "$REPO_URL" "$TMP"
-        fi
+          # If content already exists and marker is present, skip
+          if [ -d "$TARGET_DIR/.git" ] || [ -f "$MARKER_FILE" ]; then
+            echo "[fetch] Existing content detected at $TARGET_DIR"
+            echo "[fetch] Skipping clone (remove $MARKER_FILE to force refresh)"
+            exit 0
+          fi
 
-        {{- if .lfs }}
-        if command -v git-lfs >/dev/null 2>&1; then
-          (cd "$TMP" && git lfs pull) || echo "[init] WARN: git-lfs pull failed"
-        fi
-        {{- end }}
+          apk add --no-cache git git-lfs rsync ca-certificates || true
 
-        if command -v rsync >/dev/null 2>&1; then
-          rsync -a --delete --exclude='.git' "$TMP"/ "$TARGET"/
-        else
-          cp -a "$TMP"/. "$TARGET"/
-        fi
-        rm -rf "$TMP"
+          if [ -n "${GITHUB_TOKEN}" ]; then
+            echo "[fetch] Authenticated clone"
+            AUTH_B64="$(printf "x-access-token:%s" "${GITHUB_TOKEN}" | base64 | tr -d "\n")"
+            git -c http.extraHeader="Authorization: Basic ${AUTH_B64}" \
+                -c credential.helper= \
+                clone ${CLONE_FLAGS} "${REPO_URL}" "${TMP}"
+          else
+            echo "[fetch] Public clone"
+            git clone ${CLONE_FLAGS} "${REPO_URL}" "${TMP}"
+          fi
+
+          # Pull LFS
+          (cd "${TMP}" && git lfs pull)
+
+          # Sync content
+          mkdir -p "${ROOT_DIR}/${DEST_PATH}"
+          rsync -a --delete --exclude=".git" \
+                --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
+                "${TMP}"/ "${ROOT_DIR}/${DEST_PATH}"/ \
+            || cp -a "${TMP}"/. "${ROOT_DIR}/${DEST_PATH}"/
+
+          echo "[fetch] Sync complete"
+          touch "${MARKER_FILE}"
+          chmod 0644 "${MARKER_FILE}"
+
+          # Place the project-root index.html at the site root so NGINX serves it at "/"
+          if [ -f "${TMP}/index.html" ]; then
+            cp -f "${TMP}/index.html" "${ROOT_DIR}/index.html"
+            chmod 0644 "${ROOT_DIR}/index.html" || true
+          fi
+
+          rm -rf "${TMP}"
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts:
@@ -260,7 +294,7 @@ initContainer:
       mountPath: /etc/secrets
       items: # optional: map specific keys to paths (and per-file mode)
         - key: GITHUB_TOKEN
-          path: github-token/GITHUB_TOKEN
+          path: GITHUB_TOKEN
 # -- Main "backend" configuration
 # @default -- `{}`
 processor:

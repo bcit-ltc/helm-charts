@@ -84,6 +84,7 @@ exec:
 httpGet:
   path: {{ $p.path | default "/" | quote }}
   port: {{ $p.port | default 8080 }}
+  {{/* add scheme/headers here if you ever need them */}}
   {{- end }}
 failureThreshold: {{ $p.failureThreshold     | default 3 }}
 initialDelaySeconds: {{ $p.initialDelaySeconds | default 0 }}
@@ -199,7 +200,7 @@ annotations:
 {{- define "apps-common.app.pod.securityContext" -}}
 {{- $sc := (default dict .Values.securityContext) -}}
 {{- if and (hasKey $sc "pod") (eq (get $sc "pod") nil) -}}
-  {{- /* Explicitly disabled by user: .Values.securityContext.pod: null -> emit nothing */ -}}
+  {{/* Explicitly disabled by user: .Values.securityContext.pod: null -> emit nothing */}}
 {{- else -}}
   {{- $pod := (default dict (get $sc "pod")) -}}
   {{- $base := dict
@@ -217,7 +218,7 @@ annotations:
 {{- $comp := (index . "component" | default dict) -}}
 {{- $scComp := (default dict (get $comp "securityContext")) -}}
 {{- if and (hasKey $scComp "container") (eq (get $scComp "container") nil) -}}
-  {{- /* Explicitly disabled by user: <component>.securityContext.container: null -> emit nothing */ -}}
+  {{/* Explicitly disabled by user: <component>.securityContext.container: null -> emit nothing */}}
 {{- else -}}
   {{- $scGlobal := (default dict $root.Values.securityContext) -}}
   {{- $global := (default dict (get $scGlobal "container")) -}}
@@ -270,7 +271,7 @@ annotations:
 
 {{/*
   app.componentVolumeMounts
-  Inputs: dict{"root": ., "component": <.Values.frontend|.Values.processor|.Values.initContainer>, "componentKey": "frontend"|"processor"|"init"}
+  Inputs: dict{"root": ., "component": <.Values.frontend|.Values.processor>, "componentKey": "frontend"|"processor"}
   Emits mounts for:
     * configMounts   -> per-item mount
     * emptyDirMounts -> per-item mount
@@ -314,9 +315,9 @@ annotations:
    --------------------------------- */}}
 {{/*
   app.componentConfigMapVolumes
-  Inputs: dict{"component": <.Values.frontend|.Values.processor|.Values.initContainer>}
+  Inputs: dict{"component": <.Values.frontend|.Values.processor>}
   - Emits one configMap volume per configMounts item.
-  - Supports per-mount defaultMode when provided (octal like 0755) -> renders as decimal.
+  - Supports per-mount defaultMode when provided (octal like 0755).
 */}}
 {{- define "apps-common.app.componentConfigMapVolumes" -}}
 {{- $c := (get . "component") | default dict -}}
@@ -332,10 +333,9 @@ annotations:
 
 {{/*
   app.componentEmptyDirVolumes
-  Inputs: dict{"component": <.Values.frontend|.Values.processor|.Values.initContainer>}
+  Inputs: dict{"component": <.Values.frontend|.Values.processor>}
   - Emits one emptyDir volume per emptyDirMounts item.
-*/
-}}
+*/}}
 {{- define "apps-common.app.componentEmptyDirVolumes" -}}
 {{- $c := (get . "component") | default dict -}}
 {{- range $m := ($c.emptyDirMounts | default list) }}
@@ -346,7 +346,7 @@ annotations:
 
 {{/*
   app.componentSecrets.volume
-  Inputs: dict{"root": ., "component": <.Values.frontend|.Values.processor|.Values.initContainer>, "componentKey": "..."}
+  Inputs: dict{"root": ., "component": <.Values.frontend|.Values.processor>, "componentKey": "frontend"|"processor"}
   - Emits a single projected volume named "<componentKey>-secrets" aggregating all secretMounts entries.
 */}}
 {{- define "apps-common.app.componentSecrets.volume" -}}
