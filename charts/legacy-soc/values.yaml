@@ -7,6 +7,13 @@ global:
   imagePullSecrets: []
   revisionHistoryLimit: 3
   progressDeadlineSeconds: 600
+# -- Configuration for the image pull secret
+# @default -- `{}`
+imagePullSecret:
+  # -- Name of the image pull secret (defaults to "<project-name>-image-pull-secret")
+  name: ""
+  # -- Docker config JSON for the image pull secret
+  dockerconfigjson: ""
 # -- Configuration for the service account
 # @default -- `{}`
 serviceAccount:
