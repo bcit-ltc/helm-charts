@@ -84,7 +84,7 @@ exec:
 httpGet:
   path: {{ $p.path | default "/" | quote }}
   port: {{ $p.port | default 8080 }}
-  {{- /* add scheme/headers here if you ever need them */ -}}
+  {{/* add scheme/headers here if you ever need them */}}
   {{- end }}
 failureThreshold: {{ $p.failureThreshold     | default 3 }}
 initialDelaySeconds: {{ $p.initialDelaySeconds | default 0 }}
@@ -153,9 +153,11 @@ annotations:
 {{- define "apps-common.app.pod.annotations" -}}
 {{- $p := include "apps-common.app.componentConfigChecksum" .Values.processor -}}
 {{- $f := include "apps-common.app.componentConfigChecksum" .Values.frontend  -}}
+{{- $i := include "apps-common.app.componentConfigChecksum" .Values.initContainer -}}
 {{- $extra := dict -}}
 {{- if $p }}{{- $_ := set $extra "checksum/processor-config" $p -}}{{- end -}}
 {{- if $f }}{{- $_ := set $extra "checksum/frontend-config"  $f -}}{{- end -}}
+{{- if $i }}{{- $_ := set $extra "checksum/init-config"       $i -}}{{- end -}}
 {{ include "apps-common.app.annotations.block" (list .Values.frontend.annotations $extra) }}
 {{- end -}}
 
@@ -198,7 +200,7 @@ annotations:
 {{- define "apps-common.app.pod.securityContext" -}}
 {{- $sc := (default dict .Values.securityContext) -}}
 {{- if and (hasKey $sc "pod") (eq (get $sc "pod") nil) -}}
-  {{- /* Explicitly disabled by user: .Values.securityContext.pod: null -> emit nothing */ -}}
+  {{/* Explicitly disabled by user: .Values.securityContext.pod: null -> emit nothing */}}
 {{- else -}}
   {{- $pod := (default dict (get $sc "pod")) -}}
   {{- $base := dict
@@ -216,7 +218,7 @@ annotations:
 {{- $comp := (index . "component" | default dict) -}}
 {{- $scComp := (default dict (get $comp "securityContext")) -}}
 {{- if and (hasKey $scComp "container") (eq (get $scComp "container") nil) -}}
-  {{- /* Explicitly disabled by user: <component>.securityContext.container: null -> emit nothing */ -}}
+  {{/* Explicitly disabled by user: <component>.securityContext.container: null -> emit nothing */}}
 {{- else -}}
   {{- $scGlobal := (default dict $root.Values.securityContext) -}}
   {{- $global := (default dict (get $scGlobal "container")) -}}
@@ -315,6 +317,7 @@ annotations:
   app.componentConfigMapVolumes
   Inputs: dict{"component": <.Values.frontend|.Values.processor>}
   - Emits one configMap volume per configMounts item.
+  - Supports per-mount defaultMode when provided (octal like 0755).
 */}}
 {{- define "apps-common.app.componentConfigMapVolumes" -}}
 {{- $c := (get . "component") | default dict -}}
@@ -322,6 +325,9 @@ annotations:
 - name: {{ $m.name | quote }}
   configMap:
     name: {{ $m.name | quote }}
+    {{- if hasKey $m "defaultMode" }}
+    defaultMode: {{ $m.defaultMode }}
+    {{- end }}
 {{- end }}
 {{- end -}}
 
@@ -372,7 +378,7 @@ annotations:
 {{- define "apps-common.app.volumes" -}}
 {{- $seen := dict -}}
 {{- $chunks := list -}}
-{{- $components := list (dict "key" "frontend" "c" .Values.frontend) (dict "key" "processor" "c" .Values.processor) -}}
+{{- $components := list (dict "key" "frontend" "c" .Values.frontend) (dict "key" "processor" "c" .Values.processor) (dict "key" "init" "c" .Values.initContainer) -}}
 
 {{- range $e := $components }}
   {{- $c := $e.c | default dict -}}
@@ -381,7 +387,11 @@ annotations:
     {{- $n := toString $m.name -}}
     {{- if not (hasKey $seen $n) -}}
       {{- $_ := set $seen $n true -}}
-      {{- $chunks = append $chunks (printf "- name: %q\n  configMap:\n    name: %q" $n $n) -}}
+      {{- if hasKey $m "defaultMode" -}}
+        {{- $chunks = append $chunks (printf "- name: %q\n  configMap:\n    name: %q\n    defaultMode: %v" $n $n $m.defaultMode) -}}
+      {{- else -}}
+        {{- $chunks = append $chunks (printf "- name: %q\n  configMap:\n    name: %q" $n $n) -}}
+      {{- end -}}
     {{- end -}}
   {{- end }}
 
@@ -420,7 +430,7 @@ annotations:
         {{- end }}
       {{- end }}
       {{- $chunks = append $chunks (join "\n" $buf) -}}
-    {{- end -}}
+    {{- end }}
   {{- end }}
 {{- end }}
 

@@ -1,3 +1,7 @@
+{{/*
+SPDX-License-Identifier: MPL-2.0
+*/}}
+
 {{- define "apps-common.ingress.render" -}}
 {{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1

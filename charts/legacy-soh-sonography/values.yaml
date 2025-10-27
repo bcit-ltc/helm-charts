@@ -53,7 +53,7 @@ frontend:
     # -- Frontend image repository
     repository: "bcit-ltc/legacy-soh-sonography"
     # -- Frontend image tag
-    tag: "1.0.0"
+    tag: "1.0.1-rc.20251027013928.a8a9095"
   # Extra annotations to attach to the frontend
   # @default -- `{}`
   annotations: {}
@@ -68,7 +68,7 @@ frontend:
   # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br>
   # - Set to `null` to disable
   securityContext:
-    container: {}
+    container: null
   resources:
     # -- Resource requests mapped directly to the value of
     #    the resources field for a PodSpec.
@@ -95,8 +95,8 @@ frontend:
   emptyDirMounts:
     - name: tmp
       mountPath: /tmp
-  # - name: shared-data
-  #   mountPath: /var/www/html
+    - name: site
+      mountPath: /usr/share/nginx/html
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []
@@ -121,12 +121,12 @@ frontend:
   #   accessMode: ReadWriteOnce
   secretMounts: []
   # # Credentials to access the app internal management portal (local account)
-  # - name: app-internal-credentials # volume name (must be DNS-1123 compliant)
-  #   secretName: app-internal-credentials # refers to existing Secret in the same namespace
+  # - name: github-token # volume name (must be DNS-1123 compliant)
+  #   secretName: github-token # refers to existing Secret in the same namespace
   #   mountPath: /etc/secrets
   #   items: # optional: map specific keys to paths (and per-file mode)
-  #     - key: ADMIN_USERNAME
-  #       path: app-internal-credentials/ADMIN_USERNAME
+  #     - key: GITHUB_TOKEN
+  #       path: github-token/GITHUB_TOKEN
   # Defines custom livenessProbe settings
   livenessProbe:
     # -- Enables livenessProbe
@@ -182,6 +182,122 @@ frontend:
     successThreshold: 1
     # Number of seconds after which the probe times out.
     timeoutSeconds: 5
+# -- Add an initContainer configuration
+# @default -- `{}`
+initContainer:
+  # -- Enable or disable initContainer components.
+  enabled: true
+  image:
+    # -- initContainer image default pull policy
+    pullPolicy: IfNotPresent
+    # -- initContainer imageregistry
+    registry: "docker.io"
+    # -- initContainer image repository
+    repository: "alpine"
+    # -- initContainer image tag
+    tag: "latest"
+  # command to run in the initContainer
+  # @default -- `["/bin/sh"]`
+  command: []
+  # Arguments to pass to the initContainer command
+  args:
+    - -c
+    - /usr/local/fetch-content.sh
+  securityContext:
+    container:
+      readOnlyRootFilesystem: false
+      runAsUser: 0
+      runAsGroup: 0
+      runAsNonRoot: false
+  # -- List of extra environment variables that are set literally.
+  # @default -- `[]`
+  extraEnvVars:
+    - REPO_URL: "https://github.com/bcit-ltc/legacy-soh-sonography.git"
+    - DEST_PATH: "multimedia/_SOH/sonography"
+    - SITE_DIR: "/site"
+  # - API_URL: "https://app.example.com/api"
+  # -- Create `ConfigMap` resources that are passed to containers using envFrom
+  # @default -- `[]`
+  configEnvs: []
+  # - name: "special-config"
+  # -- volumeMounts for the initContainer that also create corresponding emptyDir volumes in the pod.
+  # @default -- `[]`
+  emptyDirMounts:
+    - name: site
+      mountPath: /site
+  # -- volumeMounts to be added as configMaps. Requires matching configs.
+  # @default -- `[]`
+  configMounts:
+    - name: fetch-content
+      mountPath: /usr/local
+      # -- make script executable
+      defaultMode: 0755
+      data:
+        fetch-content.sh: |-
+          #!/bin/sh
+          set -eu
+
+          GITHUB_TOKEN="$(cat /etc/secrets/GITHUB_TOKEN 2>/dev/null || true)"
+
+          TARGET_DIR="${SITE_DIR}/${DEST_PATH}"
+          MARKER_FILE="${TARGET_DIR}/.fetch-complete"
+          CLONE_FLAGS="--filter=blob:none --depth 1"
+          TMP="$(mktemp -d)"
+
+          # Skip if already fetched
+          if [ -d "${TARGET_DIR}/.git" ] || [ -f "${MARKER_FILE}" ]; then
+            echo "[fetch] Existing content detected at ${TARGET_DIR}"
+            echo "[fetch] Skipping clone (remove ${MARKER_FILE} to force refresh)"
+            exit 0
+          fi
+
+          # install dependencies
+          apk add --no-cache git git-lfs rsync ca-certificates || true
+
+
+          # Retrieve content
+          if [ -n "${GITHUB_TOKEN}" ]; then
+            echo "[fetch] Authenticated clone"
+            AUTH_B64="$(printf "x-access-token:%s" "${GITHUB_TOKEN}" | base64 | tr -d "\n")"
+            git -c http.extraHeader="Authorization: Basic ${AUTH_B64}" \
+                -c credential.helper= \
+                clone ${CLONE_FLAGS} "${REPO_URL}" "${TMP}"
+          else
+            echo "[fetch] Public clone"
+            git clone ${CLONE_FLAGS} "${REPO_URL}" "${TMP}"
+          fi
+
+          # Pull LFS (required)
+          (cd "${TMP}" && git lfs pull)
+
+          # Sync content
+          mkdir -p "${SITE_DIR}/${DEST_PATH}"
+          rsync -a --delete --exclude=".git" \
+                --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
+                "${TMP}"/ "${SITE_DIR}/${DEST_PATH}"/ \
+            || cp -a "${TMP}"/. "${SITE_DIR}/${DEST_PATH}"/
+
+          echo "[fetch] Sync complete"
+          touch "${MARKER_FILE}"
+          chmod 0644 "${MARKER_FILE}"
+
+          # Place the project-root index.html at the site root so NGINX serves it at "/"
+          if [ -f "${TMP}/index.html" ]; then
+            cp -f "${TMP}/index.html" "${SITE_DIR}/index.html"
+            chmod 0644 "${SITE_DIR}/index.html" || true
+          fi
+
+          rm -rf "${TMP}"
+  # -- volumeMounts to be added as secrets
+  # @default -- `[]`
+  secretMounts:
+    # Credentials to access the app internal management portal (local account)
+    - name: legacy-github-token # volume name (must be DNS-1123 compliant)
+      secretName: legacy-github-token # refers to existing Secret in the same namespace
+      mountPath: /etc/secrets
+      items: # optional: map specific keys to paths (and per-file mode)
+        - key: GITHUB_TOKEN
+          path: GITHUB_TOKEN
 # -- Main "backend" configuration
 # @default -- `{}`
 processor:

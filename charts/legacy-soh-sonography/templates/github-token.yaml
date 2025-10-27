@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: legacy-github-token
+type: Opaque
+stringData:
+  GITHUB_TOKEN: "retrieve-from-vault>ltc-infrastructure/github/legacy-github-token"

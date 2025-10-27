@@ -1,3 +1,8 @@
+{{/*
+SPDX-License-Identifier: MPL-2.0
+*/}}
+
+
 {{/* =========================
    Service
    ========================= */}}
@@ -22,6 +27,7 @@ spec:
 {{- end }}
 {{- end -}}
 
+
 {{/* =========================
    ServiceAccount
    ========================= */}}
@@ -36,6 +42,7 @@ metadata:
   {{ include "apps-common.app.serviceAccount.annotations" . | nindent 2 }}
 {{- end }}
 {{- end -}}
+
 
 {{/* =========================
    PVCs (from storageMounts)
@@ -64,6 +71,7 @@ spec:
   {{- end }}
 {{- end }}
 {{- end -}}
+
 
 {{/* =========================
    ConfigMaps (from configMounts)
