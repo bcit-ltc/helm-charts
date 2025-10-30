@@ -153,7 +153,7 @@ frontend:
   # Defines custom readinessProbe settings
   readinessProbe:
     # -- Enables readinessProbe
-    enabled: false
+    enabled: true
     # If you need to use a http path instead of the default exec
     # path: /health?standbyok=true
     # Port number on which readinessProbe will be checked.
@@ -163,7 +163,7 @@ frontend:
     # Number of seconds after the container has started before probe initiates
     initialDelaySeconds: 5
     # How often (in seconds) to perform the probe
-    periodSeconds: 10
+    periodSeconds: 5
     # Minimum consecutive successes for the probe to be considered successful after having failed
     successThreshold: 1
     # Number of seconds after which the probe times out.
@@ -191,30 +191,33 @@ initContainer:
     # -- initContainer image default pull policy
     pullPolicy: IfNotPresent
     # -- initContainer imageregistry
-    registry: "docker.io"
+    registry: "ghcr.io"
     # -- initContainer image repository
-    repository: "alpine"
+    repository: "oras-project/oras"
     # -- initContainer image tag
-    tag: "latest"
+    tag: "v1.2.0"
   # command to run in the initContainer
   # @default -- `["/bin/sh"]`
   command: []
   # Arguments to pass to the initContainer command
-  args:
-    - -c
-    - /usr/local/fetch-content.sh
+  args: ["-ceu", "/usr/local/oras-pull.sh"]
   securityContext:
     container:
       readOnlyRootFilesystem: false
       runAsUser: 0
       runAsGroup: 0
       runAsNonRoot: false
+      capabilities:
+        drop: ["ALL"]
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars:
-    - REPO_URL: "https://github.com/bcit-ltc/legacy-soh-sonography.git"
-    - DEST_PATH: "multimedia/_SOH/sonography"
+    - ORAS_REF: "ghcr.io/bcit-ltc/legacy-soh-sonography-assets:2025-10-26"
     - SITE_DIR: "/site"
+    - TOKEN_PATH: "/etc/secrets/GITHUB_TOKEN"
+    # Optional; oras login needs some username string when a token is present.
+    - GITHUB_USER: "github"
+
   # - API_URL: "https://app.example.com/api"
   # -- Create `ConfigMap` resources that are passed to containers using envFrom
   # @default -- `[]`
@@ -228,71 +231,56 @@ initContainer:
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts:
-    - name: fetch-content
+    - name: pull-assets
       mountPath: /usr/local
-      # -- make script executable
       defaultMode: 0755
       data:
-        fetch-content.sh: |-
+        oras-pull.sh: |-
           #!/bin/sh
-          set -eu
+          set -ceu
 
-          GITHUB_TOKEN="$(cat /etc/secrets/GITHUB_TOKEN 2>/dev/null || true)"
+          ORAS_REF="${ORAS_REF:?ORAS_REF is required}"
+          SITE_DIR="${SITE_DIR:-/site}"
+          TOKEN_PATH="${TOKEN_PATH:-/etc/secrets/GITHUB_TOKEN}"
+          GITHUB_USER="${GITHUB_USER:-github}"
 
-          TARGET_DIR="${SITE_DIR}/${DEST_PATH}"
-          MARKER_FILE="${TARGET_DIR}/.fetch-complete"
-          CLONE_FLAGS="--filter=blob:none --depth 1"
-          TMP="$(mktemp -d)"
+          echo "[oras] ORAS_REF=${ORAS_REF}"
+          echo "[oras] SITE_DIR=${SITE_DIR}"
 
-          # Skip if already fetched
-          if [ -d "${TARGET_DIR}/.git" ] || [ -f "${MARKER_FILE}" ]; then
-            echo "[fetch] Existing content detected at ${TARGET_DIR}"
-            echo "[fetch] Skipping clone (remove ${MARKER_FILE} to force refresh)"
-            exit 0
-          fi
+          TOKEN="$(cat "${TOKEN_PATH}" 2>/dev/null || true)"
+          HOST="$(printf "%s" "$ORAS_REF" | cut -d'/' -f1)"
 
-          # install dependencies
-          apk add --no-cache git git-lfs rsync ca-certificates || true
-
-
-          # Retrieve content
-          if [ -n "${GITHUB_TOKEN}" ]; then
-            echo "[fetch] Authenticated clone"
-            AUTH_B64="$(printf "x-access-token:%s" "${GITHUB_TOKEN}" | base64 | tr -d "\n")"
-            git -c http.extraHeader="Authorization: Basic ${AUTH_B64}" \
-                -c credential.helper= \
-                clone ${CLONE_FLAGS} "${REPO_URL}" "${TMP}"
+          if [ -n "${TOKEN}" ]; then
+            echo "[oras] logging in to ${HOST} as ${GITHUB_USER}"
+            oras login "${HOST}" -u "${GITHUB_USER}" -p "${TOKEN}"
           else
-            echo "[fetch] Public clone"
-            git clone ${CLONE_FLAGS} "${REPO_URL}" "${TMP}"
+            echo "[oras] no token provided; attempting anonymous pull (artifact must be public)"
           fi
 
-          # Pull LFS (required)
-          (cd "${TMP}" && git lfs pull)
+          echo "[oras] pulling ${ORAS_REF}..."
+          mkdir -p "${SITE_DIR}"
+          oras pull "${ORAS_REF}" -o "${SITE_DIR}"
+          echo "[oras] pulled -> ${SITE_DIR}"
 
-          # Sync content
-          mkdir -p "${SITE_DIR}/${DEST_PATH}"
-          rsync -a --delete --exclude=".git" \
-                --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
-                "${TMP}"/ "${SITE_DIR}/${DEST_PATH}"/ \
-            || cp -a "${TMP}"/. "${SITE_DIR}/${DEST_PATH}"/
-
-          echo "[fetch] Sync complete"
-          touch "${MARKER_FILE}"
-          chmod 0644 "${MARKER_FILE}"
-
-          # Place the project-root index.html at the site root so NGINX serves it at "/"
-          if [ -f "${TMP}/index.html" ]; then
-            cp -f "${TMP}/index.html" "${SITE_DIR}/index.html"
-            chmod 0644 "${SITE_DIR}/index.html" || true
+          # If CI published a tarball per your Makefile/workflow, extract it:
+          if [ -f "${SITE_DIR}/assets.tgz" ]; then
+            echo "[oras] extracting assets.tgz..."
+            # Avoid multimedia/multimedia double-nesting
+            if tar -tzf "${SITE_DIR}/assets.tgz" | head -1 | grep -q '^multimedia/'; then
+              tar -xzf "${SITE_DIR}/assets.tgz" -C "${SITE_DIR}" --strip-components=1
+            else
+              tar -xzf "${SITE_DIR}/assets.tgz" -C "${SITE_DIR}"
+            fi
+            rm -f "${SITE_DIR}/assets.tgz"
+            echo "[oras] extraction complete"
           fi
 
-          rm -rf "${TMP}"
+          echo "[oras] done"
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts:
     # Credentials to access the app internal management portal (local account)
-    - name: legacy-github-token # volume name (must be DNS-1123 compliant)
+    - name: init-secrets # volume name (must be DNS-1123 compliant)
       secretName: legacy-github-token # refers to existing Secret in the same namespace
       mountPath: /etc/secrets
       items: # optional: map specific keys to paths (and per-file mode)
