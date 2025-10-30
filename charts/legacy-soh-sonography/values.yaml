@@ -237,7 +237,7 @@ initContainer:
       data:
         oras-pull.sh: |-
           #!/bin/sh
-          set -ceu
+          set -eu
 
           ORAS_REF="${ORAS_REF:?ORAS_REF is required}"
           SITE_DIR="${SITE_DIR:-/site}"
