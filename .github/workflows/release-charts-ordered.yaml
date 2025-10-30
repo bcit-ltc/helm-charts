@@ -40,7 +40,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - uses: azure/setup-helm@v4
-        with: { version: v4.3.1 }
+        with: { version: latest }
 
       - name: Install chart-releaser CLI
         uses: helm/chart-releaser-action@v1.7.0
