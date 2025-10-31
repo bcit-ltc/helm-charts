@@ -53,7 +53,7 @@ frontend:
     # -- Frontend image repository
     repository: "bcit-ltc/legacy-soh-sonography"
     # -- Frontend image tag
-    tag: "1.0.5-rc.20251029002205.2db79d7"
+    tag: "0.0.1-rc.20251031164347.f5c61f4"
   # Extra annotations to attach to the frontend
   # @default -- `{}`
   annotations: {}
@@ -217,7 +217,6 @@ initContainer:
     - TOKEN_PATH: "/etc/secrets/GITHUB_TOKEN"
     # Optional; oras login needs some username string when a token is present.
     - GITHUB_USER: "github"
-
   # - API_URL: "https://app.example.com/api"
   # -- Create `ConfigMap` resources that are passed to containers using envFrom
   # @default -- `[]`
