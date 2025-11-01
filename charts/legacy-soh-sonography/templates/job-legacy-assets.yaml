@@ -1,0 +1,106 @@
+{{- if and .Values.legacy-assets .Values.legacy-assets.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "%s-populate-legacy-assets" (include "apps-common.app.name" .) | trunc 63 | trimSuffix "-" }}
+  labels:
+{{ include "apps-common.app.labels" . | nindent 4 }}
+spec:
+  template:
+    metadata:
+      labels:
+{{ include "apps-common.app.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: OnFailure
+      {{- if .Values.legacy-assets.coLocateWithApp }}
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: {{ include "apps-common.app.name" . | quote }}
+              topologyKey: kubernetes.io/hostname
+      {{- end }}
+
+      containers:
+        - name: oras
+          image: "{{ .Values.legacy-assets.image.repository }}:{{ .Values.legacy-assets.image.tag }}"
+          imagePullPolicy: {{ .Values.legacy-assets.image.pullPolicy | default "IfNotPresent" }}
+          env:
+            - name: ORAS_REF
+              value: {{ required "values.legacy-assets.ref is required" .Values.legacy-assets.ref | quote }}
+            - name: GITHUB_USER
+              value: {{ .Values.legacy-assets.githubUser | default "github" | quote }}
+            - name: TOKEN_PATH
+              value: {{ .Values.legacy-assets.tokenPath | default "/etc/secrets/GITHUB_TOKEN" | quote }}
+          resources:
+{{ toYaml .Values.legacy-assets.resources | nindent 12 }}
+          command: ["/bin/sh","-ceu"]
+          args:
+            - |
+              SITE=/site
+              STAGE=/stage
+              MARK="$SITE/.augmented.$(printf '%s' "$ORAS_REF" | tr '/:' '__')"
+              mkdir -p "$SITE" "$STAGE" "$SITE/.rsync-tmp"
+
+              [ -f "$MARK" ] && { echo "[oras] Already augmented for $ORAS_REF"; exit 0; }
+
+              HOST="$(printf '%s' "$ORAS_REF" | cut -d'/' -f1)"
+              if [ -s "$TOKEN_PATH" ]; then
+                oras login "$HOST" -u "$GITHUB_USER" -p "$(cat "$TOKEN_PATH")"
+              fi
+
+              echo "[oras] pulling ${ORAS_REF}"
+              oras pull "$ORAS_REF" -o "$STAGE"
+
+              if [ -f "$STAGE/assets.tgz" ]; then
+                if tar -tzf "$STAGE/assets.tgz" | head -1 | grep -q '^multimedia/'; then
+                  tar -xzf "$STAGE/assets.tgz" -C "$STAGE" --strip-components=1
+                else
+                  tar -xzf "$STAGE/assets.tgz" -C "$STAGE"
+                fi
+                rm -f "$STAGE/assets.tgz"
+              fi
+
+              # Add-only merge; prefer rsync (atomic-ish), fallback to cp -a -n
+              if command -v rsync >/dev/null 2>&1; then
+                if [ -d "$STAGE/multimedia" ]; then
+                  rsync -a --ignore-existing --delay-updates --temp-dir="$SITE/.rsync-tmp" \
+                        "$STAGE/multimedia/" "$SITE/"
+                else
+                  rsync -a --ignore-existing --delay-updates --temp-dir="$SITE/.rsync-tmp" \
+                        "$STAGE/" "$SITE/"
+                fi
+              else
+                if [ -d "$STAGE/multimedia" ]; then
+                  cp -a -n "$STAGE/multimedia/." "$SITE/"
+                else
+                  cp -a -n "$STAGE/." "$SITE/"
+                fi
+              fi
+
+              sync
+              touch "$MARK"
+          volumeMounts:
+            - name: assets
+              mountPath: /site
+            - name: stage-tmp
+              mountPath: /stage
+            - name: init-secrets
+              mountPath: /etc/secrets
+              readOnly: true
+      volumes:
+        - name: assets
+          persistentVolumeClaim:
+            claimName: {{ .Values.legacy-assets.pvcName | default "multimedia-assets" | quote }}
+        - name: stage-tmp
+          emptyDir: {}
+        - name: init-secrets
+          projected:
+            sources:
+              - secret:
+                  name: {{ .Values.legacy-assets.secretName | default "legacy-github-token" | quote }}
+                  items:
+                    - key: GITHUB_TOKEN
+                      path: GITHUB_TOKEN
+{{- end }}

@@ -59,14 +59,18 @@ spec:
           {{- else }}
           command: ["/bin/sh"]
           {{- end }}
-          {{- with .args }}
+          {{- if gt (len (default (list) .args)) 0 }}
           args:
-{{ toYaml . | nindent 12 }}
+{{ toYaml .args | nindent 12 }}
           {{- end }}
           {{- $icCSC := include "apps-common.app.container.securityContext" (dict "root" $ "component" .) | trim -}}
           {{- if $icCSC }}
           securityContext:
 {{ $icCSC | nindent 12 }}
+          {{- end }}
+          {{- with .resources }}
+          resources:
+{{ toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
 {{ include "apps-common.app.componentVolumeMounts" (dict "root" $ "component" . "componentKey" "init") | nindent 12 }}

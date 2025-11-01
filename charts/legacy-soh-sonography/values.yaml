@@ -360,6 +360,25 @@ processor:
   #   items: # optional: map specific keys to paths (and per-file mode)
   #     - key: ADMIN_USERNAME
   #       path: app-internal-credentials/ADMIN_USERNAME
+legacy-assets:
+  enabled: true
+  # 👇 the only thing you change per rollout/project
+  ref: "ghcr.io/bcit-ltc/legacy-soh-sonography-assets:2025-10-26"
+
+  # sensible defaults
+  pvcName: "multimedia-assets"
+  secretName: "legacy-github-token"
+  githubUser: "github"
+  tokenPath: "/etc/secrets/GITHUB_TOKEN"
+  image:
+    repository: "ghcr.io/oras-project/oras"
+    tag: "v1.2.0"
+    pullPolicy: IfNotPresent
+  coLocateWithApp: true
+  resources:
+    requests: { cpu: "100m", memory: "128Mi" }
+    limits:   { cpu: "500m", memory: "512Mi" }
+
 # -- Creates an ingress for external access
 # @default -- `{}`
 ingress:
