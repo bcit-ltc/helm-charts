@@ -1,8 +1,8 @@
-{{- if and .Values.legacy-assets .Values.legacy-assets.enabled -}}
+{{- if and .Values.assets .Values.assets.enabled -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ printf "%s-populate-legacy-assets" (include "apps-common.app.name" .) | trunc 63 | trimSuffix "-" }}
+  name: {{ printf "%s-populate-assets" (include "apps-common.app.name" .) | trunc 63 | trimSuffix "-" }}
   labels:
 {{ include "apps-common.app.labels" . | nindent 4 }}
 spec:
@@ -12,7 +12,7 @@ spec:
 {{ include "apps-common.app.labels" . | nindent 8 }}
     spec:
       restartPolicy: OnFailure
-      {{- if .Values.legacy-assets.coLocateWithApp }}
+      {{- if .Values.assets.coLocateWithApp }}
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -24,17 +24,17 @@ spec:
 
       containers:
         - name: oras
-          image: "{{ .Values.legacy-assets.image.repository }}:{{ .Values.legacy-assets.image.tag }}"
-          imagePullPolicy: {{ .Values.legacy-assets.image.pullPolicy | default "IfNotPresent" }}
+          image: "{{ .Values.assets.image.repository }}:{{ .Values.assets.image.tag }}"
+          imagePullPolicy: {{ .Values.assets.image.pullPolicy | default "IfNotPresent" }}
           env:
             - name: ORAS_REF
-              value: {{ required "values.legacy-assets.ref is required" .Values.legacy-assets.ref | quote }}
+              value: {{ required "values.assets.ref is required" .Values.assets.ref | quote }}
             - name: GITHUB_USER
-              value: {{ .Values.legacy-assets.githubUser | default "github" | quote }}
+              value: {{ .Values.assets.githubUser | default "github" | quote }}
             - name: TOKEN_PATH
-              value: {{ .Values.legacy-assets.tokenPath | default "/etc/secrets/GITHUB_TOKEN" | quote }}
+              value: {{ .Values.assets.tokenPath | default "/etc/secrets/GITHUB_TOKEN" | quote }}
           resources:
-{{ toYaml .Values.legacy-assets.resources | nindent 12 }}
+{{ toYaml .Values.assets.resources | nindent 12 }}
           command: ["/bin/sh","-ceu"]
           args:
             - |
@@ -92,14 +92,14 @@ spec:
       volumes:
         - name: assets
           persistentVolumeClaim:
-            claimName: {{ .Values.legacy-assets.pvcName | default "multimedia-assets" | quote }}
+            claimName: {{ .Values.assets.pvcName | default "multimedia-assets" | quote }}
         - name: stage-tmp
           emptyDir: {}
         - name: init-secrets
           projected:
             sources:
               - secret:
-                  name: {{ .Values.legacy-assets.secretName | default "legacy-github-token" | quote }}
+                  name: {{ .Values.assets.secretName | default "legacy-github-token" | quote }}
                   items:
                     - key: GITHUB_TOKEN
                       path: GITHUB_TOKEN

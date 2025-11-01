@@ -37,7 +37,7 @@ service:
 #   &nbsp;&nbsp;`fsGroup: 101`<br>
 # - Set to `null` to disable
 securityContext:
-  pod: {}
+  pod: null
 # -- Main "frontend" configuration
 # @default -- `{}`
 frontend:
@@ -53,7 +53,7 @@ frontend:
     # -- Frontend image repository
     repository: "bcit-ltc/legacy-soh-sonography"
     # -- Frontend image tag
-    tag: "0.0.1-rc.20251031164347.f5c61f4"
+    tag: "1.0.5-rc.20251029002205.2db79d7"
   # Extra annotations to attach to the frontend
   # @default -- `{}`
   annotations: {}
@@ -95,8 +95,8 @@ frontend:
   emptyDirMounts:
     - name: tmp
       mountPath: /tmp
-    - name: site
-      mountPath: /usr/share/nginx/html
+    # - name: seed-tmp
+    #   mountPath: /seed
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []
@@ -107,19 +107,22 @@ frontend:
   #       upload_max_filesize=4G
   #       post_max_size=6G
   #       memory_limit=8G
-  # -- volumeMounts to be added as secrets
+  # -- Configuration for persistent volume claims
   # @default -- `[]`
   storageMounts:
-  # - name: data-storage
-  #   size: 10Gi
-  # # -- Location where the PVC will be mounted.
-  #   mountPath: "/app/data"
-  # # -- Name of the storage class to use. If null it will use the
-  # # configured default Storage Class.
-  #   storageClass: null
-  # # -- Access Mode of the storage device being used for the PVC
-  #   accessMode: ReadWriteOnce
+  - name: multimedia-assets
+    size: 5Gi
+  # -- Location where the PVC will be mounted.
+    mountPath: "/usr/share/nginx/html/multimedia"
+  # -- Whether the volume should be mounted read-only.
+    readOnly: true
+  # -- Name of the storage class to use. If null it will use the
+  # configured default Storage Class.
+    storageClass: legacy-large-files
+  # -- Access Mode of the storage device being used for the PVC
+    accessMode: ReadWriteOnce
   secretMounts: []
+  # -- volumeMounts to be added as secrets
   # # Credentials to access the app internal management portal (local account)
   # - name: github-token # volume name (must be DNS-1123 compliant)
   #   secretName: github-token # refers to existing Secret in the same namespace
@@ -153,7 +156,7 @@ frontend:
   # Defines custom readinessProbe settings
   readinessProbe:
     # -- Enables readinessProbe
-    enabled: true
+    enabled: false
     # If you need to use a http path instead of the default exec
     # path: /health?standbyok=true
     # Port number on which readinessProbe will be checked.
@@ -193,14 +196,14 @@ initContainer:
     # -- initContainer imageregistry
     registry: "ghcr.io"
     # -- initContainer image repository
-    repository: "oras-project/oras"
+    repository: "go-containerregistry/crane"
     # -- initContainer image tag
-    tag: "v1.2.0"
+    tag: "debug"
   # command to run in the initContainer
   # @default -- `["/bin/sh"]`
   command: []
   # Arguments to pass to the initContainer command
-  args: ["-ceu", "/usr/local/oras-pull.sh"]
+  args: ["-ceu", "/usr/local/seed-pvc.sh"]
   securityContext:
     container:
       readOnlyRootFilesystem: false
@@ -209,14 +212,25 @@ initContainer:
       runAsNonRoot: false
       capabilities:
         drop: ["ALL"]
+  resources:
+    # -- Resource requests mapped directly to the value of
+    #    the resources field for a PodSpec.
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    # -- Resource limits mapped directly to the value of
+    #    the resources field for a PodSpec.
+    limits:
+      memory: 512Mi
+      cpu: 500m
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars:
-    - ORAS_REF: "ghcr.io/bcit-ltc/legacy-soh-sonography-assets:2025-10-26"
-    - SITE_DIR: "/site"
+    - APP_IMAGE: "ghcr.io/bcit-ltc/legacy-soh-sonography:1.0.5-rc.20251029002205.2db79d7"
     - TOKEN_PATH: "/etc/secrets/GITHUB_TOKEN"
     # Optional; oras login needs some username string when a token is present.
     - GITHUB_USER: "github"
+
   # - API_URL: "https://app.example.com/api"
   # -- Create `ConfigMap` resources that are passed to containers using envFrom
   # @default -- `[]`
@@ -225,56 +239,54 @@ initContainer:
   # -- volumeMounts for the initContainer that also create corresponding emptyDir volumes in the pod.
   # @default -- `[]`
   emptyDirMounts:
-    - name: site
-      mountPath: /site
+    - name: seed-tmp
+      mountPath: /seed
+    - name: multimedia-assets
+      mountPath: /dest
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts:
-    - name: pull-assets
+    - name: seed-pvc
       mountPath: /usr/local
       defaultMode: 0755
       data:
-        oras-pull.sh: |-
+        seed-pvc.sh: |
           #!/bin/sh
-          set -eu
-
-          ORAS_REF="${ORAS_REF:?ORAS_REF is required}"
-          SITE_DIR="${SITE_DIR:-/site}"
-          TOKEN_PATH="${TOKEN_PATH:-/etc/secrets/GITHUB_TOKEN}"
+          set -ceu
+          DEST=/dest
+          SEED=/seed
           GITHUB_USER="${GITHUB_USER:-github}"
+          TOKEN_PATH="${TOKEN_PATH:-/etc/secrets/GITHUB_TOKEN}"
+          : "${APP_IMAGE:?APP_IMAGE (app image ref) is required}"
 
-          echo "[oras] ORAS_REF=${ORAS_REF}"
-          echo "[oras] SITE_DIR=${SITE_DIR}"
+          mkdir -p "$DEST" "$SEED"
 
-          TOKEN="$(cat "${TOKEN_PATH}" 2>/dev/null || true)"
-          HOST="$(printf "%s" "$ORAS_REF" | cut -d'/' -f1)"
+          HOST="$(printf '%s' "$APP_IMAGE" | cut -d'/' -f1)"
+          if [ -s "$TOKEN_PATH" ]; then
+            crane auth login "$HOST" -u "$GITHUB_USER" -p "$(cat "$TOKEN_PATH")"
+          fi
 
-          if [ -n "${TOKEN}" ]; then
-            echo "[oras] logging in to ${HOST} as ${GITHUB_USER}"
-            oras login "${HOST}" -u "${GITHUB_USER}" -p "${TOKEN}"
+          echo "[seed] Exporting $APP_IMAGE filesystem..."
+          crane export "$APP_IMAGE" - | tar -x -C "$SEED"
+
+          SRC="$SEED/usr/share/nginx/html/multimedia"
+          if [ ! -d "$SRC" ]; then
+            echo "[seed] ERROR: $SRC not found in image" >&2
+            exit 1
+          fi
+
+          echo "[seed] Copying baked-in files to PVC (add-only)"
+          if command -v rsync >/dev/null 2>&1; then
+            rsync -a --ignore-existing "$SRC/" "$DEST/"
           else
-            echo "[oras] no token provided; attempting anonymous pull (artifact must be public)"
+            # Fallback: cp -a -n (no clobber). BusyBox/GNU cp usually supports -n.
+            # Preserve attrs (-a) and avoid overwriting existing files (-n).
+            cp -a -n "$SRC/." "$DEST/" || true
           fi
 
-          echo "[oras] pulling ${ORAS_REF}..."
-          mkdir -p "${SITE_DIR}"
-          oras pull "${ORAS_REF}" -o "${SITE_DIR}"
-          echo "[oras] pulled -> ${SITE_DIR}"
+          COUNT=$(find "$DEST" -type f | wc -l || true)
+          echo "[seed] Seeded $COUNT files into PVC: $COUNT"
 
-          # If CI published a tarball per your Makefile/workflow, extract it:
-          if [ -f "${SITE_DIR}/assets.tgz" ]; then
-            echo "[oras] extracting assets.tgz..."
-            # Avoid multimedia/multimedia double-nesting
-            if tar -tzf "${SITE_DIR}/assets.tgz" | head -1 | grep -q '^multimedia/'; then
-              tar -xzf "${SITE_DIR}/assets.tgz" -C "${SITE_DIR}" --strip-components=1
-            else
-              tar -xzf "${SITE_DIR}/assets.tgz" -C "${SITE_DIR}"
-            fi
-            rm -f "${SITE_DIR}/assets.tgz"
-            echo "[oras] extraction complete"
-          fi
-
-          echo "[oras] done"
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts:
@@ -360,12 +372,12 @@ processor:
   #   items: # optional: map specific keys to paths (and per-file mode)
   #     - key: ADMIN_USERNAME
   #       path: app-internal-credentials/ADMIN_USERNAME
-legacy-assets:
+assets:
   enabled: true
   # 👇 the only thing you change per rollout/project
   ref: "ghcr.io/bcit-ltc/legacy-soh-sonography-assets:2025-10-26"
 
-  # sensible defaults
+  # sensible defaults you can leave alone
   pvcName: "multimedia-assets"
   secretName: "legacy-github-token"
   githubUser: "github"
