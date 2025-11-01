@@ -285,28 +285,35 @@ annotations:
 {{- $out := list -}}
 
 {{- range $m := ($c.configMounts | default list) }}
-{{- $out = append $out (printf "- name: %q\n  mountPath: %q%s" $m.name $m.mountPath (ternary (printf "\n  subPath: %v" $m.subPath) "" (hasKey $m "subPath"))) -}}
+{{- $out = append $out (printf "- name: %s\n  mountPath: %q%s"
+      $m.name
+      $m.mountPath
+      (ternary (printf "\n  subPath: %v" $m.subPath) "" (hasKey $m "subPath"))
+) -}}
 {{- end }}
 
 {{- range $m := ($c.emptyDirMounts | default list) }}
-{{- $out = append $out (printf "- name: %q\n  mountPath: %q" $m.name $m.mountPath) -}}
+{{- $out = append $out (printf "- name: %s\n  mountPath: %q" $m.name $m.mountPath) -}}
 {{- end }}
 
 {{- range $m := ($c.storageMounts | default list) }}
-{{- $out = append $out (printf "- name: %q\n  mountPath: %q" $m.name $m.mountPath) -}}
+{{- $ro := (and (hasKey $m "readOnly") $m.readOnly) -}}
+{{- $out = append $out (printf "- name: %s\n  mountPath: %q%s%s"
+      $m.name
+      $m.mountPath
+      (ternary (printf "\n  subPath: %v" $m.subPath) "" (hasKey $m "subPath"))
+      (ternary "\n  readOnly: true" "" $ro)
+) -}}
 {{- end }}
 
 {{- $sms := ($c.secretMounts | default list) -}}
 {{- if gt (len $sms) 0 -}}
-  {{- $mp := (index $sms 0).mountPath | default "/etc/secrets" -}}
-  {{- $out = append $out (printf "- name: %q\n  mountPath: %q\n  readOnly: true" (include "apps-common.app.componentSecrets.volumeName" (dict "componentKey" $key)) $mp) -}}
+{{- $first := index $sms 0 -}}
+{{- $mp := (get $first "mountPath" | default "/etc/secrets") -}}
+{{- $out = append $out (printf "- name: %s\n  mountPath: %q\n  readOnly: true" (include "apps-common.app.componentSecrets.volumeName" (dict "componentKey" $key)) $mp) -}}
 {{- end }}
 
-{{- if gt (len $out) 0 }}
-{{- range $out }}
-{{ . }}
-{{- end }}
-{{- end }}
+{{- $out | join "\n" -}}
 {{- end -}}
 
 
@@ -459,6 +466,9 @@ annotations:
 {{- if and .Values.dataStorage .Values.dataStorage.enabled .Values.dataStorage.mountPath }}
 - name: {{ include "apps-common.app.dataStorage.volumeName" . }}
   mountPath: {{ .Values.dataStorage.mountPath | quote }}
+  {{- if hasKey .Values.dataStorage "readOnly" }}
+  readOnly: {{ .Values.dataStorage.readOnly }}
+  {{- end }}
 {{- end -}}
 {{- end -}}
 
@@ -466,6 +476,9 @@ annotations:
 {{- if and .Values.dataStorage .Values.dataStorage.enabled .Values.dataStorage.mountPath }}
 - name: {{ include "apps-common.app.dataStorage.volumeName" . }}
   mountPath: {{ .Values.dataStorage.mountPath | quote }}
+  {{- if hasKey .Values.dataStorage "readOnly" }}
+  readOnly: {{ .Values.dataStorage.readOnly }}
+  {{- end }}
 {{- end -}}
 {{- end -}}
 
