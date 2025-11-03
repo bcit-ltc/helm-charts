@@ -113,12 +113,12 @@ frontend:
   - name: multimedia-assets
     size: 5Gi
   # -- Location where the PVC will be mounted.
-    mountPath: "/usr/share/nginx/html/multimedia"
+    mountPath: "/usr/share/nginx/html"
   # -- Whether the volume should be mounted read-only.
     readOnly: true
   # -- Name of the storage class to use. If null it will use the
   # configured default Storage Class.
-    storageClass: legacy-large-files
+    # storageClass: legacy-large-files
   # -- Access Mode of the storage device being used for the PVC
     accessMode: ReadWriteOnce
   secretMounts: []
@@ -196,9 +196,9 @@ initContainer:
     # -- initContainer imageregistry
     registry: "ghcr.io"
     # -- initContainer image repository
-    repository: "go-containerregistry/crane"
+    repository: "bcit-ltc/legacy-soh-sonography"
     # -- initContainer image tag
-    tag: "debug"
+    tag: "1.0.5-rc.20251029002205.2db79d7"
   # command to run in the initContainer
   # @default -- `["/bin/sh"]`
   command: []
@@ -210,8 +210,8 @@ initContainer:
       runAsUser: 0
       runAsGroup: 0
       runAsNonRoot: false
-      capabilities:
-        drop: ["ALL"]
+      # capabilities:
+      #   drop: ["ALL"]
   resources:
     # -- Resource requests mapped directly to the value of
     #    the resources field for a PodSpec.
@@ -226,7 +226,7 @@ initContainer:
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars:
-    - APP_IMAGE: "ghcr.io/bcit-ltc/legacy-soh-sonography:1.0.5-rc.20251029002205.2db79d7"
+    # - APP_IMAGE: "ghcr.io/bcit-ltc/legacy-soh-sonography:1.0.5-rc.20251029002205.2db79d7"
     - TOKEN_PATH: "/etc/secrets/GITHUB_TOKEN"
     # Optional; oras login needs some username string when a token is present.
     - GITHUB_USER: "github"
@@ -238,12 +238,24 @@ initContainer:
   # - name: "special-config"
   # -- volumeMounts for the initContainer that also create corresponding emptyDir volumes in the pod.
   # @default -- `[]`
-  emptyDirMounts:
-    - name: seed-tmp
-      mountPath: /seed
-    - name: multimedia-assets
-      mountPath: /dest
-  # -- volumeMounts to be added as configMaps. Requires matching configs.
+  emptyDirMounts: []
+    # - name: seed-tmp
+    #   mountPath: /seed
+    # - name: multimedia-assets
+    #   mountPath: /dest
+  storageMounts:
+  - name: multimedia-assets
+    size: 5Gi
+  # -- Location where the PVC will be mounted.
+    mountPath: "/multimedia-assets"
+  # -- Whether the volume should be mounted read-only.
+    readOnly: false
+  # -- Name of the storage class to use. If null it will use the
+  # configured default Storage Class.
+    # storageClass: legacy-large-files
+  # -- Access Mode of the storage device being used for the PVC
+    accessMode: ReadWriteOnce
+  # -- volumeMounts to be added as configMaps.
   # @default -- `[]`
   configMounts:
     - name: seed-pvc
@@ -252,51 +264,43 @@ initContainer:
       data:
         seed-pvc.sh: |
           #!/bin/sh
-          set -ceu
-          DEST=/dest
-          SEED=/seed
-          GITHUB_USER="${GITHUB_USER:-github}"
-          TOKEN_PATH="${TOKEN_PATH:-/etc/secrets/GITHUB_TOKEN}"
-          : "${APP_IMAGE:?APP_IMAGE (app image ref) is required}"
 
-          mkdir -p "$DEST" "$SEED"
-
-          HOST="$(printf '%s' "$APP_IMAGE" | cut -d'/' -f1)"
-          if [ -s "$TOKEN_PATH" ]; then
-            crane auth login "$HOST" -u "$GITHUB_USER" -p "$(cat "$TOKEN_PATH")"
-          fi
-
-          echo "[seed] Exporting $APP_IMAGE filesystem..."
-          crane export "$APP_IMAGE" - | tar -x -C "$SEED"
-
-          SRC="$SEED/usr/share/nginx/html/multimedia"
-          if [ ! -d "$SRC" ]; then
-            echo "[seed] ERROR: $SRC not found in image" >&2
-            exit 1
-          fi
+          SRC=/usr/share/nginx/html
+          DEST=/multimedia-assets
 
           echo "[seed] Copying baked-in files to PVC (add-only)"
-          if command -v rsync >/dev/null 2>&1; then
-            rsync -a --ignore-existing "$SRC/" "$DEST/"
-          else
-            # Fallback: cp -a -n (no clobber). BusyBox/GNU cp usually supports -n.
-            # Preserve attrs (-a) and avoid overwriting existing files (-n).
-            cp -a -n "$SRC/." "$DEST/" || true
-          fi
+          cp -rp --update "$SRC/." "$DEST/" || true
 
           COUNT=$(find "$DEST" -type f | wc -l || true)
           echo "[seed] Seeded $COUNT files into PVC: $COUNT"
-
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
-  secretMounts:
+  secretMounts: []
     # Credentials to access the app internal management portal (local account)
-    - name: init-secrets # volume name (must be DNS-1123 compliant)
-      secretName: legacy-github-token # refers to existing Secret in the same namespace
-      mountPath: /etc/secrets
-      items: # optional: map specific keys to paths (and per-file mode)
-        - key: GITHUB_TOKEN
-          path: GITHUB_TOKEN
+    # - name: init-secrets # volume name (must be DNS-1123 compliant)
+    #   secretName: legacy-github-token # refers to existing Secret in the same namespace
+    #   mountPath: /etc/secrets
+    #   items: # optional: map specific keys to paths (and per-file mode)
+    #     - key: GITHUB_TOKEN
+    #       path: GITHUB_TOKEN
+  # -- job to pull assets and add them to the persistent volume
+  # @default -- `{}`
+assets:
+  enabled: true
+  # -- Reference to the asset oci image
+  ref: "ghcr.io/bcit-ltc/legacy-soh-sonography-assets:2025-10-26"
+  pvcName: "multimedia-assets"
+  secretName: "legacy-github-token"
+  githubUser: "github"
+  tokenPath: "/etc/secrets/GITHUB_TOKEN"
+  image:
+    repository: "ghcr.io/oras-project/oras"
+    tag: "v1.2.0"
+    pullPolicy: IfNotPresent
+  coLocateWithApp: true
+  resources:
+    requests: { cpu: "100m", memory: "128Mi" }
+    limits:   { cpu: "500m", memory: "512Mi" }
 # -- Main "backend" configuration
 # @default -- `{}`
 processor:
@@ -372,25 +376,6 @@ processor:
   #   items: # optional: map specific keys to paths (and per-file mode)
   #     - key: ADMIN_USERNAME
   #       path: app-internal-credentials/ADMIN_USERNAME
-assets:
-  enabled: true
-  # 👇 the only thing you change per rollout/project
-  ref: "ghcr.io/bcit-ltc/legacy-soh-sonography-assets:2025-10-26"
-
-  # sensible defaults you can leave alone
-  pvcName: "multimedia-assets"
-  secretName: "legacy-github-token"
-  githubUser: "github"
-  tokenPath: "/etc/secrets/GITHUB_TOKEN"
-  image:
-    repository: "ghcr.io/oras-project/oras"
-    tag: "v1.2.0"
-    pullPolicy: IfNotPresent
-  coLocateWithApp: true
-  resources:
-    requests: { cpu: "100m", memory: "128Mi" }
-    limits:   { cpu: "500m", memory: "512Mi" }
-
 # -- Creates an ingress for external access
 # @default -- `{}`
 ingress:

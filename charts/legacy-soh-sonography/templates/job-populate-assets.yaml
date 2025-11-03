@@ -38,54 +38,40 @@ spec:
           command: ["/bin/sh","-ceu"]
           args:
             - |
-              SITE=/site
-              STAGE=/stage
-              MARK="$SITE/.augmented.$(printf '%s' "$ORAS_REF" | tr '/:' '__')"
-              mkdir -p "$SITE" "$STAGE" "$SITE/.rsync-tmp"
+              SRC=/workspace
+              DEST=/multimedia-assets
+
+              MARK="$DEST/.augmented.$(printf '%s' "$ORAS_REF" | tr '/:' '__')"
+              mkdir -p "$DEST/.rsync-tmp"
 
               [ -f "$MARK" ] && { echo "[oras] Already augmented for $ORAS_REF"; exit 0; }
 
+              # Login to ghcr.io
               HOST="$(printf '%s' "$ORAS_REF" | cut -d'/' -f1)"
               if [ -s "$TOKEN_PATH" ]; then
                 oras login "$HOST" -u "$GITHUB_USER" -p "$(cat "$TOKEN_PATH")"
               fi
 
               echo "[oras] pulling ${ORAS_REF}"
-              oras pull "$ORAS_REF" -o "$STAGE"
+              oras pull "$ORAS_REF"
 
-              if [ -f "$STAGE/assets.tgz" ]; then
-                if tar -tzf "$STAGE/assets.tgz" | head -1 | grep -q '^multimedia/'; then
-                  tar -xzf "$STAGE/assets.tgz" -C "$STAGE" --strip-components=1
-                else
-                  tar -xzf "$STAGE/assets.tgz" -C "$STAGE"
-                fi
-                rm -f "$STAGE/assets.tgz"
+              echo "[oras] extracting archive..."
+              if [ -f "$SRC/assets.tgz" ]; then
+                tar -xzvf "$SRC/assets.tgz"
+                rm -f "$SRC/assets.tgz"
               fi
 
-              # Add-only merge; prefer rsync (atomic-ish), fallback to cp -a -n
-              if command -v rsync >/dev/null 2>&1; then
-                if [ -d "$STAGE/multimedia" ]; then
-                  rsync -a --ignore-existing --delay-updates --temp-dir="$SITE/.rsync-tmp" \
-                        "$STAGE/multimedia/" "$SITE/"
-                else
-                  rsync -a --ignore-existing --delay-updates --temp-dir="$SITE/.rsync-tmp" \
-                        "$STAGE/" "$SITE/"
-                fi
-              else
-                if [ -d "$STAGE/multimedia" ]; then
-                  cp -a -n "$STAGE/multimedia/." "$SITE/"
-                else
-                  cp -a -n "$STAGE/." "$SITE/"
-                fi
-              fi
+              echo "[augment] Copying asset files to PVC (add-only)"
+              cp -rp --update "$SRC/." "$DEST/" || true
+
+              COUNT=$(find "$DEST" -type f | wc -l || true)
+              echo "[augment] Augmented $COUNT files into PVC: $COUNT"
 
               sync
               touch "$MARK"
           volumeMounts:
             - name: assets
-              mountPath: /site
-            - name: stage-tmp
-              mountPath: /stage
+              mountPath: /multimedia-assets
             - name: init-secrets
               mountPath: /etc/secrets
               readOnly: true
@@ -93,8 +79,6 @@ spec:
         - name: assets
           persistentVolumeClaim:
             claimName: {{ .Values.assets.pvcName | default "multimedia-assets" | quote }}
-        - name: stage-tmp
-          emptyDir: {}
         - name: init-secrets
           projected:
             sources:
