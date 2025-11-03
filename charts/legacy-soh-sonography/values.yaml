@@ -53,7 +53,7 @@ frontend:
     # -- Frontend image repository
     repository: "bcit-ltc/legacy-soh-sonography"
     # -- Frontend image tag
-    tag: "1.0.5-rc.20251029002205.2db79d7"
+    tag: "1.0.0"
   # Extra annotations to attach to the frontend
   # @default -- `{}`
   annotations: {}
@@ -95,8 +95,8 @@ frontend:
   emptyDirMounts:
     - name: tmp
       mountPath: /tmp
-    # - name: seed-tmp
-    #   mountPath: /seed
+      # - name: seed-tmp
+      #   mountPath: /seed
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []
@@ -110,17 +110,17 @@ frontend:
   # -- Configuration for persistent volume claims
   # @default -- `[]`
   storageMounts:
-  - name: multimedia-assets
-    size: 5Gi
-  # -- Location where the PVC will be mounted.
-    mountPath: "/usr/share/nginx/html"
-  # -- Whether the volume should be mounted read-only.
-    readOnly: true
-  # -- Name of the storage class to use. If null it will use the
-  # configured default Storage Class.
-    # storageClass: legacy-large-files
-  # -- Access Mode of the storage device being used for the PVC
-    accessMode: ReadWriteOnce
+    - name: multimedia-assets
+      size: 5Gi
+      # -- Location where the PVC will be mounted.
+      mountPath: "/usr/share/nginx/html"
+      # -- Whether the volume should be mounted read-only.
+      readOnly: true
+      # -- Name of the storage class to use. If null it will use the
+      # configured default Storage Class.
+      # storageClass: legacy-large-files
+      # -- Access Mode of the storage device being used for the PVC
+      accessMode: ReadWriteOnce
   secretMounts: []
   # -- volumeMounts to be added as secrets
   # # Credentials to access the app internal management portal (local account)
@@ -230,7 +230,6 @@ initContainer:
     - TOKEN_PATH: "/etc/secrets/GITHUB_TOKEN"
     # Optional; oras login needs some username string when a token is present.
     - GITHUB_USER: "github"
-
   # - API_URL: "https://app.example.com/api"
   # -- Create `ConfigMap` resources that are passed to containers using envFrom
   # @default -- `[]`
@@ -239,22 +238,22 @@ initContainer:
   # -- volumeMounts for the initContainer that also create corresponding emptyDir volumes in the pod.
   # @default -- `[]`
   emptyDirMounts: []
-    # - name: seed-tmp
-    #   mountPath: /seed
-    # - name: multimedia-assets
-    #   mountPath: /dest
+  # - name: seed-tmp
+  #   mountPath: /seed
+  # - name: multimedia-assets
+  #   mountPath: /dest
   storageMounts:
-  - name: multimedia-assets
-    size: 5Gi
-  # -- Location where the PVC will be mounted.
-    mountPath: "/multimedia-assets"
-  # -- Whether the volume should be mounted read-only.
-    readOnly: false
-  # -- Name of the storage class to use. If null it will use the
-  # configured default Storage Class.
-    # storageClass: legacy-large-files
-  # -- Access Mode of the storage device being used for the PVC
-    accessMode: ReadWriteOnce
+    - name: multimedia-assets
+      size: 5Gi
+      # -- Location where the PVC will be mounted.
+      mountPath: "/multimedia-assets"
+      # -- Whether the volume should be mounted read-only.
+      readOnly: false
+      # -- Name of the storage class to use. If null it will use the
+      # configured default Storage Class.
+      # storageClass: legacy-large-files
+      # -- Access Mode of the storage device being used for the PVC
+      accessMode: ReadWriteOnce
   # -- volumeMounts to be added as configMaps.
   # @default -- `[]`
   configMounts:
@@ -276,13 +275,13 @@ initContainer:
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts: []
-    # Credentials to access the app internal management portal (local account)
-    # - name: init-secrets # volume name (must be DNS-1123 compliant)
-    #   secretName: legacy-github-token # refers to existing Secret in the same namespace
-    #   mountPath: /etc/secrets
-    #   items: # optional: map specific keys to paths (and per-file mode)
-    #     - key: GITHUB_TOKEN
-    #       path: GITHUB_TOKEN
+  # Credentials to access the app internal management portal (local account)
+  # - name: init-secrets # volume name (must be DNS-1123 compliant)
+  #   secretName: legacy-github-token # refers to existing Secret in the same namespace
+  #   mountPath: /etc/secrets
+  #   items: # optional: map specific keys to paths (and per-file mode)
+  #     - key: GITHUB_TOKEN
+  #       path: GITHUB_TOKEN
   # -- job to pull assets and add them to the persistent volume
   # @default -- `{}`
 assets:
@@ -299,8 +298,8 @@ assets:
     pullPolicy: IfNotPresent
   coLocateWithApp: true
   resources:
-    requests: { cpu: "100m", memory: "128Mi" }
-    limits:   { cpu: "500m", memory: "512Mi" }
+    requests: {cpu: "100m", memory: "128Mi"}
+    limits: {cpu: "500m", memory: "512Mi"}
 # -- Main "backend" configuration
 # @default -- `{}`
 processor:
