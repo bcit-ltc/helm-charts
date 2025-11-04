@@ -31,47 +31,58 @@ spec:
               value: {{ required "values.assets.ref is required" .Values.assets.ref | quote }}
             - name: GITHUB_USER
               value: {{ .Values.assets.githubUser | default "github" | quote }}
-            - name: TOKEN_PATH
+            - name: TOKEN
               value: {{ .Values.assets.tokenPath | default "/etc/secrets/GITHUB_TOKEN" | quote }}
+            - name: DEST
+              value: {{ .Values.assets.pvcName | default "assets" | quote }}
           resources:
 {{ toYaml .Values.assets.resources | nindent 12 }}
           command: ["/bin/sh","-ceu"]
           args:
             - |
+              REGISTRY_HOST="$(printf '%s' "$ORAS_REF" | cut -d'/' -f1)"
+
               SRC=/workspace
-              DEST=/multimedia-assets
+              DEST=$DEST
 
-              MARK="$DEST/.augmented.$(printf '%s' "$ORAS_REF" | tr '/:' '__')"
-              mkdir -p "$DEST/.rsync-tmp"
-
-              [ -f "$MARK" ] && { echo "[oras] Already augmented for $ORAS_REF"; exit 0; }
+              mkdir -p $DEST
 
               # Login to ghcr.io
-              HOST="$(printf '%s' "$ORAS_REF" | cut -d'/' -f1)"
-              if [ -s "$TOKEN_PATH" ]; then
-                oras login "$HOST" -u "$GITHUB_USER" -p "$(cat "$TOKEN_PATH")"
+              if [ -s "$TOKEN" ]; then
+                echo "[oras] logging in to $REGISTRY_HOST as $GITHUB_USER"
+                oras login "$REGISTRY_HOST" -u "$GITHUB_USER" -p "$(cat "$TOKEN")"
               fi
 
-              echo "[oras] pulling ${ORAS_REF}"
-              oras pull "$ORAS_REF"
+              echo "[oras] resolving latest tag for $ORAS_REF..."
+              LATEST_TAG="$(oras repo tags "$ORAS_REF" 2>/dev/null | sort -V | tail -n1)"
+              if [ -z "$LATEST_TAG" ]; then
+                echo "[oras] ERROR: no tags found for $ORAS_REF" >&2
+                exit 1
+              fi
 
+              REF="$ORAS_REF:$LATEST_TAG"
+              echo "[oras] pulling $REF..."
+              oras pull "$REF"
+
+              TMP="$(mktemp -d)"
               echo "[oras] extracting archive..."
-              if [ -f "$SRC/assets.tgz" ]; then
-                tar -xzvf "$SRC/assets.tgz"
-                rm -f "$SRC/assets.tgz"
-              fi
+              tar -xzvf "$SRC/assets.tgz" -C "$TMP" --no-same-owner --no-same-permissions
+              # keep only newer/missing files:
+              cp -aun "$TMP"/. "$DEST"/
+              rm -rf "$TMP"
 
-              echo "[augment] Copying asset files to PVC (add-only)"
-              cp -rp --update "$SRC/." "$DEST/" || true
+              # keep only newer/missing files
+              echo "[augment] Copying asset files (add-only)"
+              cp -aun "$TMP"/. "$DEST"/
+              rm -rf "$TMP"
+              rm "$SRC/assets.tgz"
 
               COUNT=$(find "$DEST" -type f | wc -l || true)
-              echo "[augment] Augmented $COUNT files into PVC: $COUNT"
+              echo "[augment] Copied $COUNT files: $COUNT"
 
-              sync
-              touch "$MARK"
           volumeMounts:
             - name: assets
-              mountPath: /multimedia-assets
+              mountPath: /assets
             - name: init-secrets
               mountPath: /etc/secrets
               readOnly: true
