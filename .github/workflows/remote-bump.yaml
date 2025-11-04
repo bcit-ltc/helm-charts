@@ -81,7 +81,14 @@ jobs:
                 yq -i '
                   .frontend       = (.frontend       // {}) |
                   .frontend.image = (.frontend.image // {}) |
-                  .frontend.image.tag = strenv(APP_VERSION)
+                  .frontend.image.tag = strenv(APP_VERSION) |
+                  .initContainer       = (.initContainer       // {}) |
+                  .initContainer.image = (.initContainer.image // {}) |
+                  (if ((.frontend.image.repository // "") != "" and
+                       (.initContainer.image.repository // "") == (.frontend.image.repository // ""))
+                   then .initContainer.image.tag = strenv(APP_VERSION)
+                   else .
+                   end)
                 ' "$VALUES"
               fi
             else
