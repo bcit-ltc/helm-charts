@@ -85,6 +85,8 @@ spec:
               COUNT=$(find "$DEST" -type f | wc -l || true)
               echo "[augment] Copied $COUNT files: $COUNT"
 
+              echo "[augment] Finished processing assets"
+
           volumeMounts:
             - name: assets
               mountPath: /assets
