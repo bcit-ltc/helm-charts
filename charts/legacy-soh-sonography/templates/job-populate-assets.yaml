@@ -33,8 +33,8 @@ spec:
               value: {{ .Values.assets.githubUser | default "github" | quote }}
             - name: GITHUB_PAT
               value: {{ .Values.assets.tokenPath | default "/etc/secrets/GITHUB_TOKEN" | quote }}
-            - name: DEST
-              value: {{ .Values.assets.pvcName | default "assets" | quote }}
+            - name: ASSET_DIR
+              value: {{ .Values.assets.assetDir | default "src" | quote }}
           resources:
 {{ toYaml .Values.assets.resources | nindent 12 }}
           command: ["/bin/sh","-ceu"]
@@ -42,11 +42,12 @@ spec:
             - |
               REGISTRY_HOST="$(printf '%s' "$ORAS_REF" | cut -d'/' -f1)"
 
-              SRC=/workspace
-              DEST=${DEST#src/}
+              WORKING_DIR=/workspace
+              ASSET_DIR=${ASSET_DIR#src/}
+              DEST=/assets/$ASSET_DIR
+
               apk update && apk add rsync
 
-              # Login to ghcr.io
               if [ -s "$GITHUB_PAT" ]; then
                 echo "[oras] logging in to $REGISTRY_HOST as $GITHUB_USER"
                 oras login "$REGISTRY_HOST" -u "$GITHUB_USER" -p "$(cat "$GITHUB_PAT")"
@@ -63,13 +64,13 @@ spec:
               echo "[oras] pulling $REF..."
               oras pull "$REF"
 
-              TMP="$(mktemp -d)"
-              echo "[oras] extracting archive..."
-              tar -xzvf "$SRC/assets.tgz" -C "$TMP"
+              echo "[oras] extracting archive into $ASSET_DIR"
+              mkdir -p "$ASSET_DIR"
+              tar -xzvf "$WORKING_DIR/assets.tgz" -C "$ASSET_DIR"
 
               # keep only newer/missing files
               echo "[augment] Copying asset files (add-only)"
-              rsync -a --update --chown=${HOST_UID:-1000}:${HOST_GID:-1000} "$TMP"/ "$DEST"/
+              rsync -av --update --chown=${HOST_UID:-1000}:${HOST_GID:-1000} "$ASSET_DIR"/ "$DEST"/
 
               # correct permissions
               find "$DEST" -type d -exec chmod 755 {} +
@@ -77,9 +78,9 @@ spec:
 
               # give ownership back to the developer user (host uid/gid)
               chown -R ${HOST_UID:-1000}:${HOST_GID:-1000} "$DEST"
-
-              rm -rf "$TMP"
-              rm "$SRC/assets.tgz"
+              pwd
+              ls -lahR "$DEST"
+              rm "$WORKING_DIR/assets.tgz"
 
               COUNT=$(find "$DEST" -type f | wc -l || true)
               echo "[augment] Copied $COUNT files: $COUNT"

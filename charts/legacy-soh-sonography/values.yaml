@@ -110,17 +110,17 @@ frontend:
   # -- Configuration for persistent volume claims
   # @default -- `[]`
   storageMounts:
-  - name: assets
-    size: 5Gi
-  # -- Location where the PVC will be mounted.
-    mountPath: "/usr/share/nginx/html"
-  # -- Whether the volume should be mounted read-only.
-    readOnly: true
-  # -- Name of the storage class to use. If null it will use the
-  # configured default Storage Class.
-    # storageClass: legacy-large-files
-  # -- Access Mode of the storage device being used for the PVC
-    accessMode: ReadWriteOnce
+    - name: assets
+      size: 5Gi
+      # -- Location where the PVC will be mounted.
+      mountPath: "/usr/share/nginx/html"
+      # -- Whether the volume should be mounted read-only.
+      readOnly: true
+      # -- Name of the storage class to use. If null it will use the
+      # configured default Storage Class.
+      # storageClass: legacy-large-files
+      # -- Access Mode of the storage device being used for the PVC
+      accessMode: ReadWriteOnce
   secretMounts: []
   # -- volumeMounts to be added as secrets
   # # Credentials to access the app internal management portal (local account)
@@ -198,7 +198,7 @@ initContainer:
     # -- initContainer image repository
     repository: "bcit-ltc/legacy-soh-sonography"
     # -- initContainer image tag
-    tag: "1.0.5-rc.20251029002205.2db79d7"
+    tag: "1.0.1"
   # command to run in the initContainer
   # @default -- `["/bin/sh"]`
   command: []
@@ -243,17 +243,17 @@ initContainer:
   # - name: multimedia-assets
   #   mountPath: /dest
   storageMounts:
-  - name: assets
-    size: 5Gi
-  # -- Location where the PVC will be mounted.
-    mountPath: "/assets"
-  # -- Whether the volume should be mounted read-only.
-    readOnly: false
-  # -- Name of the storage class to use. If null it will use the
-  # configured default Storage Class.
-    # storageClass: legacy-large-files
-  # -- Access Mode of the storage device being used for the PVC
-    accessMode: ReadWriteOnce
+    - name: assets
+      size: 5Gi
+      # -- Location where the PVC will be mounted.
+      mountPath: "/assets"
+      # -- Whether the volume should be mounted read-only.
+      readOnly: false
+      # -- Name of the storage class to use. If null it will use the
+      # configured default Storage Class.
+      # storageClass: legacy-large-files
+      # -- Access Mode of the storage device being used for the PVC
+      accessMode: ReadWriteOnce
   # -- volumeMounts to be added as configMaps.
   # @default -- `[]`
   configMounts:
@@ -287,6 +287,7 @@ assets:
   enabled: true
   # -- Reference to the asset oci image
   ref: "ghcr.io/bcit-ltc/legacy-soh-sonography-assets"
+  assetDir: "src/multimedia"
   pvcName: "assets"
   secretName: "legacy-github-token"
   githubUser: "github"
