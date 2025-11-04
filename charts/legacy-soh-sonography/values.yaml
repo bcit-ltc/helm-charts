@@ -286,7 +286,7 @@ initContainer:
 assets:
   enabled: true
   # -- Reference to the asset oci image
-  ref: "ghcr.io/bcit-ltc/legacy-soh-sonography-assets:2025-11-03"
+  ref: "ghcr.io/bcit-ltc/legacy-soh-sonography-assets"
   pvcName: "assets"
   secretName: "legacy-github-token"
   githubUser: "github"

@@ -31,7 +31,7 @@ spec:
               value: {{ required "values.assets.ref is required" .Values.assets.ref | quote }}
             - name: GITHUB_USER
               value: {{ .Values.assets.githubUser | default "github" | quote }}
-            - name: TOKEN
+            - name: GITHUB_PAT
               value: {{ .Values.assets.tokenPath | default "/etc/secrets/GITHUB_TOKEN" | quote }}
             - name: DEST
               value: {{ .Values.assets.pvcName | default "assets" | quote }}
@@ -43,14 +43,13 @@ spec:
               REGISTRY_HOST="$(printf '%s' "$ORAS_REF" | cut -d'/' -f1)"
 
               SRC=/workspace
-              DEST=$DEST
-
-              mkdir -p $DEST
+              DEST=${DEST#src/}
+              apk update && apk add rsync
 
               # Login to ghcr.io
-              if [ -s "$TOKEN" ]; then
+              if [ -s "$GITHUB_PAT" ]; then
                 echo "[oras] logging in to $REGISTRY_HOST as $GITHUB_USER"
-                oras login "$REGISTRY_HOST" -u "$GITHUB_USER" -p "$(cat "$TOKEN")"
+                oras login "$REGISTRY_HOST" -u "$GITHUB_USER" -p "$(cat "$GITHUB_PAT")"
               fi
 
               echo "[oras] resolving latest tag for $ORAS_REF..."
@@ -66,14 +65,19 @@ spec:
 
               TMP="$(mktemp -d)"
               echo "[oras] extracting archive..."
-              tar -xzvf "$SRC/assets.tgz" -C "$TMP" --no-same-owner --no-same-permissions
-              # keep only newer/missing files:
-              cp -aun "$TMP"/. "$DEST"/
-              rm -rf "$TMP"
+              tar -xzvf "$SRC/assets.tgz" -C "$TMP"
 
               # keep only newer/missing files
               echo "[augment] Copying asset files (add-only)"
-              cp -aun "$TMP"/. "$DEST"/
+              rsync -a --update --chown=${HOST_UID:-1000}:${HOST_GID:-1000} "$TMP"/ "$DEST"/
+
+              # correct permissions
+              find "$DEST" -type d -exec chmod 755 {} +
+              find "$DEST" -type f -exec chmod 644 {} +
+
+              # give ownership back to the developer user (host uid/gid)
+              chown -R ${HOST_UID:-1000}:${HOST_GID:-1000} "$DEST"
+
               rm -rf "$TMP"
               rm "$SRC/assets.tgz"
 
