@@ -67,21 +67,19 @@ spec:
               echo "[oras] extracting archive into $ASSET_DIR"
               mkdir -p "$ASSET_DIR"
               tar -xzvf "$WORKING_DIR/assets.tgz" -C "$ASSET_DIR"
+              rm "$WORKING_DIR/assets.tgz"
 
-              # keep only newer/missing files
+              # augment image files with large files from OCI
               echo "[augment] Copying asset files (add-only)"
               rsync -av --update --chown=${HOST_UID:-1000}:${HOST_GID:-1000} "$ASSET_DIR"/ "$DEST"/
 
               # correct permissions
               find "$DEST" -type d -exec chmod 755 {} +
               find "$DEST" -type f -exec chmod 644 {} +
-
-              # give ownership back to the developer user (host uid/gid)
               chown -R ${HOST_UID:-1000}:${HOST_GID:-1000} "$DEST"
-              pwd
-              ls -lahR "$DEST"
-              rm "$WORKING_DIR/assets.tgz"
 
+              # Debugging output
+              pwd && ls -lahR "$DEST"
               COUNT=$(find "$DEST" -type f | wc -l || true)
               echo "[augment] Copied $COUNT files: $COUNT"
 
@@ -90,14 +88,14 @@ spec:
           volumeMounts:
             - name: assets
               mountPath: /assets
-            - name: init-secrets
+            - name: job-secrets
               mountPath: /etc/secrets
               readOnly: true
       volumes:
         - name: assets
           persistentVolumeClaim:
             claimName: {{ .Values.assets.pvcName | default "multimedia-assets" | quote }}
-        - name: init-secrets
+        - name: job-secrets
           projected:
             sources:
               - secret:

@@ -4,7 +4,7 @@
 global:
   # -- Authoritative name
   name: "legacy-soh-sonography"
-  imagePullSecrets: []
+  imagePullSecrets: ["github-private-repo-token"]
   revisionHistoryLimit: 3
   progressDeadlineSeconds: 600
 # -- Configuration for the service account
@@ -95,8 +95,6 @@ frontend:
   emptyDirMounts:
     - name: tmp
       mountPath: /tmp
-      # - name: seed-tmp
-      #   mountPath: /seed
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []
@@ -121,9 +119,8 @@ frontend:
       # storageClass: legacy-large-files
       # -- Access Mode of the storage device being used for the PVC
       accessMode: ReadWriteOnce
-  secretMounts: []
   # -- volumeMounts to be added as secrets
-  # # Credentials to access the app internal management portal (local account)
+  secretMounts: []
   # - name: github-token # volume name (must be DNS-1123 compliant)
   #   secretName: github-token # refers to existing Secret in the same namespace
   #   mountPath: /etc/secrets
@@ -210,8 +207,8 @@ initContainer:
       runAsUser: 0
       runAsGroup: 0
       runAsNonRoot: false
-      # capabilities:
-      #   drop: ["ALL"]
+      capabilities:
+        drop: ["ALL"]
   resources:
     # -- Resource requests mapped directly to the value of
     #    the resources field for a PodSpec.
@@ -226,11 +223,7 @@ initContainer:
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars:
-    # - APP_IMAGE: "ghcr.io/bcit-ltc/legacy-soh-sonography:1.0.5-rc.20251029002205.2db79d7"
-    - TOKEN_PATH: "/etc/secrets/GITHUB_TOKEN"
-    # Optional; oras login needs some username string when a token is present.
-    - GITHUB_USER: "github"
-  # - API_URL: "https://app.example.com/api"
+    # - MY_ENV: "/usr/local/MY_ENV"
   # -- Create `ConfigMap` resources that are passed to containers using envFrom
   # @default -- `[]`
   configEnvs: []
@@ -238,10 +231,8 @@ initContainer:
   # -- volumeMounts for the initContainer that also create corresponding emptyDir volumes in the pod.
   # @default -- `[]`
   emptyDirMounts: []
-  # - name: seed-tmp
-  #   mountPath: /seed
-  # - name: multimedia-assets
-  #   mountPath: /dest
+  # - name: tmp
+  #   mountPath: /tmp
   storageMounts:
     - name: assets
       size: 5Gi
@@ -274,22 +265,21 @@ initContainer:
   # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts: []
-  # Credentials to access the app internal management portal (local account)
   # - name: init-secrets # volume name (must be DNS-1123 compliant)
-  #   secretName: legacy-github-token # refers to existing Secret in the same namespace
+  #   secretName: github-private-repo-token # refers to existing Secret in the same namespace
   #   mountPath: /etc/secrets
   #   items: # optional: map specific keys to paths (and per-file mode)
   #     - key: GITHUB_TOKEN
   #       path: GITHUB_TOKEN
-  # -- job to pull assets and add them to the persistent volume
-  # @default -- `{}`
+# -- Job to retrieve and add assets to a persistent volume
+# @default -- `{}`
 assets:
   enabled: true
   # -- Reference to the asset oci image
   ref: "ghcr.io/bcit-ltc/legacy-soh-sonography-assets"
   assetDir: "src/multimedia"
   pvcName: "assets"
-  secretName: "legacy-github-token"
+  secretName: "gh-private-oci-token"
   githubUser: "github"
   tokenPath: "/etc/secrets/GITHUB_TOKEN"
   image:

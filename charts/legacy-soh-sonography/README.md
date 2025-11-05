@@ -1,11 +1,11 @@
 <!-- markdownlint-disable MD033 MD034 -->
 # legacy-soh-sonography
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![AppVersion: 1.0.1](https://img.shields.io/badge/AppVersion-1.0.1-informational?style=flat-square)
+![Version: 1.0.4-rc.20251105025347.8d8aca2](https://img.shields.io/badge/Version-1.0.4--rc.20251105025347.8d8aca2-informational?style=flat-square) ![AppVersion: 1.0.4-rc.20251105025347.8d8aca2](https://img.shields.io/badge/AppVersion-1.0.4--rc.20251105025347.8d8aca2-informational?style=flat-square)
 
 legacy-soh-sonography is a legacy multimedia application.
 
-**Homepage:** <https://legacy-html.ltc.bcit.ca>
+**Homepage:** <https://legacy-soh-sonography.ltc.bcit.ca>
 
 ## Maintainers
 
@@ -15,13 +15,13 @@ legacy-soh-sonography is a legacy multimedia application.
 
 ## Installing the Chart
 
-Our registry images are public, but in ["Working with Container Registries"](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) GitHub says:
+Most of our registry images are public, however the [GitHub docs](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) say:
 > "You need an access token to publish, install, and delete private, internal, and public packages."
 
 1. Create a [GitHub personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) and set it in your terminal shell:
 
     ```console
-    export CR_PAT=YOUR_TOKEN
+    export GITHUB_PAT=YOUR_TOKEN
     ```
 
 1. Install [Helm](https://helm.sh/docs/intro/install) and [jq](https://jqlang.org/download/).
@@ -29,7 +29,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 1. Login to the global GitHub registry service:
 
     ```console
-    echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
+    echo $GITHUB_PAT | docker login ghcr.io -u USERNAME --password-stdin
     ```
 
 1. List the available registry tags
@@ -37,7 +37,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
     ```console
     curl -L \
     -H "Accept: application/vnd.github+json" \
-    -H "Authorization: Bearer $CR_PAT" \
+    -H "Authorization: Bearer $GITHUB_PAT" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
     https://api.github.com/orgs/bcit-ltc/packages/container/legacy-soh-sonography/versions \
     | jq '.[].metadata.container.tags.[]'
@@ -65,6 +65,8 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| assets | object | `{}` | Job to retrieve and add assets to a persistent volume |
+| assets.ref | string | `"ghcr.io/bcit-ltc/legacy-soh-sonography-assets"` | Reference to the asset oci image |
 | frontend | object | `{}` | Main "frontend" configuration |
 | frontend.configEnvs | list | `[]` | configEnvs create ConfigMaps that are passed to containers using envFrom |
 | frontend.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
@@ -74,7 +76,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image default pull policy |
 | frontend.image.registry | string | `"ghcr.io"` | Frontend image registry |
 | frontend.image.repository | string | `"bcit-ltc/legacy-soh-sonography"` | Frontend image repository |
-| frontend.image.tag | string | `"1.0.0"` | Frontend image tag |
+| frontend.image.tag | string | `"1.0.4-rc.20251105025347.8d8aca2"` | Frontend image tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"legacy-soh-sonography"` | The name of the frontend container to create. If empty uses "frontend" |
@@ -82,9 +84,13 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.readinessProbe.enabled | bool | `false` | Enables readinessProbe |
 | frontend.resources.limits | object | `{"cpu":"250m","memory":"256Mi"}` | Resource limits mapped directly to the value of    the resources field for a PodSpec. |
 | frontend.resources.requests | object | `{"cpu":"100m","memory":"64Mi"}` | Resource requests mapped directly to the value of    the resources field for a PodSpec. |
-| frontend.securityContext | object | `{"container":{}}` | Security context for the frontend container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
+| frontend.secretMounts | list | `[]` | volumeMounts to be added as secrets |
+| frontend.securityContext | object | `{"container":[]}` | Security context for the frontend container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
 | frontend.startupProbe.enabled | bool | `false` | Enables startupProbe |
-| frontend.storageMounts | string | `[]` | volumeMounts to be added as secrets |
+| frontend.storageMounts | list | `[]` | Configuration for persistent volume claims |
+| frontend.storageMounts[0].accessMode | string | `"ReadWriteOnce"` | Access Mode of the storage device being used for the PVC |
+| frontend.storageMounts[0].mountPath | string | `"/usr/share/nginx/html"` | Location where the PVC will be mounted. |
+| frontend.storageMounts[0].readOnly | bool | `true` | Whether the volume should be mounted read-only. |
 | global.imagePullSecrets | list | `[]` |  |
 | global.name | string | `"legacy-soh-sonography"` | Authoritative name |
 | global.progressDeadlineSeconds | int | `600` |  |
@@ -94,6 +100,22 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | ingress.extraPaths | list | `[]` | Extra path rules to render verbatim before the default "/". |
 | ingress.pathType | string | `"Prefix"` | Path type for the default route ("/") |
 | ingress.tlsSecret | string | `""` | TLS secret to use. Sets `<spec.tls.hosts>` to `<global.name>.<defaultDomain>` |
+| initContainer | object | `{}` | Add an initContainer configuration |
+| initContainer.configEnvs | list | `[]` | Create `ConfigMap` resources that are passed to containers using envFrom |
+| initContainer.configMounts | list | `[]` | volumeMounts to be added as configMaps. |
+| initContainer.emptyDirMounts | list | `[]` | volumeMounts for the initContainer that also create corresponding emptyDir volumes in the pod. |
+| initContainer.enabled | bool | `true` | Enable or disable initContainer components. |
+| initContainer.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
+| initContainer.image.pullPolicy | string | `"IfNotPresent"` | initContainer image default pull policy |
+| initContainer.image.registry | string | `"ghcr.io"` | initContainer imageregistry |
+| initContainer.image.repository | string | `"bcit-ltc/legacy-soh-sonography"` | initContainer image repository |
+| initContainer.image.tag | string | `"1.0.4-rc.20251105025347.8d8aca2"` | initContainer image tag |
+| initContainer.resources.limits | object | `{"cpu":"500m","memory":"512Mi"}` | Resource limits mapped directly to the value of    the resources field for a PodSpec. |
+| initContainer.resources.requests | object | `{"cpu":"100m","memory":"128Mi"}` | Resource requests mapped directly to the value of    the resources field for a PodSpec. |
+| initContainer.secretMounts | list | `[]` | volumeMounts to be added as secrets |
+| initContainer.storageMounts[0].accessMode | string | `"ReadWriteOnce"` | Access Mode of the storage device being used for the PVC |
+| initContainer.storageMounts[0].mountPath | string | `"/assets"` | Location where the PVC will be mounted. |
+| initContainer.storageMounts[0].readOnly | bool | `false` | Whether the volume should be mounted read-only. |
 | processor | object | `{}` | Main "backend" configuration |
 | processor.configEnvs | list | `[]` | Create `ConfigMap` resources that are passed to containers using envFrom |
 | processor.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
@@ -108,7 +130,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | processor.replicas | int | `1` | Number of replicas for the processor |
 | processor.secretMounts | list | `[]` | volumeMounts to be added as secrets |
 | processor.securityContext | object | `{"container":null}` | Security context for the processor container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
-| securityContext | object | `{"pod":{}}` | Security context for the pod template<br>   &nbsp;&nbsp;`runAsNonRoot: true`<br>   &nbsp;&nbsp;`runAsGroup: 101`<br>   &nbsp;&nbsp;`runAsUser: 101`<br>   &nbsp;&nbsp;`fsGroup: 101`<br> - Set to `null` to disable |
+| securityContext | object | `{"pod":[]}` | Security context for the pod template<br>   &nbsp;&nbsp;`runAsNonRoot: true`<br>   &nbsp;&nbsp;`runAsGroup: 101`<br>   &nbsp;&nbsp;`runAsUser: 101`<br>   &nbsp;&nbsp;`fsGroup: 101`<br> - Set to `null` to disable |
 | service | object | `{}` | Enables a service for the app |
 | service.enabled | bool | `true` | Enable or disable service components. |
 | service.port | int | `8080` | Port on which the app is listening |
