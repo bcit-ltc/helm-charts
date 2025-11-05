@@ -275,7 +275,7 @@ initContainer:
 # @default -- `{}`
 assets:
   enabled: true
-  # -- Reference to the asset oci image
+  # -- Reference to the asset OCI image
   ref: "ghcr.io/bcit-ltc/legacy-soh-sonography-assets"
   assetDir: "src/multimedia"
   pvcName: "assets"

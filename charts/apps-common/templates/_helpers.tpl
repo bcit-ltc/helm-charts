@@ -7,7 +7,6 @@ Common helpers for LTC app charts
 {{/* ---------------------------------
      Identity & Labels
    --------------------------------- */}}
-
 {{- define "apps-common.app.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
@@ -66,9 +65,9 @@ imagePullSecrets:
   apps-common.app.probe
   Input: a probe map (e.g., .Values.frontend.livenessProbe)
   Behavior:
-    - If .enabled is false or empty -> emit nothing
-    - If .execCommand has entries  -> use exec
-    - Else                         -> use httpGet with .path and .port
+    - if .enabled is false or empty -> emit nothing
+    - if .execCommand has entries   -> use exec
+    - else                          -> use httpGet with .path and .port
     - Applies sane defaults if fields are missing
 */}}
 {{- define "apps-common.app.probe" -}}
