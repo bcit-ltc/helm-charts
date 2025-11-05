@@ -25,7 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
 
       - uses: mikefarah/yq@v4.44.3
 
@@ -78,18 +79,23 @@ jobs:
                 ' "$VALUES"
               else
                 echo "Processor disabled — setting .frontend.image.tag to ${APP_VERSION}"
+                # Ensure the nodes exist, then set the frontend tag
                 yq -i '
                   .frontend       = (.frontend       // {}) |
                   .frontend.image = (.frontend.image // {}) |
                   .frontend.image.tag = strenv(APP_VERSION) |
                   .initContainer       = (.initContainer       // {}) |
-                  .initContainer.image = (.initContainer.image // {}) |
-                  (if ((.frontend.image.repository // "") != "" and
-                       (.initContainer.image.repository // "") == (.frontend.image.repository // ""))
-                   then .initContainer.image.tag = strenv(APP_VERSION)
-                   else .
-                   end)
+                  .initContainer.image = (.initContainer.image // {})
                 ' "$VALUES"
+
+                # If initContainer.image.repository matches frontend.image.repository (and not empty),
+                # also bump initContainer.image.tag
+                FRONT_REPO="$(yq -r '.frontend.image.repository // ""' "$VALUES")"
+                INIT_REPO="$(yq -r '.initContainer.image.repository // ""' "$VALUES")"
+                if [[ -n "$FRONT_REPO" && "$INIT_REPO" == "$FRONT_REPO" ]]; then
+                  echo "initContainer repo matches frontend — setting .initContainer.image.tag to ${APP_VERSION}"
+                  yq -i '.initContainer.image.tag = strenv(APP_VERSION)' "$VALUES"
+                fi
               fi
             else
               echo "No frontend/processor image repository configured; skipping values.yaml tag bump."
