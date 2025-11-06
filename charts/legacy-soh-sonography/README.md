@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD033 MD034 -->
 # legacy-soh-sonography
 
-![Version: 1.0.14](https://img.shields.io/badge/Version-1.0.14-informational?style=flat-square) ![AppVersion: 1.0.14](https://img.shields.io/badge/AppVersion-1.0.14-informational?style=flat-square)
+![Version: 1.0.4](https://img.shields.io/badge/Version-1.0.4-informational?style=flat-square) ![AppVersion: 1.0.4](https://img.shields.io/badge/AppVersion-1.0.4-informational?style=flat-square)
 
 legacy-soh-sonography is a legacy multimedia application.
 
@@ -81,12 +81,12 @@ Most of our registry images are public, however the [GitHub docs](https://docs.g
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"legacy-soh-sonography"` | The name of the frontend container to create. If empty uses "frontend" |
 | frontend.port | int | `8080` | Port on which the frontend is listening |
-| frontend.readinessProbe.enabled | bool | `false` | Enables readinessProbe |
+| frontend.readinessProbe.enabled | bool | `true` | Enables readinessProbe |
 | frontend.resources.limits | object | `{"cpu":"250m","memory":"256Mi"}` | Resource limits mapped directly to the value of    the resources field for a PodSpec. |
 | frontend.resources.requests | object | `{"cpu":"100m","memory":"64Mi"}` | Resource requests mapped directly to the value of    the resources field for a PodSpec. |
 | frontend.secretMounts | list | `[]` | volumeMounts to be added as secrets |
 | frontend.securityContext | object | `{"container":null}` | Security context for the frontend container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
-| frontend.startupProbe.enabled | bool | `false` | Enables startupProbe |
+| frontend.startupProbe.enabled | bool | `true` | Enables startupProbe |
 | frontend.storageMounts | list | `[]` | Configuration for persistent volume claims |
 | frontend.storageMounts[0].accessMode | string | `"ReadWriteOnce"` | Access Mode of the storage device being used for the PVC |
 | frontend.storageMounts[0].mountPath | string | `"/usr/share/nginx/html"` | Location where the PVC will be mounted. |

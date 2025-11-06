@@ -137,7 +137,7 @@ frontend:
     # - -c
     # - <command>
     # Path for the httpGet handler
-    path: "/"
+    path: "/healthz"
     # Port number on which livenessProbe will be checked if httpGet is used as the livenessProbe handler
     port: 8080
     # When a probe fails, Kubernetes will try failureThreshold times before giving up
@@ -153,35 +153,43 @@ frontend:
   # Defines custom readinessProbe settings
   readinessProbe:
     # -- Enables readinessProbe
-    enabled: false
+    enabled: true
     # If you need to use a http path instead of the default exec
-    # path: /health?standbyok=true
+    path: "/healthz/ready"
     # Port number on which readinessProbe will be checked.
     port: 8080
     # When a probe fails, Kubernetes will try failureThreshold times before giving up
-    failureThreshold: 2
+    failureThreshold: 3
     # Number of seconds after the container has started before probe initiates
-    initialDelaySeconds: 5
+    initialDelaySeconds: 0
     # How often (in seconds) to perform the probe
     periodSeconds: 5
     # Minimum consecutive successes for the probe to be considered successful after having failed
     successThreshold: 1
     # Number of seconds after which the probe times out.
-    timeoutSeconds: 5
+    timeoutSeconds: 2
   # Defines custom startupProbe settings
   startupProbe:
     # -- Enables startupProbe
-    enabled: false
+    enabled: true
+    execCommand: []
+    # - /bin/sh
+    # - -c
+    # - <command>
+    # Path for the httpGet handler
+    path: "/healthz/startup"
+    # Port number on which startupProbe will be checked.
+    port: 8080
     # When a probe fails, Kubernetes will try failureThreshold times before giving up
-    failureThreshold: 12
+    failureThreshold: 6
     # Number of seconds after the container has started before probe initiates
-    initialDelaySeconds: 5
+    initialDelaySeconds: 10
     # How often (in seconds) to perform the probe
     periodSeconds: 5
     # Minimum consecutive successes for the probe to be considered successful after having failed
     successThreshold: 1
     # Number of seconds after which the probe times out.
-    timeoutSeconds: 5
+    # timeoutSeconds: 5
 # -- Add an initContainer configuration
 # @default -- `{}`
 initContainer:
@@ -223,7 +231,7 @@ initContainer:
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars:
-  # - MY_ENV: "/usr/local/MY_ENV"
+    # - MY_ENV: "/usr/local/MY_ENV"
   # -- Create `ConfigMap` resources that are passed to containers using envFrom
   # @default -- `[]`
   configEnvs: []
