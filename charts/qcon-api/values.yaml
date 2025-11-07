@@ -103,7 +103,7 @@ frontend:
     - name: nginx-config
       mountPath: /etc/nginx/conf.d
       data:
-        nginx.conf: |-
+        default.conf: |-
           upstream channels-backend {
               server 127.0.0.1:8000;
           }

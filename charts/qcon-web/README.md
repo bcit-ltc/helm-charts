@@ -1,9 +1,9 @@
 <!-- markdownlint-disable MD033 MD034 -->
 # qcon-web
 
-![Version: 1.1.7-rc.66e9d66.20251015063838](https://img.shields.io/badge/Version-1.1.7--rc.66e9d66.20251015063838-informational?style=flat-square) ![AppVersion: 1.1.7-rc.66e9d66.20251015063838](https://img.shields.io/badge/AppVersion-1.1.7--rc.66e9d66.20251015063838-informational?style=flat-square)
+![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![AppVersion: 1.0.1](https://img.shields.io/badge/AppVersion-1.0.1-informational?style=flat-square)
 
-Information about the architecture and makeup of the LTC's server infrastructure.
+Frontend of the Qcon service. Requires the qcon-api processor engine to work correctly.
 
 **Homepage:** <https://qcon-web.ltc.bcit.ca>
 
@@ -59,7 +59,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://bcit-ltc.github.io/helm-charts | apps-common | >=0.1.2 |
+| https://bcit-ltc.github.io/helm-charts | apps-common | >=0.3.0 |
 
 ## Values
 
@@ -68,16 +68,16 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend | object | `{}` | Main "frontend" configuration |
 | frontend.configEnvs | list | `[]` | configEnvs create ConfigMaps that are passed to containers using envFrom |
 | frontend.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
-| frontend.emptyDirMounts | list | `[]` | volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod. |
+| frontend.emptyDirMounts | list | `[{name: tmp, mountPath: /tmp}]` | volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod. |
 | frontend.enabled | bool | `true` | Enable or disable frontend components. |
 | frontend.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image default pull policy |
-| frontend.image.registry | string | `"ghcr.io"` | Frontend image registry |
-| frontend.image.repository | string | `"bcit-ltc/qcon-web"` | Frontend image repository |
-| frontend.image.tag | string | `"1.1.7-rc.66e9d66.20251015063838"` | Frontend image tag |
+| frontend.image.registry | string | `"docker.io"` | Frontend image registry |
+| frontend.image.repository | string | `"nginx"` | Frontend image repository |
+| frontend.image.tag | string | `"mainline-alpine3.22-perl"` | Frontend image tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
-| frontend.name | string | `"qcon-web"` | The name of the frontend container to create. If empty uses "frontend" |
+| frontend.name | string | `"nginx"` | The name of the frontend container to create. If empty uses "frontend" |
 | frontend.port | int | `8080` | Port on which the frontend is listening |
 | frontend.readinessProbe.enabled | bool | `false` | Enables readinessProbe |
 | frontend.resources.limits | object | `{"cpu":"250m","memory":"256Mi"}` | Resource limits mapped directly to the value of    the resources field for a PodSpec. |
@@ -98,16 +98,18 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | processor.configEnvs | list | `[]` | Create `ConfigMap` resources that are passed to containers using envFrom |
 | processor.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
 | processor.emptyDirMounts | list | `[]` | volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod. |
-| processor.enabled | bool | `false` | Enable or disable processor components. |
+| processor.enabled | bool | `true` | Enable or disable processor components. |
 | processor.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
 | processor.image.pullPolicy | string | `"IfNotPresent"` | Processor image default pull policy |
 | processor.image.registry | string | `"ghcr.io"` | Processor imageregistry |
-| processor.image.repository | string | `""` | Processor image repository |
-| processor.image.tag | string | `""` | Processor image tag |
+| processor.image.repository | string | `"bcit-ltc/qcon-web"` | Processor image repository |
+| processor.image.tag | string | `"1.0.0"` | Processor image tag |
 | processor.port | int | `8000` | Port on which processor is listening |
 | processor.replicas | int | `1` | Number of replicas for the processor |
-| processor.secretMounts | list | `[]` | volumeMounts to be added as secrets |
 | processor.securityContext | object | `{"container":null}` | Security context for the processor container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
+| processor.storageMounts[0].accessMode | string | `"ReadWriteOnce"` | Access Mode of the storage device being used for the PVC |
+| processor.storageMounts[0].mountPath | string | `"/app/data"` | Location where the PVC will be mounted. |
+| processor.storageMounts[0].storageClass | string | `nil` | Name of the storage class to use. If null it will use the configured default Storage Class. |
 | securityContext | object | `{"pod":{}}` | Security context for the pod template<br>   &nbsp;&nbsp;`runAsNonRoot: true`<br>   &nbsp;&nbsp;`runAsGroup: 101`<br>   &nbsp;&nbsp;`runAsUser: 101`<br>   &nbsp;&nbsp;`fsGroup: 101`<br> - Set to `null` to disable |
 | service | object | `{}` | Enables a service for the app |
 | service.enabled | bool | `true` | Enable or disable service components. |

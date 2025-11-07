@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD033 MD034 -->
 # qcon-api
 
-![Version: 1.1.2](https://img.shields.io/badge/Version-1.1.2-informational?style=flat-square) ![AppVersion: 1.1.2](https://img.shields.io/badge/AppVersion-1.1.2-informational?style=flat-square)
+![Version: 1.2.2](https://img.shields.io/badge/Version-1.2.2-informational?style=flat-square) ![AppVersion: 1.2.2](https://img.shields.io/badge/AppVersion-1.2.2-informational?style=flat-square)
 
 Backend API for the Qcon application. It provides a websocket endpoint for converting documents from word to SCORM format.
 
@@ -68,13 +68,13 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend | object | `{}` | Main "frontend" configuration |
 | frontend.configEnvs | list | `[]` | configEnvs create ConfigMaps that are passed to containers using envFrom |
 | frontend.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
-| frontend.emptyDirMounts | list | `[]` | volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod. |
+| frontend.emptyDirMounts | list | `[{name: tmp, mountPath: /tmp}]` | volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod. |
 | frontend.enabled | bool | `true` | Enable or disable frontend components. |
 | frontend.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image default pull policy |
 | frontend.image.registry | string | `"docker.io"` | Frontend image registry |
-| frontend.image.repository | string | `"nginxinc/nginx-unprivileged"` | Frontend image repository |
-| frontend.image.tag | string | `"1.25-alpine"` | Frontend image tag |
+| frontend.image.repository | string | `"nginx"` | Frontend image repository |
+| frontend.image.tag | string | `"mainline-alpine3.22-perl"` | Frontend image tag |
 | frontend.includeConfigAnnotation | bool | `true` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"nginx"` | The name of the frontend container to create. If empty uses "frontend" |
@@ -82,7 +82,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.readinessProbe.enabled | bool | `false` | Enables readinessProbe |
 | frontend.resources.limits | object | `{"cpu":"250m","memory":"256Mi"}` | Resource limits mapped directly to the value of    the resources field for a PodSpec. |
 | frontend.resources.requests | object | `{"cpu":"100m","memory":"64Mi"}` | Resource requests mapped directly to the value of    the resources field for a PodSpec. |
-| frontend.securityContext | object | `{"container":{}}` | Security context for the frontend container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
+| frontend.securityContext | object | `{"container":null}` | Security context for the frontend container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
 | frontend.startupProbe.enabled | bool | `false` | Enables startupProbe |
 | frontend.storageMounts | string | `[]` | volumeMounts to be added as secrets |
 | global.imagePullSecrets | list | `[]` |  |
@@ -98,12 +98,12 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | processor.configEnvs | list | `[]` | Create `ConfigMap` resources that are passed to containers using envFrom |
 | processor.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
 | processor.emptyDirMounts | list | `[]` | volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod. |
-| processor.enabled | bool | `false` | Enable or disable processor components. |
+| processor.enabled | bool | `true` | Enable or disable processor components. |
 | processor.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
 | processor.image.pullPolicy | string | `"IfNotPresent"` | Processor image default pull policy |
 | processor.image.registry | string | `"ghcr.io"` | Processor imageregistry |
 | processor.image.repository | string | `"bcit-ltc/qcon-api"` | Processor image repository |
-| processor.image.tag | string | `"1.1.2"` | Processor image tag |
+| processor.image.tag | string | `"1.2.1"` | Processor image tag |
 | processor.port | int | `8000` | Port on which processor is listening |
 | processor.replicas | int | `1` | Number of replicas for the processor |
 | processor.securityContext | object | `{"container":null}` | Security context for the processor container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
