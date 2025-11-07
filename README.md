@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: MPL-2.0 -->
 # Helm Charts
 
 Helm charts for apps and services developed and maintained by BCIT's Learning and Teaching Centre.
