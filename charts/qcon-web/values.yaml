@@ -275,7 +275,7 @@ processor:
   # Configuration for persistent volume claims
   # @default -- `[]`
   storageMounts:
-    - name: data-storage
+    - name: web-data-storage
       size: 5Gi
       # -- Location where the PVC will be mounted.
       mountPath: "/app/data"
