@@ -137,7 +137,7 @@ frontend:
     # - -c
     # - <command>
     # Path for the httpGet handler
-    path: "/healthz"
+    path: "/healthz/ready"
     # Port number on which livenessProbe will be checked if httpGet is used as the livenessProbe handler
     port: 8080
     # When a probe fails, Kubernetes will try failureThreshold times before giving up
