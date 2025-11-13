@@ -137,7 +137,7 @@ frontend:
     # - -c
     # - <command>
     # Path for the httpGet handler
-    path: "/healthz"
+    path: "/healthz/ready"
     # Port number on which livenessProbe will be checked if httpGet is used as the livenessProbe handler
     port: 8080
     # When a probe fails, Kubernetes will try failureThreshold times before giving up
@@ -292,7 +292,7 @@ assets:
   tokenPath: "/etc/secrets/GITHUB_TOKEN"
   image:
     repository: "ghcr.io/oras-project/oras"
-    tag: "v1.2.0"
+    tag: "v1.3.0"
     pullPolicy: IfNotPresent
   coLocateWithApp: true
   resources:
