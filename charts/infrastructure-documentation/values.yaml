@@ -53,7 +53,7 @@ frontend:
     # -- Frontend image repository
     repository: "bcit-ltc/infrastructure-documentation"
     # -- Frontend image tag
-    tag: "1.1.9"
+    tag: "1.1.10-rc.20251113051049.6a9cb34"
   # Extra annotations to attach to the frontend
   # @default -- `{}`
   annotations: {}
@@ -296,3 +296,6 @@ ingress:
 #   minAvailable: 1
 # networkPolicy:
 #   enabled: false
+
+initContainer:
+  image: {}
