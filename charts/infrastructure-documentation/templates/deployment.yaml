@@ -36,7 +36,6 @@ spec:
 
       {{- $podSC := include "apps-common.app.pod.securityContext" . | trim -}}
       {{- if $podSC }}
-      # Pod-level securityContext (defaults merged with .Values.securityContext.pod)
       securityContext:
 {{ $podSC | nindent 8 }}
       {{- end }}
