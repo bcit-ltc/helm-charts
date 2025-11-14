@@ -210,13 +210,14 @@ jobs:
       - uses: imjasonh/setup-crane@v0.4
         with: { version: v0.20.1 }
 
-      - name: Push & sign charts to GHCR only if missing (from local packages)
+      - name: Push & sign charts to GHCR (always push)
         env:
           OWNER: ${{ github.repository_owner }}
           LIB_NAME: ${{ env.LIB_NAME }}
         run: |
           set -euo pipefail
           shopt -s nullglob
+
           repo="oci://ghcr.io/${OWNER}/oci"
           WORKFLOW_SAFE="$(printf '%s' "${GITHUB_WORKFLOW:-}" | tr -c '[:alnum:]._-' '_')"
 
@@ -239,22 +240,11 @@ jobs:
             REF_BASE="ghcr.io/${OWNER}/oci/${name}"
             TAG_REF="${REF_BASE}:${version}"
 
-            echo "==> Checking remote for ${TAG_REF}"
-            if digest_remote="$(crane digest "${TAG_REF}" 2>/dev/null)"; then
-              echo "Found existing ${TAG_REF} with digest ${digest_remote}; skipping push and sign."
+            echo "==> Forcing push of ${TAG_REF} (overwriting any existing tag)"
 
-              latest_digest="$(crane digest "${REF_BASE}:latest" 2>/dev/null || true)"
-              if [[ -z "${latest_digest}" || "${latest_digest}" != "${digest_remote}" ]]; then
-                echo "Updating 'latest' to point at ${digest_remote}"
-                crane tag "${REF_BASE}@${digest_remote}" latest
-              else
-                echo "'latest' already points at the same digest; no change."
-              fi
-              continue
-            fi
-
-            echo "Pushing ${name}-${version} to ${repo}"
+            # Always push the chart; this will move the tag to the new manifest
             PUSH_OUT="$(helm push "$pkg" "${repo}" 2>&1 | tee /dev/stderr)"
+
             DGST="$(printf '%s\n' "$PUSH_OUT" | tr -d '\r' | awk 'tolower($1)=="digest:" {print $2; exit}')"
             [[ -n "$DGST" && "$DGST" =~ ^sha256:[0-9A-Fa-f]{64}$ ]] || { echo "Failed to parse digest"; exit 1; }
 
