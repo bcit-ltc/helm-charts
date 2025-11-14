@@ -130,14 +130,14 @@ frontend:
   # Defines custom livenessProbe settings
   livenessProbe:
     # -- Enables livenessProbe
-    enabled: false
+    enabled: true
     # exec is preferred to httpGet (path) as the livenessProbe handler.
     execCommand: []
     # - /bin/sh
     # - -c
     # - <command>
     # Path for the httpGet handler
-    path: "/healthz/ready"
+    path: "/healthz"
     # Port number on which livenessProbe will be checked if httpGet is used as the livenessProbe handler
     port: 8080
     # When a probe fails, Kubernetes will try failureThreshold times before giving up
@@ -145,7 +145,7 @@ frontend:
     # Number of seconds after the container has started before probe initiates
     initialDelaySeconds: 10
     # How often (in seconds) to perform the probe
-    periodSeconds: 5
+    periodSeconds: 10
     # Minimum consecutive successes for the probe to be considered successful after having failed
     successThreshold: 1
     # Number of seconds after which the probe times out.
