@@ -108,7 +108,7 @@ frontend:
   # -- Configuration for persistent volume claims
   # @default -- `[]`
   storageMounts:
-    - name: assets
+    - name: legacy-soh-sonography-assets
       size: 5Gi
       # -- Location where the PVC will be mounted.
       mountPath: "/usr/share/nginx/html"
@@ -242,7 +242,7 @@ initContainer:
   # - name: tmp
   #   mountPath: /tmp
   storageMounts:
-    - name: assets
+    - name: legacy-soh-sonography-assets
       size: 5Gi
       # -- Location where the PVC will be mounted.
       mountPath: "/assets"
@@ -286,7 +286,7 @@ assets:
   # -- Reference to the asset OCI image
   ref: "ghcr.io/bcit-ltc/legacy-soh-sonography-assets"
   assetDir: "src/multimedia"
-  pvcName: "assets"
+  pvcName: "legacy-soh-sonography-assets"
   secretName: "gh-private-oci-token"
   githubUser: "github"
   tokenPath: "/etc/secrets/GITHUB_TOKEN"
