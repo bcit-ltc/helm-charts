@@ -53,7 +53,7 @@ frontend:
     # -- Frontend image repository
     repository: "bcit-ltc/legacy-soh-sonography"
     # -- Frontend image tag
-    tag: "1.1.8-rc.20251114061855.2eec581"
+    tag: "1.1.8"
   # Extra annotations to attach to the frontend
   # @default -- `{}`
   annotations: {}
@@ -203,7 +203,7 @@ initContainer:
     # -- initContainer image repository
     repository: "bcit-ltc/legacy-soh-sonography"
     # -- initContainer image tag
-    tag: "1.1.8-rc.20251114061855.2eec581"
+    tag: "1.1.8"
   # command to run in the initContainer
   # @default -- `["/bin/sh"]`
   command: []
