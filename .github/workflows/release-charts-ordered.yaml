@@ -30,21 +30,73 @@ jobs:
       contents: write
       packages: write
       id-token: write
+
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
 
       - name: Configure Git identity
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Compute changed charts
+        id: changes
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_EVENT_NAME" == "push" && -n "${BEFORE}" ]]; then
+            BASE="${BEFORE}"
+            HEAD="${SHA}"
+          else
+            BASE="HEAD~1"
+            HEAD="HEAD"
+          fi
+
+          echo "Diffing $BASE..$HEAD"
+          mapfile -t files < <(git diff --name-only "$BASE" "$HEAD" -- 'charts/**' || true)
+
+          if (( ${#files[@]} == 0 )); then
+            echo "No chart changes detected."
+            echo "charts=" >>"$GITHUB_OUTPUT"
+            echo "lib_changed=false" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          declare -A seen=()
+          charts=()
+          for f in "${files[@]}"; do
+            rel="${f#charts/}"
+            chart="${rel%%/*}"
+            [[ -n "$chart" ]] || continue
+            [[ -n "${seen[$chart]:-}" ]] && continue
+            seen[$chart]=1
+            charts+=("$chart")
+          done
+
+          changed_csv="$(IFS=,; echo "${charts[*]}")"
+          echo "Changed charts: $changed_csv"
+          echo "charts=$changed_csv" >>"$GITHUB_OUTPUT"
+
+          if printf '%s\n' "${charts[@]}" | grep -qx 'apps-common'; then
+            echo "lib_changed=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "lib_changed=false" >>"$GITHUB_OUTPUT"
+          fi
+
       - uses: azure/setup-helm@v4
-        with: { version: latest }
+        with:
+          version: latest
 
       - name: Install chart-releaser CLI
         uses: helm/chart-releaser-action@v1.7.0
-        with: { install_only: true }
+        with:
+          install_only: true
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -52,6 +104,7 @@ jobs:
       # LIBRARY
       # ----------------------------
       - name: Package library (apps-common)
+        if: steps.changes.outputs.lib_changed == 'true'
         run: |
           set -euo pipefail
           rm -rf .cr-release-packages
@@ -59,6 +112,7 @@ jobs:
           cr package charts/apps-common --package-path .cr-release-packages
 
       - name: Upload library to Releases
+        if: steps.changes.outputs.lib_changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -70,6 +124,7 @@ jobs:
             --token "${GH_TOKEN}"
 
       - name: Publish library to gh-pages (early)
+        if: steps.changes.outputs.lib_changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
@@ -112,12 +167,14 @@ jobs:
       - uses: mikefarah/yq@v4.44.3
 
       - name: Add chart repos for dependencies
+        if: steps.changes.outputs.charts != '' || steps.changes.outputs.lib_changed == 'true'
         run: |
           set -euo pipefail
           helm repo add bcit-ltc https://bcit-ltc.github.io/helm-charts || true
           helm repo update
 
       - name: Sync & build chart dependencies (apps)
+        if: steps.changes.outputs.charts != '' || steps.changes.outputs.lib_changed == 'true'
         run: |
           set -euo pipefail
           for d in charts/*; do
@@ -128,18 +185,42 @@ jobs:
           done
 
       - name: Package app charts
+        if: steps.changes.outputs.charts != '' || steps.changes.outputs.lib_changed == 'true'
         run: |
           set -euo pipefail
           mkdir -p .cr-release-packages
+
+          IFS=',' read -ra CHANGED <<< "${{ steps.changes.outputs.charts }}"
+          echo "CHANGED charts: ${CHANGED[*]:-(none)}"
+
           for d in charts/*; do
             [[ -f "$d/Chart.yaml" ]] || continue
-            [[ "$(basename "$d")" == "apps-common" ]] && continue
+
+            chart="$(basename "$d")"
+
+            # Skip library here
+            [[ "$chart" == "apps-common" ]] && continue
+
+            # If we have a non-empty changed list, skip anything not in it
+            if (( ${#CHANGED[@]} > 0 )); then
+              skip=1
+              for c in "${CHANGED[@]}"; do
+                [[ "$c" == "$chart" ]] && skip=0 && break
+              done
+              if (( skip )); then
+                echo "Skipping $chart (no changes)."
+                continue
+              fi
+            fi
+
             echo "==> helm package $d -d .cr-release-packages"
             helm package "$d" -d .cr-release-packages
           done
+
           ls -la .cr-release-packages || true
 
       - name: Upload app packages to Releases
+        if: steps.changes.outputs.charts != '' || steps.changes.outputs.lib_changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -154,6 +235,7 @@ jobs:
       # gh-pages
       # ----------------------------
       - name: Update gh-pages (publish library + apps)
+        if: steps.changes.outputs.charts != '' || steps.changes.outputs.lib_changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
@@ -191,14 +273,16 @@ jobs:
           popd
 
       # ----------------------------
-      # PUBLISH TO GHCR (OCI) — only if missing
+      # PUBLISH TO GHCR (OCI) — only changed charts
       # ----------------------------
       - name: Login to GHCR (Helm)
+        if: steps.changes.outputs.charts != ''
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io \
             -u "${{ github.actor }}" --password-stdin
 
       - name: Login to GHCR (Cosign)
+        if: steps.changes.outputs.charts != ''
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -206,11 +290,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: sigstore/cosign-installer@v3
+        if: steps.changes.outputs.charts != ''
 
       - uses: imjasonh/setup-crane@v0.4
-        with: { version: v0.20.1 }
+        if: steps.changes.outputs.charts != ''
+        with:
+          version: v0.20.1
 
-      - name: Push & sign charts to GHCR (always push)
+      - name: Push & sign charts to GHCR (only changed charts)
+        if: steps.changes.outputs.charts != ''
         env:
           OWNER: ${{ github.repository_owner }}
           LIB_NAME: ${{ env.LIB_NAME }}
@@ -227,6 +315,8 @@ jobs:
             exit 0
           fi
 
+          IFS=',' read -ra CHANGED <<< "${{ steps.changes.outputs.charts }}"
+
           for pkg in "${pkgs[@]}"; do
             name="$(helm show chart "$pkg"   | awk -F': ' '/^name:/{print $2; exit}')"
             version="$(helm show chart "$pkg"| awk -F': ' '/^version:/{print $2; exit}')"
@@ -237,12 +327,21 @@ jobs:
               continue
             fi
 
+            # Skip charts that didn't change
+            skip=1
+            for c in "${CHANGED[@]}"; do
+              [[ "$c" == "$name" ]] && skip=0 && break
+            done
+            if (( skip )); then
+              echo "Skipping OCI publish for $name (no changes)."
+              continue
+            fi
+
             REF_BASE="ghcr.io/${OWNER}/oci/${name}"
             TAG_REF="${REF_BASE}:${version}"
 
             echo "==> Forcing push of ${TAG_REF} (overwriting any existing tag)"
 
-            # Always push the chart; this will move the tag to the new manifest
             PUSH_OUT="$(helm push "$pkg" "${repo}" 2>&1 | tee /dev/stderr)"
 
             DGST="$(printf '%s\n' "$PUSH_OUT" | tr -d '\r' | awk 'tolower($1)=="digest:" {print $2; exit}')"
