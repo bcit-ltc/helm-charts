@@ -53,7 +53,7 @@ frontend:
     # -- Frontend image repository
     repository: "bcit-ltc/course-workload-estimator"
     # -- Frontend image tag
-    tag: "1.0.4"
+    tag: "1.0.5"
   # Extra annotations to attach to the frontend
   # @default -- `{}`
   annotations: {}
@@ -296,3 +296,6 @@ ingress:
 #   minAvailable: 1
 # networkPolicy:
 #   enabled: false
+
+initContainer:
+  image: {}
