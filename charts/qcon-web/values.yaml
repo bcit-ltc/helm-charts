@@ -101,7 +101,7 @@ frontend:
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts:
-    - name: nginx-config
+    - name: nginx-config-web
       mountPath: /etc/nginx/conf.d
       data:
         default.conf: |-
