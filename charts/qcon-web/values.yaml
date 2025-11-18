@@ -232,7 +232,7 @@ processor:
     # -- Processor image repository
     repository: "bcit-ltc/qcon-web"
     # -- Processor image tag
-    tag: "1.2.2"
+    tag: "1.2.3"
   # -- Number of replicas for the processor
   replicas: 1
   # -- Port on which processor is listening
@@ -251,8 +251,8 @@ processor:
   # -- volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod.
   # @default -- `[]`
   emptyDirMounts:
-  - name: shared-data
-    mountPath: /app/data
+    - name: shared-data
+      mountPath: /app/data
   # -- Security context for the processor container. Default:<br>
   # &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br>
   # &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br>
@@ -275,15 +275,15 @@ processor:
   # Configuration for persistent volume claims
   # @default -- `[]`
   storageMounts: []
-    # - name: web-data-storage
-    #   size: 5Gi
-    #   # -- Location where the PVC will be mounted.
-    #   mountPath: "/app/data"
-    #   # -- Name of the storage class to use. If null it will use the
-    #   # configured default Storage Class.
-    #   storageClass: null
-    #   # -- Access Mode of the storage device being used for the PVC
-    #   accessMode: ReadWriteOnce
+  # - name: web-data-storage
+  #   size: 5Gi
+  #   # -- Location where the PVC will be mounted.
+  #   mountPath: "/app/data"
+  #   # -- Name of the storage class to use. If null it will use the
+  #   # configured default Storage Class.
+  #   storageClass: null
+  #   # -- Access Mode of the storage device being used for the PVC
+  #   accessMode: ReadWriteOnce
   # @default -- `[]`
   secretMounts:
     # Credentials to access the app internal management portal (local account)
