@@ -1,11 +1,11 @@
 <!-- markdownlint-disable MD033 MD034 -->
-# cdn
+# common
 
 ![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-1.0.0-informational?style=flat-square)
 
 Content delivery and proxy service for static assets and third-party API routing.
 
-**Homepage:** <https://cdn.ltc.bcit.ca>
+**Homepage:** <https://common.ltc.bcit.ca>
 
 ## Maintainers
 
@@ -39,20 +39,20 @@ Our registry images are public, but in ["Working with Container Registries"](htt
     -H "Accept: application/vnd.github+json" \
     -H "Authorization: Bearer $CR_PAT" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    https://api.github.com/orgs/bcit-ltc/packages/container/cdn/versions \
+    https://api.github.com/orgs/bcit-ltc/packages/container/common/versions \
     | jq '.[].metadata.container.tags.[]'
     ```
 
 1. Pull and inspect the helm chart:
 
     ```console
-    helm pull --untar oci://ghcr.io/bcit-ltc/cdn --version {VERSION}
+    helm pull --untar oci://ghcr.io/bcit-ltc/common --version {VERSION}
     ```
 
 1. Install the chart:
 
     ```console
-    helm install cdn .
+    helm install common .
     ```
 
 ## Requirements
@@ -73,11 +73,11 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image default pull policy |
 | frontend.image.registry | string | `"ghcr.io"` | Frontend image registry |
-| frontend.image.repository | string | `"bcit-ltc/cdn"` | Frontend image repository |
+| frontend.image.repository | string | `"bcit-ltc/common"` | Frontend image repository |
 | frontend.image.tag | string | `"1.0.0"` | Frontend image tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
-| frontend.name | string | `"cdn"` | The name of the frontend container to create. If empty uses "frontend" |
+| frontend.name | string | `"common"` | The name of the frontend container to create. If empty uses "frontend" |
 | frontend.port | int | `8080` | Port on which the frontend is listening |
 | frontend.readinessProbe.enabled | bool | `false` | Enables readinessProbe |
 | frontend.resources.limits | object | `{"cpu":"250m","memory":"256Mi"}` | Resource limits mapped directly to the value of    the resources field for a PodSpec. |
@@ -86,7 +86,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.startupProbe.enabled | bool | `false` | Enables startupProbe |
 | frontend.storageMounts | string | `[]` | volumeMounts to be added as secrets |
 | global.imagePullSecrets | list | `[]` |  |
-| global.name | string | `"cdn"` | Authoritative name |
+| global.name | string | `"common"` | Authoritative name |
 | global.progressDeadlineSeconds | int | `600` |  |
 | global.revisionHistoryLimit | int | `3` |  |
 | ingress | object | `{}` | Creates an ingress for external access |

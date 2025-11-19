@@ -1,17 +1,17 @@
 apiVersion: v2
-appVersion: 1.0.2
+appVersion: 1.0.0
 description: Content delivery and proxy service for static assets and third-party API routing.
-home: https://cdn.ltc.bcit.ca
+home: https://common.ltc.bcit.ca
 icon: https://course-production.ltc.bcit.ca/favicon.ico
 maintainers:
   - email: ltc_techops@bcit.ca
     name: BCIT LTC
     url: https://www.bcit.ca/learning-teaching-centre/
-name: cdn
+name: common
 sources:
   - https://github.com/bcit-ltc/
-  - https://github.com/bcit-ltc/cdn
-version: 1.0.2
+  - https://github.com/bcit-ltc/common
+version: 1.0.0
 dependencies:
   - name: apps-common
     version: ">=0.3.0"

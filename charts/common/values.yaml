@@ -3,7 +3,7 @@
 # Global configuration settings
 global:
   # -- Authoritative name
-  name: "cdn"
+  name: "common"
   imagePullSecrets: []
   revisionHistoryLimit: 3
   progressDeadlineSeconds: 600
@@ -44,16 +44,16 @@ frontend:
   # -- Enable or disable frontend components.
   enabled: true
   # -- The name of the frontend container to create. If empty uses "frontend"
-  name: cdn
+  name: common
   image:
     # -- Frontend image default pull policy
     pullPolicy: IfNotPresent
     # -- Frontend image registry
     registry: "ghcr.io"
     # -- Frontend image repository
-    repository: "bcit-ltc/cdn"
+    repository: "bcit-ltc/common"
     # -- Frontend image tag
-    tag: "1.0.2"
+    tag: "1.0.0"
   # Extra annotations to attach to the frontend
   # @default -- `{}`
   annotations: {}
