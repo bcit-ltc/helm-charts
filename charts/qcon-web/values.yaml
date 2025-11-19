@@ -37,7 +37,7 @@ service:
 #   &nbsp;&nbsp;`fsGroup: 101`<br>
 # - Set to `null` to disable
 securityContext:
-  pod: {}
+  pod: null
 # -- Main "frontend" configuration
 # @default -- `{}`
 frontend:
@@ -68,7 +68,7 @@ frontend:
   # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br>
   # - Set to `null` to disable
   securityContext:
-    container: {}
+    container: null
   resources:
     # -- Resource requests mapped directly to the value of
     #    the resources field for a PodSpec.
@@ -97,7 +97,7 @@ frontend:
     - name: tmp
       mountPath: /tmp
     - name: shared-data
-      mountPath: /var/www/html
+      mountPath: /usr/share/nginx/html
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts:
@@ -117,7 +117,7 @@ frontend:
               server_name _;
 
               client_max_body_size 20M;
-              root /var/www/html;
+              root /usr/share/nginx/html;
 
               location / {
                   # checks for static file, if not found proxy to app
@@ -126,7 +126,7 @@ frontend:
 
               location /static/ {
                   autoindex on;
-                  alias /var/www/html/static/;
+                  alias /usr/share/nginx/html/static/;
               }
 
               location @proxy_to_app {
@@ -252,7 +252,7 @@ processor:
   # @default -- `[]`
   emptyDirMounts:
     - name: shared-data
-      mountPath: /app/data
+      mountPath: /code/frontend/build
   # -- Security context for the processor container. Default:<br>
   # &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br>
   # &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br>
