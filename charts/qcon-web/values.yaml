@@ -85,8 +85,8 @@ frontend:
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars: []
-    # - API_HOST: "qcon-api.ltc.bcit.ca"
-    # - API_PORT: "8000"
+  # - API_HOST: "qcon-api.ltc.bcit.ca"
+  # - API_PORT: "8000"
   # -- configEnvs create ConfigMaps that are passed to containers using envFrom
   # @default -- `[]`
   configEnvs: []
@@ -232,7 +232,7 @@ processor:
     # -- Processor image repository
     repository: "bcit-ltc/qcon-web"
     # -- Processor image tag
-    tag: "1.2.4"
+    tag: "1.2.5"
   # -- Number of replicas for the processor
   replicas: 1
   # -- Port on which processor is listening
