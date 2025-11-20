@@ -84,9 +84,9 @@ frontend:
   port: 8080
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
-  extraEnvVars:
-    - API_HOST: "qcon-api.ltc.bcit.ca"
-    - API_PORT: "8000"
+  extraEnvVars: []
+    # - API_HOST: "qcon-api.ltc.bcit.ca"
+    # - API_PORT: "8000"
   # -- configEnvs create ConfigMaps that are passed to containers using envFrom
   # @default -- `[]`
   configEnvs: []
@@ -239,8 +239,9 @@ processor:
   port: 8000
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
-  extraEnvVars: []
-  # - API_URL: "https://app.example.com/api"
+  extraEnvVars:
+    - API_HOST: "qcon-api.ltc.bcit.ca"
+    - API_PORT: "8000"
   # Extra annotations to attach to the processor container
   # @default -- `{}`
   annotations: {}
