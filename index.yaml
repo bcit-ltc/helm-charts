@@ -3,7 +3,7 @@ entries:
   apps-common:
   - apiVersion: v2
     appVersion: 0.3.4
-    created: "2025-11-24T22:32:47.556435933Z"
+    created: "2025-11-25T16:51:12.805795799Z"
     description: Common helpers and partials for LTC Helm charts (library chart).
     digest: d663820f241faf48645096f716a8c5fef82452a63769329f04914d61370554bc
     icon: https://course-production.ltc.bcit.ca/favicon.ico
@@ -18,7 +18,7 @@ entries:
     version: 0.3.4
   - apiVersion: v2
     appVersion: 0.3.3
-    created: "2025-11-24T22:32:47.556189021Z"
+    created: "2025-11-25T16:51:12.805023265Z"
     description: Common helpers and partials for LTC Helm charts (library chart).
     digest: c1985c79d8a746fbed8dc205eabb0a6053e504976e66662e1d90d60a0595e05c
     icon: https://course-production.ltc.bcit.ca/favicon.ico
@@ -33,7 +33,7 @@ entries:
     version: 0.3.3
   - apiVersion: v2
     appVersion: 0.3.2
-    created: "2025-11-24T22:32:47.555967016Z"
+    created: "2025-11-25T16:51:12.804244961Z"
     description: Common helpers and partials for LTC Helm charts (library chart).
     digest: cc2a19fd5b1c07a13c16be62173358e3cd4478f58f65bd20bf3b07c75881b09a
     icon: https://course-production.ltc.bcit.ca/favicon.ico
@@ -48,7 +48,7 @@ entries:
     version: 0.3.2
   - apiVersion: v2
     appVersion: 0.3.1
-    created: "2025-11-24T22:32:47.555722178Z"
+    created: "2025-11-25T16:51:12.804040047Z"
     description: Common helpers and partials for LTC Helm charts (library chart).
     digest: 67c12c080ba89eac5e5329697ccdaf538258da524d0d39e5dbc7eb11a1ed6221
     icon: https://course-production.ltc.bcit.ca/favicon.ico
@@ -63,7 +63,7 @@ entries:
     version: 0.3.1
   - apiVersion: v2
     appVersion: 0.3.0
-    created: "2025-11-24T22:32:47.55527775Z"
+    created: "2025-11-25T16:51:12.803830035Z"
     description: Common helpers and partials for LTC Helm charts (library chart).
     digest: a5fd2e82b80d3b3bd02d84ea4c36eb45727b79dbed178ddfe8e8800bffe2d896
     icon: https://course-production.ltc.bcit.ca/favicon.ico
@@ -79,7 +79,7 @@ entries:
   cdn:
   - apiVersion: v2
     appVersion: 1.0.2
-    created: "2025-11-24T22:32:47.55930591Z"
+    created: "2025-11-25T16:51:12.809162834Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -102,7 +102,7 @@ entries:
     version: 1.0.2
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2025-11-24T22:32:47.558360913Z"
+    created: "2025-11-25T16:51:12.808216598Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -125,7 +125,7 @@ entries:
     version: 1.0.1
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.557438368Z"
+    created: "2025-11-25T16:51:12.807109906Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -148,8 +148,31 @@ entries:
     version: 1.0.0
   common:
   - apiVersion: v2
+    appVersion: 1.0.7
+    created: "2025-11-25T16:51:12.815749284Z"
+    dependencies:
+    - name: apps-common
+      repository: https://bcit-ltc.github.io/helm-charts
+      version: '>=0.3.0'
+    description: Content delivery and proxy service for static assets and third-party
+      API routing.
+    digest: 77dddaf22fe2e36a62004655213de2747507633d69f562f461e82864d4773b3d
+    home: https://common.ltc.bcit.ca
+    icon: https://course-production.ltc.bcit.ca/favicon.ico
+    maintainers:
+    - email: ltc_techops@bcit.ca
+      name: BCIT LTC
+      url: https://www.bcit.ca/learning-teaching-centre/
+    name: common
+    sources:
+    - https://github.com/bcit-ltc/
+    - https://github.com/bcit-ltc/common
+    urls:
+    - https://bcit-ltc.github.io/helm-charts/common-1.0.7.tgz
+    version: 1.0.7
+  - apiVersion: v2
     appVersion: 1.0.6
-    created: "2025-11-24T22:32:47.564590417Z"
+    created: "2025-11-25T16:51:12.814841914Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -172,7 +195,7 @@ entries:
     version: 1.0.6
   - apiVersion: v2
     appVersion: 1.0.5
-    created: "2025-11-24T22:32:47.563683601Z"
+    created: "2025-11-25T16:51:12.813845792Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -195,7 +218,7 @@ entries:
     version: 1.0.5
   - apiVersion: v2
     appVersion: 1.0.4
-    created: "2025-11-24T22:32:47.562753621Z"
+    created: "2025-11-25T16:51:12.811986136Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -218,7 +241,7 @@ entries:
     version: 1.0.4
   - apiVersion: v2
     appVersion: 1.0.3
-    created: "2025-11-24T22:32:47.561145531Z"
+    created: "2025-11-25T16:51:12.811042793Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -241,7 +264,7 @@ entries:
     version: 1.0.3
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.560220691Z"
+    created: "2025-11-25T16:51:12.810085891Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -265,7 +288,7 @@ entries:
   conversion-guide:
   - apiVersion: v2
     appVersion: 1.1.1
-    created: "2025-11-24T22:32:47.571731604Z"
+    created: "2025-11-25T16:51:12.823079045Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -288,7 +311,7 @@ entries:
     version: 1.1.1
   - apiVersion: v2
     appVersion: 1.1.0
-    created: "2025-11-24T22:32:47.570847861Z"
+    created: "2025-11-25T16:51:12.82219522Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -311,7 +334,7 @@ entries:
     version: 1.1.0
   - apiVersion: v2
     appVersion: 1.0.18
-    created: "2025-11-24T22:32:47.569918683Z"
+    created: "2025-11-25T16:51:12.821239484Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -334,7 +357,7 @@ entries:
     version: 1.0.18
   - apiVersion: v2
     appVersion: 1.0.17
-    created: "2025-11-24T22:32:47.56824421Z"
+    created: "2025-11-25T16:51:12.819304465Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -357,7 +380,7 @@ entries:
     version: 1.0.17
   - apiVersion: v2
     appVersion: 1.0.16-rc.20251113035238.ce6438f
-    created: "2025-11-24T22:32:47.567349417Z"
+    created: "2025-11-25T16:51:12.818405572Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -380,7 +403,7 @@ entries:
     version: 1.0.16-rc.20251113035238.ce6438f
   - apiVersion: v2
     appVersion: 1.0.15
-    created: "2025-11-24T22:32:47.566449063Z"
+    created: "2025-11-25T16:51:12.817527818Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -403,7 +426,7 @@ entries:
     version: 1.0.15
   - apiVersion: v2
     appVersion: 1.0.14
-    created: "2025-11-24T22:32:47.565505679Z"
+    created: "2025-11-25T16:51:12.816615311Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -427,7 +450,7 @@ entries:
   course-production-site:
   - apiVersion: v2
     appVersion: 1.0.2
-    created: "2025-11-24T22:32:47.572615658Z"
+    created: "2025-11-25T16:51:12.823976446Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -450,7 +473,7 @@ entries:
   course-workload-estimator:
   - apiVersion: v2
     appVersion: 1.0.7
-    created: "2025-11-24T22:32:47.576983367Z"
+    created: "2025-11-25T16:51:12.828490151Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -473,7 +496,7 @@ entries:
     version: 1.0.7
   - apiVersion: v2
     appVersion: 1.0.6
-    created: "2025-11-24T22:32:47.575282696Z"
+    created: "2025-11-25T16:51:12.826658456Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -496,7 +519,7 @@ entries:
     version: 1.0.6
   - apiVersion: v2
     appVersion: 1.0.5
-    created: "2025-11-24T22:32:47.574395927Z"
+    created: "2025-11-25T16:51:12.825762318Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -519,7 +542,7 @@ entries:
     version: 1.0.5
   - apiVersion: v2
     appVersion: 1.0.4
-    created: "2025-11-24T22:32:47.573474794Z"
+    created: "2025-11-25T16:51:12.82488417Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -543,7 +566,7 @@ entries:
   infrastructure-documentation:
   - apiVersion: v2
     appVersion: 1.2.5
-    created: "2025-11-24T22:32:47.588603126Z"
+    created: "2025-11-25T16:51:12.840162866Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -566,7 +589,7 @@ entries:
     version: 1.2.5
   - apiVersion: v2
     appVersion: 1.2.4
-    created: "2025-11-24T22:32:47.587720716Z"
+    created: "2025-11-25T16:51:12.839293327Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -589,7 +612,7 @@ entries:
     version: 1.2.4
   - apiVersion: v2
     appVersion: 1.2.3
-    created: "2025-11-24T22:32:47.586821564Z"
+    created: "2025-11-25T16:51:12.838431149Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -612,7 +635,7 @@ entries:
     version: 1.2.3
   - apiVersion: v2
     appVersion: 1.2.2
-    created: "2025-11-24T22:32:47.585936709Z"
+    created: "2025-11-25T16:51:12.837557839Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -635,7 +658,7 @@ entries:
     version: 1.2.2
   - apiVersion: v2
     appVersion: 1.2.1
-    created: "2025-11-24T22:32:47.585028471Z"
+    created: "2025-11-25T16:51:12.836632299Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -658,7 +681,7 @@ entries:
     version: 1.2.1
   - apiVersion: v2
     appVersion: 1.2.0
-    created: "2025-11-24T22:32:47.58408717Z"
+    created: "2025-11-25T16:51:12.835691217Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -681,7 +704,7 @@ entries:
     version: 1.2.0
   - apiVersion: v2
     appVersion: 1.1.11
-    created: "2025-11-24T22:32:47.581491528Z"
+    created: "2025-11-25T16:51:12.832927086Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -704,7 +727,7 @@ entries:
     version: 1.1.11
   - apiVersion: v2
     appVersion: 1.1.11-rc.20251114065616.2e2c1a8
-    created: "2025-11-24T22:32:47.580627191Z"
+    created: "2025-11-25T16:51:12.832055022Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -727,7 +750,7 @@ entries:
     version: 1.1.11-rc.20251114065616.2e2c1a8
   - apiVersion: v2
     appVersion: 1.1.10
-    created: "2025-11-24T22:32:47.579747266Z"
+    created: "2025-11-25T16:51:12.831167549Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -750,7 +773,7 @@ entries:
     version: 1.1.10
   - apiVersion: v2
     appVersion: 1.1.10-rc.20251113052619.508faf0
-    created: "2025-11-24T22:32:47.578841772Z"
+    created: "2025-11-25T16:51:12.830313749Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -773,7 +796,7 @@ entries:
     version: 1.1.10-rc.20251113052619.508faf0
   - apiVersion: v2
     appVersion: 1.1.10-rc.20251113051049.6a9cb34
-    created: "2025-11-24T22:32:47.577914177Z"
+    created: "2025-11-25T16:51:12.829415521Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -796,7 +819,7 @@ entries:
     version: 1.1.10-rc.20251113051049.6a9cb34
   - apiVersion: v2
     appVersion: 1.1.9
-    created: "2025-11-24T22:32:47.582404215Z"
+    created: "2025-11-25T16:51:12.833857118Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -820,7 +843,7 @@ entries:
   legacy-html:
   - apiVersion: v2
     appVersion: 1.0.6
-    created: "2025-11-24T22:32:47.59216738Z"
+    created: "2025-11-25T16:51:12.844074544Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -842,7 +865,7 @@ entries:
     version: 1.0.6
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2025-11-24T22:32:47.59122105Z"
+    created: "2025-11-25T16:51:12.843050667Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -864,7 +887,7 @@ entries:
     version: 1.0.1
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.589459518Z"
+    created: "2025-11-25T16:51:12.841040738Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -887,7 +910,7 @@ entries:
   legacy-ltc:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.59303902Z"
+    created: "2025-11-25T16:51:12.844974806Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -910,7 +933,7 @@ entries:
   legacy-multimedia:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.593910891Z"
+    created: "2025-11-25T16:51:12.845852844Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -933,7 +956,7 @@ entries:
   legacy-sob:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.594767132Z"
+    created: "2025-11-25T16:51:12.846776362Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -956,7 +979,7 @@ entries:
   legacy-soc:
   - apiVersion: v2
     appVersion: 1.0.10
-    created: "2025-11-24T22:32:47.599606513Z"
+    created: "2025-11-25T16:51:12.852340903Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -978,7 +1001,7 @@ entries:
     version: 1.0.10
   - apiVersion: v2
     appVersion: 1.0.10-rc.20251114181637.adb6929
-    created: "2025-11-24T22:32:47.598463916Z"
+    created: "2025-11-25T16:51:12.850898205Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1000,7 +1023,7 @@ entries:
     version: 1.0.10-rc.20251114181637.adb6929
   - apiVersion: v2
     appVersion: 1.0.9
-    created: "2025-11-24T22:32:47.611716622Z"
+    created: "2025-11-25T16:51:12.864771729Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1022,7 +1045,7 @@ entries:
     version: 1.0.9
   - apiVersion: v2
     appVersion: 1.0.8
-    created: "2025-11-24T22:32:47.610428042Z"
+    created: "2025-11-25T16:51:12.863630106Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1044,7 +1067,7 @@ entries:
     version: 1.0.8
   - apiVersion: v2
     appVersion: 1.0.7
-    created: "2025-11-24T22:32:47.609320441Z"
+    created: "2025-11-25T16:51:12.86248658Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1066,7 +1089,7 @@ entries:
     version: 1.0.7
   - apiVersion: v2
     appVersion: 1.0.6
-    created: "2025-11-24T22:32:47.608235021Z"
+    created: "2025-11-25T16:51:12.861340054Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1088,7 +1111,7 @@ entries:
     version: 1.0.6
   - apiVersion: v2
     appVersion: 1.0.5
-    created: "2025-11-24T22:32:47.607145593Z"
+    created: "2025-11-25T16:51:12.860175125Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1110,7 +1133,7 @@ entries:
     version: 1.0.5
   - apiVersion: v2
     appVersion: 1.0.4
-    created: "2025-11-24T22:32:47.606006913Z"
+    created: "2025-11-25T16:51:12.85904367Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1132,7 +1155,7 @@ entries:
     version: 1.0.4
   - apiVersion: v2
     appVersion: 1.0.4-rc.20251113165750.04ed697
-    created: "2025-11-24T22:32:47.604369584Z"
+    created: "2025-11-25T16:51:12.857297758Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1154,7 +1177,7 @@ entries:
     version: 1.0.4-rc.20251113165750.04ed697
   - apiVersion: v2
     appVersion: 1.0.4-rc.20251107003117.8934675
-    created: "2025-11-24T22:32:47.603098153Z"
+    created: "2025-11-25T16:51:12.856168203Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1176,7 +1199,7 @@ entries:
     version: 1.0.4-rc.20251107003117.8934675
   - apiVersion: v2
     appVersion: 1.0.3
-    created: "2025-11-24T22:32:47.60221394Z"
+    created: "2025-11-25T16:51:12.855238441Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1198,7 +1221,7 @@ entries:
     version: 1.0.3
   - apiVersion: v2
     appVersion: 1.0.2
-    created: "2025-11-24T22:32:47.601344013Z"
+    created: "2025-11-25T16:51:12.854382932Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1220,7 +1243,7 @@ entries:
     version: 1.0.2
   - apiVersion: v2
     appVersion: 1.0.2-rc.20251027174020.921c08d
-    created: "2025-11-24T22:32:47.600469196Z"
+    created: "2025-11-25T16:51:12.853442379Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1242,7 +1265,7 @@ entries:
     version: 1.0.2-rc.20251027174020.921c08d
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2025-11-24T22:32:47.596502969Z"
+    created: "2025-11-25T16:51:12.848518786Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1264,7 +1287,7 @@ entries:
     version: 1.0.1
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.595624656Z"
+    created: "2025-11-25T16:51:12.84764052Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1287,7 +1310,7 @@ entries:
   legacy-soc-royaloak:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.613108145Z"
+    created: "2025-11-25T16:51:12.866718615Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1310,7 +1333,7 @@ entries:
   legacy-socas:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.614015231Z"
+    created: "2025-11-25T16:51:12.867908732Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1333,7 +1356,7 @@ entries:
   legacy-soe:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.614883535Z"
+    created: "2025-11-25T16:51:12.869000239Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1356,7 +1379,7 @@ entries:
   legacy-soh:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.615798787Z"
+    created: "2025-11-25T16:51:12.8699314Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1379,7 +1402,7 @@ entries:
   legacy-soh-3dbirth:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.616669215Z"
+    created: "2025-11-25T16:51:12.870820749Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1402,7 +1425,7 @@ entries:
   legacy-soh-3dheart:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.617529945Z"
+    created: "2025-11-25T16:51:12.87170956Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1425,7 +1448,7 @@ entries:
   legacy-soh-sonography:
   - apiVersion: v2
     appVersion: 1.1.10
-    created: "2025-11-24T22:32:47.647341372Z"
+    created: "2025-11-25T16:51:12.903908907Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1447,7 +1470,7 @@ entries:
     version: 1.1.10
   - apiVersion: v2
     appVersion: 1.1.9
-    created: "2025-11-24T22:32:47.663374438Z"
+    created: "2025-11-25T16:51:12.921517922Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1469,7 +1492,7 @@ entries:
     version: 1.1.9
   - apiVersion: v2
     appVersion: 1.1.8
-    created: "2025-11-24T22:32:47.662290601Z"
+    created: "2025-11-25T16:51:12.920362882Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1491,7 +1514,7 @@ entries:
     version: 1.1.8
   - apiVersion: v2
     appVersion: 1.1.8-rc.20251114061855.2eec581
-    created: "2025-11-24T22:32:47.661166709Z"
+    created: "2025-11-25T16:51:12.919230002Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1513,7 +1536,7 @@ entries:
     version: 1.1.8-rc.20251114061855.2eec581
   - apiVersion: v2
     appVersion: 1.1.7
-    created: "2025-11-24T22:32:47.660047335Z"
+    created: "2025-11-25T16:51:12.918072158Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1535,7 +1558,7 @@ entries:
     version: 1.1.7
   - apiVersion: v2
     appVersion: 1.1.7-rc.20251114031103.2178704
-    created: "2025-11-24T22:32:47.658945475Z"
+    created: "2025-11-25T16:51:12.916897389Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1557,7 +1580,7 @@ entries:
     version: 1.1.7-rc.20251114031103.2178704
   - apiVersion: v2
     appVersion: 1.1.6
-    created: "2025-11-24T22:32:47.657792288Z"
+    created: "2025-11-25T16:51:12.915709144Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1579,7 +1602,7 @@ entries:
     version: 1.1.6
   - apiVersion: v2
     appVersion: 1.1.6-rc.20251112223730.4846c31
-    created: "2025-11-24T22:32:47.655906383Z"
+    created: "2025-11-25T16:51:12.913422051Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1601,7 +1624,7 @@ entries:
     version: 1.1.6-rc.20251112223730.4846c31
   - apiVersion: v2
     appVersion: 1.1.5
-    created: "2025-11-24T22:32:47.654815453Z"
+    created: "2025-11-25T16:51:12.912116483Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1623,7 +1646,7 @@ entries:
     version: 1.1.5
   - apiVersion: v2
     appVersion: 1.1.4
-    created: "2025-11-24T22:32:47.653704826Z"
+    created: "2025-11-25T16:51:12.91098076Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1645,7 +1668,7 @@ entries:
     version: 1.1.4
   - apiVersion: v2
     appVersion: 1.1.3
-    created: "2025-11-24T22:32:47.652590161Z"
+    created: "2025-11-25T16:51:12.909826789Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1667,7 +1690,7 @@ entries:
     version: 1.1.3
   - apiVersion: v2
     appVersion: 1.1.3-rc.20251112182901.39e3512
-    created: "2025-11-24T22:32:47.651474084Z"
+    created: "2025-11-25T16:51:12.908622596Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1689,7 +1712,7 @@ entries:
     version: 1.1.3-rc.20251112182901.39e3512
   - apiVersion: v2
     appVersion: 1.1.2
-    created: "2025-11-24T22:32:47.650292794Z"
+    created: "2025-11-25T16:51:12.907167446Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1711,7 +1734,7 @@ entries:
     version: 1.1.2
   - apiVersion: v2
     appVersion: 1.1.2-rc.20251107063858.8a3bb02
-    created: "2025-11-24T22:32:47.648448533Z"
+    created: "2025-11-25T16:51:12.905035849Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1733,7 +1756,7 @@ entries:
     version: 1.1.2-rc.20251107063858.8a3bb02
   - apiVersion: v2
     appVersion: 1.1.1
-    created: "2025-11-24T22:32:47.64622263Z"
+    created: "2025-11-25T16:51:12.90281652Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1755,7 +1778,7 @@ entries:
     version: 1.1.1
   - apiVersion: v2
     appVersion: 1.1.0
-    created: "2025-11-24T22:32:47.64512659Z"
+    created: "2025-11-25T16:51:12.901714363Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1777,7 +1800,7 @@ entries:
     version: 1.1.0
   - apiVersion: v2
     appVersion: 1.0.15
-    created: "2025-11-24T22:32:47.631394089Z"
+    created: "2025-11-25T16:51:12.886710166Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1799,7 +1822,7 @@ entries:
     version: 1.0.15
   - apiVersion: v2
     appVersion: 1.0.14
-    created: "2025-11-24T22:32:47.630290815Z"
+    created: "2025-11-25T16:51:12.885606483Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1821,7 +1844,7 @@ entries:
     version: 1.0.14
   - apiVersion: v2
     appVersion: 1.0.13
-    created: "2025-11-24T22:32:47.629134042Z"
+    created: "2025-11-25T16:51:12.884474507Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1843,7 +1866,7 @@ entries:
     version: 1.0.13
   - apiVersion: v2
     appVersion: 1.0.12
-    created: "2025-11-24T22:32:47.628010621Z"
+    created: "2025-11-25T16:51:12.883212257Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1865,7 +1888,7 @@ entries:
     version: 1.0.12
   - apiVersion: v2
     appVersion: 1.0.11
-    created: "2025-11-24T22:32:47.626130763Z"
+    created: "2025-11-25T16:51:12.880982036Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1887,7 +1910,7 @@ entries:
     version: 1.0.11
   - apiVersion: v2
     appVersion: 1.0.10
-    created: "2025-11-24T22:32:47.625044913Z"
+    created: "2025-11-25T16:51:12.879866919Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1909,7 +1932,7 @@ entries:
     version: 1.0.10
   - apiVersion: v2
     appVersion: 1.0.9
-    created: "2025-11-24T22:32:47.643949428Z"
+    created: "2025-11-25T16:51:12.900337688Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1931,7 +1954,7 @@ entries:
     version: 1.0.9
   - apiVersion: v2
     appVersion: 1.0.8
-    created: "2025-11-24T22:32:47.642788898Z"
+    created: "2025-11-25T16:51:12.898871159Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1953,7 +1976,7 @@ entries:
     version: 1.0.8
   - apiVersion: v2
     appVersion: 1.0.7
-    created: "2025-11-24T22:32:47.640798067Z"
+    created: "2025-11-25T16:51:12.896699025Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1975,7 +1998,7 @@ entries:
     version: 1.0.7
   - apiVersion: v2
     appVersion: 1.0.6
-    created: "2025-11-24T22:32:47.639718227Z"
+    created: "2025-11-25T16:51:12.895583311Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -1997,7 +2020,7 @@ entries:
     version: 1.0.6
   - apiVersion: v2
     appVersion: 1.0.5-rc.20251029002205.2db79d7
-    created: "2025-11-24T22:32:47.638682189Z"
+    created: "2025-11-25T16:51:12.89451816Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2019,7 +2042,7 @@ entries:
     version: 1.0.5-rc.20251029002205.2db79d7
   - apiVersion: v2
     appVersion: 1.0.4
-    created: "2025-11-24T22:32:47.637621205Z"
+    created: "2025-11-25T16:51:12.893399892Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2041,7 +2064,7 @@ entries:
     version: 1.0.4
   - apiVersion: v2
     appVersion: 1.0.4-rc.20251105025347.8d8aca2
-    created: "2025-11-24T22:32:47.636507913Z"
+    created: "2025-11-25T16:51:12.892253616Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2063,7 +2086,7 @@ entries:
     version: 1.0.4-rc.20251105025347.8d8aca2
   - apiVersion: v2
     appVersion: 1.0.3
-    created: "2025-11-24T22:32:47.635375315Z"
+    created: "2025-11-25T16:51:12.891114961Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2085,7 +2108,7 @@ entries:
     version: 1.0.3
   - apiVersion: v2
     appVersion: 1.0.2
-    created: "2025-11-24T22:32:47.633483146Z"
+    created: "2025-11-25T16:51:12.8888954Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2107,7 +2130,7 @@ entries:
     version: 1.0.2
   - apiVersion: v2
     appVersion: 1.0.2-rc.20251028063350.f19d048
-    created: "2025-11-24T22:32:47.632445275Z"
+    created: "2025-11-25T16:51:12.88780549Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2129,7 +2152,7 @@ entries:
     version: 1.0.2-rc.20251028063350.f19d048
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2025-11-24T22:32:47.623961376Z"
+    created: "2025-11-25T16:51:12.878761482Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2151,7 +2174,7 @@ entries:
     version: 1.0.1
   - apiVersion: v2
     appVersion: 1.0.1-rc.20251027013928.a8a9095
-    created: "2025-11-24T22:32:47.622837013Z"
+    created: "2025-11-25T16:51:12.877655766Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2173,7 +2196,7 @@ entries:
     version: 1.0.1-rc.20251027013928.a8a9095
   - apiVersion: v2
     appVersion: 1.0.1-rc.20251026175713.fd1a067
-    created: "2025-11-24T22:32:47.621782661Z"
+    created: "2025-11-25T16:51:12.876560083Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2195,7 +2218,7 @@ entries:
     version: 1.0.1-rc.20251026175713.fd1a067
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.620676262Z"
+    created: "2025-11-25T16:51:12.875130814Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2217,7 +2240,7 @@ entries:
     version: 1.0.0
   - apiVersion: v2
     appVersion: 0.0.1-rc.20251031164347.f5c61f4
-    created: "2025-11-24T22:32:47.618632757Z"
+    created: "2025-11-25T16:51:12.872774439Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2240,7 +2263,7 @@ entries:
   legacy-sot:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.665095126Z"
+    created: "2025-11-25T16:51:12.922448542Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2263,7 +2286,7 @@ entries:
   module-estimator:
   - apiVersion: v2
     appVersion: 1.0.7
-    created: "2025-11-24T22:32:47.675492089Z"
+    created: "2025-11-25T16:51:12.934305147Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2285,7 +2308,7 @@ entries:
     version: 1.0.7
   - apiVersion: v2
     appVersion: 1.0.6
-    created: "2025-11-24T22:32:47.674648041Z"
+    created: "2025-11-25T16:51:12.933390021Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2307,7 +2330,7 @@ entries:
     version: 1.0.6
   - apiVersion: v2
     appVersion: 1.0.5
-    created: "2025-11-24T22:32:47.673772623Z"
+    created: "2025-11-25T16:51:12.932521147Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2329,7 +2352,7 @@ entries:
     version: 1.0.5
   - apiVersion: v2
     appVersion: 1.0.5-rc.20251114061934.00b8213
-    created: "2025-11-24T22:32:47.672897136Z"
+    created: "2025-11-25T16:51:12.931597017Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2351,7 +2374,7 @@ entries:
     version: 1.0.5-rc.20251114061934.00b8213
   - apiVersion: v2
     appVersion: 1.0.4
-    created: "2025-11-24T22:32:47.671986493Z"
+    created: "2025-11-25T16:51:12.929757413Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2373,7 +2396,7 @@ entries:
     version: 1.0.4
   - apiVersion: v2
     appVersion: 1.0.3
-    created: "2025-11-24T22:32:47.670372767Z"
+    created: "2025-11-25T16:51:12.92887579Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2395,7 +2418,7 @@ entries:
     version: 1.0.3
   - apiVersion: v2
     appVersion: 1.0.2
-    created: "2025-11-24T22:32:47.669504413Z"
+    created: "2025-11-25T16:51:12.928011779Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2417,7 +2440,7 @@ entries:
     version: 1.0.2
   - apiVersion: v2
     appVersion: 1.0.2-rc.20251030162254.d0c3ea6
-    created: "2025-11-24T22:32:47.668648192Z"
+    created: "2025-11-25T16:51:12.927101058Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2439,7 +2462,7 @@ entries:
     version: 1.0.2-rc.20251030162254.d0c3ea6
   - apiVersion: v2
     appVersion: 1.0.2-rc.20251030161738.89188fe
-    created: "2025-11-24T22:32:47.66777582Z"
+    created: "2025-11-25T16:51:12.926211475Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2461,7 +2484,7 @@ entries:
     version: 1.0.2-rc.20251030161738.89188fe
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2025-11-24T22:32:47.666884623Z"
+    created: "2025-11-25T16:51:12.925333289Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2483,7 +2506,7 @@ entries:
     version: 1.0.1
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.665989088Z"
+    created: "2025-11-25T16:51:12.924191039Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2506,7 +2529,7 @@ entries:
   nginx-unprivileged:
   - apiVersion: v2
     appVersion: alpine3.22
-    created: "2025-11-24T22:32:47.675925199Z"
+    created: "2025-11-25T16:51:12.934644445Z"
     description: Minimal, standardized chart for running nginx-unprivileged
     digest: 05bb34a4033a976606857cc9b228f1b04589a0613a1a2493c0cb5ebd32b5be0b
     name: nginx-unprivileged
@@ -2517,7 +2540,7 @@ entries:
   qcon-api:
   - apiVersion: v2
     appVersion: 1.2.6
-    created: "2025-11-24T22:32:47.68607802Z"
+    created: "2025-11-25T16:51:12.943806842Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2540,7 +2563,7 @@ entries:
     version: 1.2.6
   - apiVersion: v2
     appVersion: 1.2.5
-    created: "2025-11-24T22:32:47.68403577Z"
+    created: "2025-11-25T16:51:12.942800692Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2563,7 +2586,7 @@ entries:
     version: 1.2.5
   - apiVersion: v2
     appVersion: 1.2.4
-    created: "2025-11-24T22:32:47.683035029Z"
+    created: "2025-11-25T16:51:12.941787287Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2586,7 +2609,7 @@ entries:
     version: 1.2.4
   - apiVersion: v2
     appVersion: 1.2.3
-    created: "2025-11-24T22:32:47.681987289Z"
+    created: "2025-11-25T16:51:12.940766366Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2609,7 +2632,7 @@ entries:
     version: 1.2.3
   - apiVersion: v2
     appVersion: 1.2.2
-    created: "2025-11-24T22:32:47.680981708Z"
+    created: "2025-11-25T16:51:12.939764168Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2632,7 +2655,7 @@ entries:
     version: 1.2.2
   - apiVersion: v2
     appVersion: 1.2.2-rc.20251107064313.1e5525b
-    created: "2025-11-24T22:32:47.67993469Z"
+    created: "2025-11-25T16:51:12.93844621Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2655,7 +2678,7 @@ entries:
     version: 1.2.2-rc.20251107064313.1e5525b
   - apiVersion: v2
     appVersion: 1.2.1
-    created: "2025-11-24T22:32:47.678886039Z"
+    created: "2025-11-25T16:51:12.936740548Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2678,7 +2701,7 @@ entries:
     version: 1.2.1
   - apiVersion: v2
     appVersion: 1.2.1-rc.20251022032130.5ef117c
-    created: "2025-11-24T22:32:47.677018414Z"
+    created: "2025-11-25T16:51:12.935720436Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2702,7 +2725,7 @@ entries:
   qcon-guide:
   - apiVersion: v2
     appVersion: 1.0.4
-    created: "2025-11-24T22:32:47.688753514Z"
+    created: "2025-11-25T16:51:12.947747956Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2724,7 +2747,7 @@ entries:
     version: 1.0.4
   - apiVersion: v2
     appVersion: 1.0.3
-    created: "2025-11-24T22:32:47.687862938Z"
+    created: "2025-11-25T16:51:12.946577807Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2746,7 +2769,7 @@ entries:
     version: 1.0.3
   - apiVersion: v2
     appVersion: 1.0.2
-    created: "2025-11-24T22:32:47.686980518Z"
+    created: "2025-11-25T16:51:12.944682038Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2769,7 +2792,7 @@ entries:
   qcon-web:
   - apiVersion: v2
     appVersion: 1.2.5
-    created: "2025-11-24T22:32:47.7078609Z"
+    created: "2025-11-25T16:51:12.966902915Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2792,7 +2815,7 @@ entries:
     version: 1.2.5
   - apiVersion: v2
     appVersion: 1.2.4
-    created: "2025-11-24T22:32:47.706027293Z"
+    created: "2025-11-25T16:51:12.965893208Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2815,7 +2838,7 @@ entries:
     version: 1.2.4
   - apiVersion: v2
     appVersion: 1.2.3
-    created: "2025-11-24T22:32:47.705017814Z"
+    created: "2025-11-25T16:51:12.964842675Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2838,7 +2861,7 @@ entries:
     version: 1.2.3
   - apiVersion: v2
     appVersion: 1.2.2
-    created: "2025-11-24T22:32:47.703910494Z"
+    created: "2025-11-25T16:51:12.963808353Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2861,7 +2884,7 @@ entries:
     version: 1.2.2
   - apiVersion: v2
     appVersion: 1.2.1
-    created: "2025-11-24T22:32:47.702902889Z"
+    created: "2025-11-25T16:51:12.962432137Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2884,7 +2907,7 @@ entries:
     version: 1.2.1
   - apiVersion: v2
     appVersion: 1.2.0
-    created: "2025-11-24T22:32:47.70185008Z"
+    created: "2025-11-25T16:51:12.960204227Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2907,7 +2930,7 @@ entries:
     version: 1.2.0
   - apiVersion: v2
     appVersion: 1.1.5
-    created: "2025-11-24T22:32:47.700797331Z"
+    created: "2025-11-25T16:51:12.959137699Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2930,7 +2953,7 @@ entries:
     version: 1.1.5
   - apiVersion: v2
     appVersion: 1.1.4
-    created: "2025-11-24T22:32:47.698906375Z"
+    created: "2025-11-25T16:51:12.958121398Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2953,7 +2976,7 @@ entries:
     version: 1.1.4
   - apiVersion: v2
     appVersion: 1.1.4-rc.20251112002503.8b27267
-    created: "2025-11-24T22:32:47.69788265Z"
+    created: "2025-11-25T16:51:12.957089265Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2976,7 +2999,7 @@ entries:
     version: 1.1.4-rc.20251112002503.8b27267
   - apiVersion: v2
     appVersion: 1.1.3
-    created: "2025-11-24T22:32:47.696872781Z"
+    created: "2025-11-25T16:51:12.95601223Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -2999,7 +3022,7 @@ entries:
     version: 1.1.3
   - apiVersion: v2
     appVersion: 1.1.2
-    created: "2025-11-24T22:32:47.6958245Z"
+    created: "2025-11-25T16:51:12.954959231Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -3022,7 +3045,7 @@ entries:
     version: 1.1.2
   - apiVersion: v2
     appVersion: 1.1.1
-    created: "2025-11-24T22:32:47.694806917Z"
+    created: "2025-11-25T16:51:12.953065328Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -3045,7 +3068,7 @@ entries:
     version: 1.1.1
   - apiVersion: v2
     appVersion: 1.1.0
-    created: "2025-11-24T22:32:47.693748147Z"
+    created: "2025-11-25T16:51:12.952061813Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -3068,7 +3091,7 @@ entries:
     version: 1.1.0
   - apiVersion: v2
     appVersion: 1.0.1
-    created: "2025-11-24T22:32:47.692025663Z"
+    created: "2025-11-25T16:51:12.951036622Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -3091,7 +3114,7 @@ entries:
     version: 1.0.1
   - apiVersion: v2
     appVersion: 1.0.1-rc.20251107055825.6ca81ef
-    created: "2025-11-24T22:32:47.690811663Z"
+    created: "2025-11-25T16:51:12.950012645Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -3114,7 +3137,7 @@ entries:
     version: 1.0.1-rc.20251107055825.6ca81ef
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-11-24T22:32:47.689700655Z"
+    created: "2025-11-25T16:51:12.948968378Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -3138,7 +3161,7 @@ entries:
   sugar-suite:
   - apiVersion: v2
     appVersion: 1.1.4-rc.20251114065904.f28c4ff
-    created: "2025-11-24T22:32:47.711442168Z"
+    created: "2025-11-25T16:51:12.971335566Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -3161,7 +3184,7 @@ entries:
     version: 1.1.4-rc.20251114065904.f28c4ff
   - apiVersion: v2
     appVersion: 1.1.3
-    created: "2025-11-24T22:32:47.710538428Z"
+    created: "2025-11-25T16:51:12.970412317Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -3184,7 +3207,7 @@ entries:
     version: 1.1.3
   - apiVersion: v2
     appVersion: 1.1.2
-    created: "2025-11-24T22:32:47.709667148Z"
+    created: "2025-11-25T16:51:12.969009624Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -3207,7 +3230,7 @@ entries:
     version: 1.1.2
   - apiVersion: v2
     appVersion: 1.1.1
-    created: "2025-11-24T22:32:47.708781652Z"
+    created: "2025-11-25T16:51:12.967766261Z"
     dependencies:
     - name: apps-common
       repository: https://bcit-ltc.github.io/helm-charts
@@ -3228,4 +3251,4 @@ entries:
     urls:
     - https://bcit-ltc.github.io/helm-charts/sugar-suite-1.1.1.tgz
     version: 1.1.1
-generated: "2025-11-24T22:32:47.554895284Z"
+generated: "2025-11-25T16:51:12.803466104Z"
