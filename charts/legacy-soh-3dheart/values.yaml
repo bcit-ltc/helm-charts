@@ -4,7 +4,7 @@
 global:
   # -- Authoritative name
   name: "legacy-soh-3dheart"
-  imagePullSecrets: []
+  imagePullSecrets: ["github-private-repo-token"]
   revisionHistoryLimit: 3
   progressDeadlineSeconds: 600
 # -- Configuration for the service account
@@ -30,14 +30,14 @@ service:
   # Extra annotations to attach to the service
   annotations: {}
 # -- Security context for the pod template<br>
-# @default -- 
+# @default --
 #   &nbsp;&nbsp;`runAsNonRoot: true`<br>
 #   &nbsp;&nbsp;`runAsGroup: 101`<br>
 #   &nbsp;&nbsp;`runAsUser: 101`<br>
 #   &nbsp;&nbsp;`fsGroup: 101`<br>
 # - Set to `null` to disable
 securityContext:
-  pod: {}
+  pod: null
 # -- Main "frontend" configuration
 # @default -- `{}`
 frontend:
@@ -68,7 +68,7 @@ frontend:
   # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br>
   # - Set to `null` to disable
   securityContext:
-    container: {}
+    container: null
   resources:
     # -- Resource requests mapped directly to the value of
     #    the resources field for a PodSpec.
@@ -95,8 +95,6 @@ frontend:
   emptyDirMounts:
     - name: tmp
       mountPath: /tmp
-  # - name: shared-data
-  #   mountPath: /var/www/html
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []
@@ -107,37 +105,39 @@ frontend:
   #       upload_max_filesize=4G
   #       post_max_size=6G
   #       memory_limit=8G
-  # -- volumeMounts to be added as secrets
+  # -- Configuration for persistent volume claims
   # @default -- `[]`
   storageMounts:
-  # - name: data-storage
-  #   size: 10Gi
-  # # -- Location where the PVC will be mounted.
-  #   mountPath: "/app/data"
-  # # -- Name of the storage class to use. If null it will use the
-  # # configured default Storage Class.
-  #   storageClass: null
-  # # -- Access Mode of the storage device being used for the PVC
-  #   accessMode: ReadWriteOnce
+    - name: legacy-soh-3dheart-assets
+      size: 5Gi
+      # -- Location where the PVC will be mounted.
+      mountPath: "/usr/share/nginx/html"
+      # -- Whether the volume should be mounted read-only.
+      readOnly: true
+      # -- Name of the storage class to use. If null it will use the
+      # configured default Storage Class.
+      # storageClass: legacy-large-files
+      # -- Access Mode of the storage device being used for the PVC
+      accessMode: ReadWriteOnce
+  # -- volumeMounts to be added as secrets
   secretMounts: []
-  # # Credentials to access the app internal management portal (local account)
-  # - name: app-internal-credentials # volume name (must be DNS-1123 compliant)
-  #   secretName: app-internal-credentials # refers to existing Secret in the same namespace
+  # - name: github-token # volume name (must be DNS-1123 compliant)
+  #   secretName: github-token # refers to existing Secret in the same namespace
   #   mountPath: /etc/secrets
   #   items: # optional: map specific keys to paths (and per-file mode)
-  #     - key: ADMIN_USERNAME
-  #       path: app-internal-credentials/ADMIN_USERNAME
+  #     - key: GITHUB_TOKEN
+  #       path: github-token/GITHUB_TOKEN
   # Defines custom livenessProbe settings
   livenessProbe:
     # -- Enables livenessProbe
-    enabled: false
+    enabled: true
     # exec is preferred to httpGet (path) as the livenessProbe handler.
     execCommand: []
     # - /bin/sh
     # - -c
     # - <command>
     # Path for the httpGet handler
-    path: "/"
+    path: "/healthz"
     # Port number on which livenessProbe will be checked if httpGet is used as the livenessProbe handler
     port: 8080
     # When a probe fails, Kubernetes will try failureThreshold times before giving up
@@ -145,7 +145,7 @@ frontend:
     # Number of seconds after the container has started before probe initiates
     initialDelaySeconds: 10
     # How often (in seconds) to perform the probe
-    periodSeconds: 5
+    periodSeconds: 10
     # Minimum consecutive successes for the probe to be considered successful after having failed
     successThreshold: 1
     # Number of seconds after which the probe times out.
@@ -153,35 +153,151 @@ frontend:
   # Defines custom readinessProbe settings
   readinessProbe:
     # -- Enables readinessProbe
-    enabled: false
+    enabled: true
     # If you need to use a http path instead of the default exec
-    # path: /health?standbyok=true
+    path: "/healthz/ready"
     # Port number on which readinessProbe will be checked.
     port: 8080
     # When a probe fails, Kubernetes will try failureThreshold times before giving up
-    failureThreshold: 2
+    failureThreshold: 3
     # Number of seconds after the container has started before probe initiates
-    initialDelaySeconds: 5
-    # How often (in seconds) to perform the probe
-    periodSeconds: 10
-    # Minimum consecutive successes for the probe to be considered successful after having failed
-    successThreshold: 1
-    # Number of seconds after which the probe times out.
-    timeoutSeconds: 5
-  # Defines custom startupProbe settings
-  startupProbe:
-    # -- Enables startupProbe
-    enabled: false
-    # When a probe fails, Kubernetes will try failureThreshold times before giving up
-    failureThreshold: 12
-    # Number of seconds after the container has started before probe initiates
-    initialDelaySeconds: 5
+    initialDelaySeconds: 0
     # How often (in seconds) to perform the probe
     periodSeconds: 5
     # Minimum consecutive successes for the probe to be considered successful after having failed
     successThreshold: 1
     # Number of seconds after which the probe times out.
-    timeoutSeconds: 5
+    timeoutSeconds: 2
+  # Defines custom startupProbe settings
+  startupProbe:
+    # -- Enables startupProbe
+    enabled: true
+    execCommand: []
+    # - /bin/sh
+    # - -c
+    # - <command>
+    # Path for the httpGet handler
+    path: "/healthz/startup"
+    # Port number on which startupProbe will be checked.
+    port: 8080
+    # When a probe fails, Kubernetes will try failureThreshold times before giving up
+    failureThreshold: 6
+    # Number of seconds after the container has started before probe initiates
+    initialDelaySeconds: 10
+    # How often (in seconds) to perform the probe
+    periodSeconds: 5
+    # Minimum consecutive successes for the probe to be considered successful after having failed
+    successThreshold: 1
+    # Number of seconds after which the probe times out.
+    # timeoutSeconds: 5
+# -- Add an initContainer configuration
+# @default -- `{}`
+initContainer:
+  # -- Enable or disable initContainer components.
+  enabled: true
+  image:
+    # -- initContainer image default pull policy
+    pullPolicy: IfNotPresent
+    # -- initContainer imageregistry
+    registry: "ghcr.io"
+    # -- initContainer image repository
+    repository: "bcit-ltc/legacy-soh-3dheart"
+    # -- initContainer image tag
+    tag: "1.0.0"
+  # command to run in the initContainer
+  # @default -- `["/bin/sh"]`
+  command: []
+  # Arguments to pass to the initContainer command
+  args: ["-ceu", "/usr/local/seed-pvc.sh"]
+  securityContext:
+    container:
+      readOnlyRootFilesystem: false
+      runAsUser: 0
+      runAsGroup: 0
+      runAsNonRoot: false
+      capabilities:
+        drop: ["ALL"]
+  resources:
+    # -- Resource requests mapped directly to the value of
+    #    the resources field for a PodSpec.
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    # -- Resource limits mapped directly to the value of
+    #    the resources field for a PodSpec.
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  # -- List of extra environment variables that are set literally.
+  # @default -- `[]`
+  extraEnvVars:
+  # - MY_ENV: "/usr/local/MY_ENV"
+  # -- Create `ConfigMap` resources that are passed to containers using envFrom
+  # @default -- `[]`
+  configEnvs: []
+  # - name: "special-config"
+  # -- volumeMounts for the initContainer that also create corresponding emptyDir volumes in the pod.
+  # @default -- `[]`
+  emptyDirMounts: []
+  # - name: tmp
+  #   mountPath: /tmp
+  storageMounts:
+    - name: legacy-soh-3dheart-assets
+      size: 5Gi
+      # -- Location where the PVC will be mounted.
+      mountPath: "/assets"
+      # -- Whether the volume should be mounted read-only.
+      readOnly: false
+      # -- Name of the storage class to use. If null it will use the
+      # configured default Storage Class.
+      # storageClass: legacy-large-files
+      # -- Access Mode of the storage device being used for the PVC
+      accessMode: ReadWriteOnce
+  # -- volumeMounts to be added as configMaps.
+  # @default -- `[]`
+  configMounts:
+    - name: seed-pvc
+      mountPath: /usr/local
+      defaultMode: 0755
+      data:
+        seed-pvc.sh: |
+          #!/bin/sh
+          SRC=/usr/share/nginx/html
+          DEST=/assets
+
+          echo "[seed] Copying baked-in files to PVC"
+          cp -rp "$SRC/." "$DEST/" || true
+
+          COUNT=$(find "$DEST" -type f | wc -l || true)
+          echo "[seed] Seeded $COUNT files into PVC: $COUNT"
+  # -- volumeMounts to be added as secrets
+  # @default -- `[]`
+  secretMounts: []
+  # - name: init-secrets # volume name (must be DNS-1123 compliant)
+  #   secretName: github-private-repo-token # refers to existing Secret in the same namespace
+  #   mountPath: /etc/secrets
+  #   items: # optional: map specific keys to paths (and per-file mode)
+  #     - key: GITHUB_TOKEN
+  #       path: GITHUB_TOKEN
+# -- Job to retrieve and add assets to a persistent volume
+# @default -- `{}`
+assets:
+  enabled: true
+  # -- Reference to the asset OCI image
+  ref: "ghcr.io/bcit-ltc/legacy-soh-3dheart-assets"
+  assetDir: "src/multimedia"
+  pvcName: "legacy-soh-3dheart-assets"
+  secretName: "gh-private-oci-token"
+  githubUser: "github"
+  tokenPath: "/etc/secrets/GITHUB_TOKEN"
+  image:
+    repository: "ghcr.io/oras-project/oras"
+    tag: "v1.3.0"
+    pullPolicy: IfNotPresent
+  coLocateWithApp: true
+  resources:
+    requests: { cpu: "100m", memory: "128Mi" }
+    limits: { cpu: "500m", memory: "512Mi" }
 # -- Main "backend" configuration
 # @default -- `{}`
 processor:
