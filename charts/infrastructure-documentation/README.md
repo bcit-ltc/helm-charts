@@ -1,7 +1,7 @@
-<!-- markdownlint-disable MD033 MD034 -->
+<!-- markdownlint-disable no-bare-urls no-inline-html -->
 # infrastructure-documentation
 
-![Version: 1.1.7-rc.66e9d66.20251015063838](https://img.shields.io/badge/Version-1.1.7--rc.66e9d66.20251015063838-informational?style=flat-square) ![AppVersion: 1.1.7-rc.66e9d66.20251015063838](https://img.shields.io/badge/AppVersion-1.1.7--rc.66e9d66.20251015063838-informational?style=flat-square)
+![Version: 1.2.7](https://img.shields.io/badge/Version-1.2.7-informational?style=flat-square) ![AppVersion: 1.2.7](https://img.shields.io/badge/AppVersion-1.2.7-informational?style=flat-square)
 
 Information about the architecture and makeup of the LTC's server infrastructure.
 
@@ -59,7 +59,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://bcit-ltc.github.io/helm-charts | apps-common | >=0.1.2 |
+| https://bcit-ltc.github.io/helm-charts | apps-common | >=0.3.4 |
 
 ## Values
 
@@ -68,13 +68,13 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend | object | `{}` | Main "frontend" configuration |
 | frontend.configEnvs | list | `[]` | configEnvs create ConfigMaps that are passed to containers using envFrom |
 | frontend.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
-| frontend.emptyDirMounts | list | `[]` | volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod. |
+| frontend.emptyDirMounts | list | `[{name: tmp, mountPath: /tmp}]` | volumeMounts for the frontend container that also create corresponding `emptyDir` volumes in the pod. |
 | frontend.enabled | bool | `true` | Enable or disable frontend components. |
 | frontend.extraEnvVars | list | `[]` | List of extra environment variables that are set literally. |
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image default pull policy |
 | frontend.image.registry | string | `"ghcr.io"` | Frontend image registry |
 | frontend.image.repository | string | `"bcit-ltc/infrastructure-documentation"` | Frontend image repository |
-| frontend.image.tag | string | `"1.1.7-rc.66e9d66.20251015063838"` | Frontend image tag |
+| frontend.image.tag | string | `"1.2.7"` | Frontend image tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"infrastructure-documentation"` | The name of the frontend container to create. If empty uses "frontend" |
@@ -84,7 +84,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.resources.requests | object | `{"cpu":"100m","memory":"64Mi"}` | Resource requests mapped directly to the value of    the resources field for a PodSpec. |
 | frontend.securityContext | object | `{"container":{}}` | Security context for the frontend container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
 | frontend.startupProbe.enabled | bool | `false` | Enables startupProbe |
-| frontend.storageMounts | string | `[]` | volumeMounts to be added as secrets |
+| frontend.storageMounts | string | `[]` | Configuration for persistent volume claims |
 | global.imagePullSecrets | list | `[]` |  |
 | global.name | string | `"infrastructure-documentation"` | Authoritative name |
 | global.progressDeadlineSeconds | int | `600` |  |
@@ -94,6 +94,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | ingress.extraPaths | list | `[]` | Extra path rules to render verbatim before the default "/". |
 | ingress.pathType | string | `"Prefix"` | Path type for the default route ("/") |
 | ingress.tlsSecret | string | `""` | TLS secret to use. Sets `<spec.tls.hosts>` to `<global.name>.<defaultDomain>` |
+| initContainer.image | object | `{}` |  |
 | processor | object | `{}` | Main "backend" configuration |
 | processor.configEnvs | list | `[]` | Create `ConfigMap` resources that are passed to containers using envFrom |
 | processor.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
@@ -108,7 +109,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | processor.replicas | int | `1` | Number of replicas for the processor |
 | processor.secretMounts | list | `[]` | volumeMounts to be added as secrets |
 | processor.securityContext | object | `{"container":null}` | Security context for the processor container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
-| securityContext | object | `{"pod":{}}` | Security context for the pod template<br>   &nbsp;&nbsp;`runAsNonRoot: true`<br>   &nbsp;&nbsp;`runAsGroup: 101`<br>   &nbsp;&nbsp;`runAsUser: 101`<br>   &nbsp;&nbsp;`fsGroup: 101`<br> - Set to `null` to disable |
+| securityContext | object | `{"pod":{}}` | Security context for the pod template<br> @default --   &nbsp;&nbsp;`runAsNonRoot: true`<br>   &nbsp;&nbsp;`runAsGroup: 101`<br>   &nbsp;&nbsp;`runAsUser: 101`<br>   &nbsp;&nbsp;`fsGroup: 101`<br> - Set to `null` to disable |
 | service | object | `{}` | Enables a service for the app |
 | service.enabled | bool | `true` | Enable or disable service components. |
 | service.port | int | `8080` | Port on which the app is listening |

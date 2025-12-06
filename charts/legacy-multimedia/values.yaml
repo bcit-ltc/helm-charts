@@ -95,6 +95,8 @@ frontend:
   emptyDirMounts:
     - name: tmp
       mountPath: /tmp
+  # - name: shared-data
+  #   mountPath: /var/www/html
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []

@@ -283,6 +283,7 @@ processor:
       storageClass: null
       # -- Access Mode of the storage device being used for the PVC
       accessMode: ReadWriteOnce
+  # -- volumeMounts to be added as secrets
   # @default -- `[]`
   secretMounts:
     # Credentials to access the app internal management portal (local account)

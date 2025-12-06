@@ -95,6 +95,8 @@ frontend:
   emptyDirMounts:
     - name: tmp
       mountPath: /tmp
+  # - name: shared-data
+  #   mountPath: /var/www/html
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []
@@ -121,12 +123,12 @@ frontend:
       accessMode: ReadWriteOnce
   # -- volumeMounts to be added as secrets
   secretMounts: []
-  # - name: github-token # volume name (must be DNS-1123 compliant)
-  #   secretName: github-token # refers to existing Secret in the same namespace
+  # - name: app-internal-credentials # volume name (must be DNS-1123 compliant)
+  #   secretName: app-internal-credentials # refers to existing Secret in the same namespace
   #   mountPath: /etc/secrets
   #   items: # optional: map specific keys to paths (and per-file mode)
-  #     - key: GITHUB_TOKEN
-  #       path: github-token/GITHUB_TOKEN
+  #     - key: ADMIN_USERNAME
+  #       path: app-internal-credentials/ADMIN_USERNAME
   # Defines custom livenessProbe settings
   livenessProbe:
     # -- Enables livenessProbe
@@ -203,7 +205,7 @@ initContainer:
     # -- initContainer image repository
     repository: "bcit-ltc/legacy-soh"
     # -- initContainer image tag
-    tag: "1.0.0"
+    tag: "1.1.10"
   # command to run in the initContainer
   # @default -- `["/bin/sh"]`
   command: []
@@ -296,8 +298,8 @@ assets:
     pullPolicy: IfNotPresent
   coLocateWithApp: true
   resources:
-    requests: { cpu: "100m", memory: "128Mi" }
-    limits: { cpu: "500m", memory: "512Mi" }
+    requests: {cpu: "100m", memory: "128Mi"}
+    limits: {cpu: "500m", memory: "512Mi"}
 # -- Main "backend" configuration
 # @default -- `{}`
 processor:

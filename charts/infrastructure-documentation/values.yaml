@@ -107,7 +107,7 @@ frontend:
   #       upload_max_filesize=4G
   #       post_max_size=6G
   #       memory_limit=8G
-  # -- volumeMounts to be added as secrets
+  # -- Configuration for persistent volume claims
   # @default -- `[]`
   storageMounts:
   # - name: data-storage

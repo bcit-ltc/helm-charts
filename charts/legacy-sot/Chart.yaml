@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 1.0.4-rc.20251204221536.3c6b3b8
+appVersion: 1.0.1
 description: legacy-sot is a legacy multimedia application.
 home: https://legacy-sot.ltc.bcit.ca
 icon: https://course-production.ltc.bcit.ca/favicon.ico
@@ -10,9 +10,9 @@ maintainers:
 name: legacy-sot
 sources:
   - https://github.com/bcit-ltc/
-  - https://github.com/bcit-ltc/legacy-html
-version: 1.0.4-rc.20251204221536.3c6b3b8
+  - https://github.com/bcit-ltc/legacy-sot
+version: 1.0.1
 dependencies:
   - name: apps-common
-    version: ">=0.3.0"
+    version: ">=0.3.4"
     repository: https://bcit-ltc.github.io/helm-charts

@@ -1,6 +1,5 @@
 {{/*
 SPDX-License-Identifier: MPL-2.0
-Common helpers for LTC app charts
 */}}
 
 

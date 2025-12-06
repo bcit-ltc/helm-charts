@@ -1,7 +1,7 @@
-<!-- markdownlint-disable MD033 MD034 -->
+<!-- markdownlint-disable no-bare-urls no-inline-html -->
 # qcon-web
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![AppVersion: 1.0.1](https://img.shields.io/badge/AppVersion-1.0.1-informational?style=flat-square)
+![Version: 1.2.5](https://img.shields.io/badge/Version-1.2.5-informational?style=flat-square) ![AppVersion: 1.2.5](https://img.shields.io/badge/AppVersion-1.2.5-informational?style=flat-square)
 
 Frontend of the Qcon service. Requires the qcon-api processor engine to work correctly.
 
@@ -59,7 +59,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://bcit-ltc.github.io/helm-charts | apps-common | >=0.3.0 |
+| https://bcit-ltc.github.io/helm-charts | apps-common | >=0.3.4 |
 
 ## Values
 
@@ -82,7 +82,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.readinessProbe.enabled | bool | `false` | Enables readinessProbe |
 | frontend.resources.limits | object | `{"cpu":"250m","memory":"256Mi"}` | Resource limits mapped directly to the value of    the resources field for a PodSpec. |
 | frontend.resources.requests | object | `{"cpu":"100m","memory":"64Mi"}` | Resource requests mapped directly to the value of    the resources field for a PodSpec. |
-| frontend.securityContext | object | `{"container":{}}` | Security context for the frontend container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
+| frontend.securityContext | object | `{"container":null}` | Security context for the frontend container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
 | frontend.startupProbe.enabled | bool | `false` | Enables startupProbe |
 | frontend.storageMounts | string | `[]` | volumeMounts to be added as secrets |
 | global.imagePullSecrets | list | `[]` |  |
@@ -103,14 +103,11 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | processor.image.pullPolicy | string | `"IfNotPresent"` | Processor image default pull policy |
 | processor.image.registry | string | `"ghcr.io"` | Processor imageregistry |
 | processor.image.repository | string | `"bcit-ltc/qcon-web"` | Processor image repository |
-| processor.image.tag | string | `"1.0.0"` | Processor image tag |
+| processor.image.tag | string | `"1.2.5"` | Processor image tag |
 | processor.port | int | `8000` | Port on which processor is listening |
 | processor.replicas | int | `1` | Number of replicas for the processor |
 | processor.securityContext | object | `{"container":null}` | Security context for the processor container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
-| processor.storageMounts[0].accessMode | string | `"ReadWriteOnce"` | Access Mode of the storage device being used for the PVC |
-| processor.storageMounts[0].mountPath | string | `"/app/data"` | Location where the PVC will be mounted. |
-| processor.storageMounts[0].storageClass | string | `nil` | Name of the storage class to use. If null it will use the configured default Storage Class. |
-| securityContext | object | `{"pod":{}}` | Security context for the pod template<br>   &nbsp;&nbsp;`runAsNonRoot: true`<br>   &nbsp;&nbsp;`runAsGroup: 101`<br>   &nbsp;&nbsp;`runAsUser: 101`<br>   &nbsp;&nbsp;`fsGroup: 101`<br> - Set to `null` to disable |
+| securityContext | object | `{"pod":null}` | Security context for the pod template<br>   &nbsp;&nbsp;`runAsNonRoot: true`<br>   &nbsp;&nbsp;`runAsGroup: 101`<br>   &nbsp;&nbsp;`runAsUser: 101`<br>   &nbsp;&nbsp;`fsGroup: 101`<br> - Set to `null` to disable |
 | service | object | `{}` | Enables a service for the app |
 | service.enabled | bool | `true` | Enable or disable service components. |
 | service.port | int | `8080` | Port on which the app is listening |

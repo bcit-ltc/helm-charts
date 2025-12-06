@@ -30,7 +30,7 @@ service:
   # Extra annotations to attach to the service
   annotations: {}
 # -- Security context for the pod template<br>
-# @default -- 
+# @default --
 #   &nbsp;&nbsp;`runAsNonRoot: true`<br>
 #   &nbsp;&nbsp;`runAsGroup: 101`<br>
 #   &nbsp;&nbsp;`runAsUser: 101`<br>
@@ -95,6 +95,8 @@ frontend:
   emptyDirMounts:
     - name: tmp
       mountPath: /tmp
+  # - name: shared-data
+  #   mountPath: /var/www/html
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts: []

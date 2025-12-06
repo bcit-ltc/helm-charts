@@ -1,4 +1,4 @@
-<!-- markdownlint-disable MD033 MD034 -->
+<!-- markdownlint-disable no-bare-urls no-inline-html -->
 # module-estimator
 
 ![Version: 1.1.7-rc.66e9d66.20251015063838](https://img.shields.io/badge/Version-1.1.7--rc.66e9d66.20251015063838-informational?style=flat-square) ![AppVersion: 1.1.7-rc.66e9d66.20251015063838](https://img.shields.io/badge/AppVersion-1.1.7--rc.66e9d66.20251015063838-informational?style=flat-square)

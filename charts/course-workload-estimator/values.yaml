@@ -30,7 +30,7 @@ service:
   # Extra annotations to attach to the service
   annotations: {}
 # -- Security context for the pod template<br>
-# @default -- 
+# @default --
 #   &nbsp;&nbsp;`runAsNonRoot: true`<br>
 #   &nbsp;&nbsp;`runAsGroup: 101`<br>
 #   &nbsp;&nbsp;`runAsUser: 101`<br>
@@ -107,7 +107,7 @@ frontend:
   #       upload_max_filesize=4G
   #       post_max_size=6G
   #       memory_limit=8G
-  # -- volumeMounts to be added as secrets
+  # -- Configuration for persistent volume claims
   # @default -- `[]`
   storageMounts:
   # - name: data-storage
@@ -130,14 +130,14 @@ frontend:
   # Defines custom livenessProbe settings
   livenessProbe:
     # -- Enables livenessProbe
-    enabled: false
+    enabled: true
     # exec is preferred to httpGet (path) as the livenessProbe handler.
     execCommand: []
     # - /bin/sh
     # - -c
     # - <command>
     # Path for the httpGet handler
-    path: "/"
+    path: "/healthz"
     # Port number on which livenessProbe will be checked if httpGet is used as the livenessProbe handler
     port: 8080
     # When a probe fails, Kubernetes will try failureThreshold times before giving up
@@ -145,7 +145,7 @@ frontend:
     # Number of seconds after the container has started before probe initiates
     initialDelaySeconds: 10
     # How often (in seconds) to perform the probe
-    periodSeconds: 5
+    periodSeconds: 10
     # Minimum consecutive successes for the probe to be considered successful after having failed
     successThreshold: 1
     # Number of seconds after which the probe times out.
@@ -153,35 +153,43 @@ frontend:
   # Defines custom readinessProbe settings
   readinessProbe:
     # -- Enables readinessProbe
-    enabled: false
+    enabled: true
     # If you need to use a http path instead of the default exec
-    # path: /health?standbyok=true
+    path: "/healthz/ready"
     # Port number on which readinessProbe will be checked.
     port: 8080
     # When a probe fails, Kubernetes will try failureThreshold times before giving up
-    failureThreshold: 2
+    failureThreshold: 3
     # Number of seconds after the container has started before probe initiates
-    initialDelaySeconds: 5
-    # How often (in seconds) to perform the probe
-    periodSeconds: 10
-    # Minimum consecutive successes for the probe to be considered successful after having failed
-    successThreshold: 1
-    # Number of seconds after which the probe times out.
-    timeoutSeconds: 5
-  # Defines custom startupProbe settings
-  startupProbe:
-    # -- Enables startupProbe
-    enabled: false
-    # When a probe fails, Kubernetes will try failureThreshold times before giving up
-    failureThreshold: 12
-    # Number of seconds after the container has started before probe initiates
-    initialDelaySeconds: 5
+    initialDelaySeconds: 0
     # How often (in seconds) to perform the probe
     periodSeconds: 5
     # Minimum consecutive successes for the probe to be considered successful after having failed
     successThreshold: 1
     # Number of seconds after which the probe times out.
-    timeoutSeconds: 5
+    timeoutSeconds: 2
+  # Defines custom startupProbe settings
+  startupProbe:
+    # -- Enables startupProbe
+    enabled: true
+    execCommand: []
+    # - /bin/sh
+    # - -c
+    # - <command>
+    # Path for the httpGet handler
+    path: "/healthz/startup"
+    # Port number on which startupProbe will be checked.
+    port: 8080
+    # When a probe fails, Kubernetes will try failureThreshold times before giving up
+    failureThreshold: 6
+    # Number of seconds after the container has started before probe initiates
+    initialDelaySeconds: 10
+    # How often (in seconds) to perform the probe
+    periodSeconds: 5
+    # Minimum consecutive successes for the probe to be considered successful after having failed
+    successThreshold: 1
+    # Number of seconds after which the probe times out.
+    # timeoutSeconds: 5
 # -- Main "backend" configuration
 # @default -- `{}`
 processor:
@@ -296,6 +304,3 @@ ingress:
 #   minAvailable: 1
 # networkPolicy:
 #   enabled: false
-
-initContainer:
-  image: {}
