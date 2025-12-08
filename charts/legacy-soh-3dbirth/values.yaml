@@ -287,7 +287,7 @@ assets:
   enabled: true
   # -- Reference to the asset OCI image
   ref: "ghcr.io/bcit-ltc/legacy-soh-3dbirth-assets"
-  assetDir: "src/multimedia"
+  assetDir: "src/multimedia/_SOH/3DBirth"
   pvcName: "legacy-soh-3dbirth-assets"
   secretName: "gh-private-oci-token"
   githubUser: "github"
