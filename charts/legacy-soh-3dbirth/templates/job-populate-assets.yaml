@@ -34,8 +34,12 @@ spec:
               value: {{ .Values.assets.githubUser | default "github" | quote }}
             - name: GITHUB_PAT
               value: {{ .Values.assets.tokenPath | default "/etc/secrets/GITHUB_TOKEN" | quote }}
-            - name: ASSET_DIR
-              value: {{ .Values.assets.assetDir | default "src" | quote }}
+            # path inside the tarball
+            - name: ASSET_SOURCE
+              value: {{ .Values.assets.sourcePath | default "." | quote }}
+            # path under /usr/share/nginx/html (PVC) where assets should land
+            - name: ASSET_TARGET
+              value: {{ .Values.assets.targetPath | default "." | quote }}
           resources:
 {{ toYaml .Values.assets.resources | nindent 12 }}
           command: ["/bin/sh","-ceu"]
@@ -44,8 +48,10 @@ spec:
               REGISTRY_HOST="$(printf '%s' "$ORAS_REF" | cut -d'/' -f1)"
 
               WORKING_DIR=/workspace
-              ASSET_DIR=${ASSET_DIR#src/}
-              DEST=/assets/$ASSET_DIR
+              EXTRACT_DIR="$WORKING_DIR/extracted"
+
+              ASSET_SOURCE="${ASSET_SOURCE:-.}"
+              ASSET_TARGET="${ASSET_TARGET:-.}"
 
               apk update && apk add rsync
 
@@ -66,9 +72,16 @@ spec:
               oras pull "$REF"
 
               echo "[oras] extracting archive into $ASSET_DIR"
-              mkdir -p "$ASSET_DIR"
-              tar -xzvf "$WORKING_DIR/assets.tgz" -C "$ASSET_DIR"
-              rm "$WORKING_DIR/assets.tgz"
+              mkdir -p "$EXTRACT_DIR"
+              tar -xzvf "$WORKING_DIR/assets.tgz" -C "$EXTRACT_DIR"
+
+              SRC="$EXTRACT_DIR/$ASSET_SOURCE"
+              DEST="/assets/$ASSET_TARGET"
+
+              echo "[augment] Copying from '$SRC' to '$DEST'"
+
+              mkdir -p "$DEST"
+              rsync -av --update --chown=${HOST_UID:-1000}:${HOST_GID:-1000} "$SRC"/ "$DEST"/
 
               # augment image files with large files from OCI
               echo "[augment] Copying asset files (add-only)"
