@@ -80,12 +80,10 @@ spec:
 
               echo "[augment] Copying from '$SRC' to '$DEST'"
 
-              mkdir -p "$DEST"
-              rsync -av --update --chown=${HOST_UID:-1000}:${HOST_GID:-1000} "$SRC"/ "$DEST"/
-
               # augment image files with large files from OCI
+              mkdir -p "$DEST"
               echo "[augment] Copying asset files (add-only)"
-              rsync -av --update --chown=${HOST_UID:-1000}:${HOST_GID:-1000} "$ASSET_DIR"/ "$DEST"/
+              rsync -av --update --chown=${HOST_UID:-1000}:${HOST_GID:-1000} "$SRC"/ "$DEST"/
 
               # correct permissions
               find "$DEST" -type d -exec chmod 755 {} +
