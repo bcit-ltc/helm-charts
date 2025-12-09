@@ -78,7 +78,7 @@ Most of our registry images are public, however the [GitHub docs](https://docs.g
 | frontend.image.repository | string | `"bcit-ltc/legacy-soc-royaloak"` | Frontend image repository |
 | frontend.image.tag | string | `"1.0.0"` | Frontend image tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
-| frontend.livenessProbe.enabled | bool | `true` | Enables livenessProbe |
+| frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"legacy-soc-royaloak"` | The name of the frontend container to create. If empty uses "frontend" |
 | frontend.port | int | `8080` | Port on which the frontend is listening |
 | frontend.readinessProbe.enabled | bool | `true` | Enables readinessProbe |
@@ -86,7 +86,7 @@ Most of our registry images are public, however the [GitHub docs](https://docs.g
 | frontend.resources.requests | object | `{"cpu":"100m","memory":"64Mi"}` | Resource requests mapped directly to the value of    the resources field for a PodSpec. |
 | frontend.secretMounts | list | `[]` | volumeMounts to be added as secrets |
 | frontend.securityContext | object | `{"container":null}` | Security context for the frontend container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
-| frontend.startupProbe.enabled | bool | `true` | Enables startupProbe |
+| frontend.startupProbe.enabled | bool | `false` | Enables startupProbe |
 | frontend.storageMounts | list | `[]` | Configuration for persistent volume claims |
 | frontend.storageMounts[0].accessMode | string | `"ReadWriteOnce"` | Access Mode of the storage device being used for the PVC |
 | frontend.storageMounts[0].mountPath | string | `"/usr/share/nginx/html"` | Location where the PVC will be mounted. |

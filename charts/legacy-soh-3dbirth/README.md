@@ -1,7 +1,7 @@
 <!-- markdownlint-disable no-bare-urls no-inline-html -->
 # legacy-soh-3dbirth
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![AppVersion: 1.0.1](https://img.shields.io/badge/AppVersion-1.0.1-informational?style=flat-square)
+![Version: 1.0.16](https://img.shields.io/badge/Version-1.0.16-informational?style=flat-square) ![AppVersion: 1.0.16](https://img.shields.io/badge/AppVersion-1.0.16-informational?style=flat-square)
 
 legacy-soh-3dbirth is a legacy multimedia application.
 
@@ -66,7 +66,6 @@ Most of our registry images are public, however the [GitHub docs](https://docs.g
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | assets | object | `{}` | Job to retrieve and add assets to a persistent volume |
-| assets.ref | string | `"ghcr.io/bcit-ltc/legacy-soh-3dbirth-assets"` | Reference to the asset OCI image |
 | frontend | object | `{}` | Main "frontend" configuration |
 | frontend.configEnvs | list | `[]` | configEnvs create ConfigMaps that are passed to containers using envFrom |
 | frontend.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |
@@ -76,9 +75,9 @@ Most of our registry images are public, however the [GitHub docs](https://docs.g
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image default pull policy |
 | frontend.image.registry | string | `"ghcr.io"` | Frontend image registry |
 | frontend.image.repository | string | `"bcit-ltc/legacy-soh-3dbirth"` | Frontend image repository |
-| frontend.image.tag | string | `"1.0.5-rc.20251203203418.858628b"` | Frontend image tag |
+| frontend.image.tag | string | `"1.0.16"` | Frontend image tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
-| frontend.livenessProbe.enabled | bool | `true` | Enables livenessProbe |
+| frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"legacy-soh-3dbirth"` | The name of the frontend container to create. If empty uses "frontend" |
 | frontend.port | int | `8080` | Port on which the frontend is listening |
 | frontend.readinessProbe.enabled | bool | `true` | Enables readinessProbe |
@@ -86,7 +85,7 @@ Most of our registry images are public, however the [GitHub docs](https://docs.g
 | frontend.resources.requests | object | `{"cpu":"100m","memory":"64Mi"}` | Resource requests mapped directly to the value of    the resources field for a PodSpec. |
 | frontend.secretMounts | list | `[]` | volumeMounts to be added as secrets |
 | frontend.securityContext | object | `{"container":null}` | Security context for the frontend container. Default:<br> &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br> &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br> &nbsp;&nbsp;`capabilities:`<br> &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br> - Set to `null` to disable |
-| frontend.startupProbe.enabled | bool | `true` | Enables startupProbe |
+| frontend.startupProbe.enabled | bool | `false` | Enables startupProbe |
 | frontend.storageMounts | list | `[]` | Configuration for persistent volume claims |
 | frontend.storageMounts[0].accessMode | string | `"ReadWriteOnce"` | Access Mode of the storage device being used for the PVC |
 | frontend.storageMounts[0].mountPath | string | `"/usr/share/nginx/html"` | Location where the PVC will be mounted. |
@@ -109,7 +108,7 @@ Most of our registry images are public, however the [GitHub docs](https://docs.g
 | initContainer.image.pullPolicy | string | `"IfNotPresent"` | initContainer image default pull policy |
 | initContainer.image.registry | string | `"ghcr.io"` | initContainer imageregistry |
 | initContainer.image.repository | string | `"bcit-ltc/legacy-soh-3dbirth"` | initContainer image repository |
-| initContainer.image.tag | string | `"1.0.5-rc.20251203203418.858628b"` | initContainer image tag |
+| initContainer.image.tag | string | `"1.0.16"` | initContainer image tag |
 | initContainer.resources.limits | object | `{"cpu":"500m","memory":"512Mi"}` | Resource limits mapped directly to the value of    the resources field for a PodSpec. |
 | initContainer.resources.requests | object | `{"cpu":"100m","memory":"128Mi"}` | Resource requests mapped directly to the value of    the resources field for a PodSpec. |
 | initContainer.secretMounts | list | `[]` | volumeMounts to be added as secrets |

@@ -132,7 +132,7 @@ frontend:
   # Defines custom livenessProbe settings
   livenessProbe:
     # -- Enables livenessProbe
-    enabled: true
+    enabled: false
     # exec is preferred to httpGet (path) as the livenessProbe handler.
     execCommand: []
     # - /bin/sh
@@ -147,7 +147,7 @@ frontend:
     # Number of seconds after the container has started before probe initiates
     initialDelaySeconds: 10
     # How often (in seconds) to perform the probe
-    periodSeconds: 5
+    periodSeconds: 10
     # Minimum consecutive successes for the probe to be considered successful after having failed
     successThreshold: 1
     # Number of seconds after which the probe times out.
@@ -161,19 +161,19 @@ frontend:
     # Port number on which readinessProbe will be checked.
     port: 8080
     # When a probe fails, Kubernetes will try failureThreshold times before giving up
-    failureThreshold: 3
+    failureThreshold: 5
     # Number of seconds after the container has started before probe initiates
-    initialDelaySeconds: 0
+    initialDelaySeconds: 5
     # How often (in seconds) to perform the probe
-    periodSeconds: 5
+    periodSeconds: 10
     # Minimum consecutive successes for the probe to be considered successful after having failed
     successThreshold: 1
     # Number of seconds after which the probe times out.
-    timeoutSeconds: 2
+    timeoutSeconds: 5
   # Defines custom startupProbe settings
   startupProbe:
     # -- Enables startupProbe
-    enabled: true
+    enabled: false
     execCommand: []
     # - /bin/sh
     # - -c
@@ -185,7 +185,7 @@ frontend:
     # When a probe fails, Kubernetes will try failureThreshold times before giving up
     failureThreshold: 6
     # Number of seconds after the container has started before probe initiates
-    initialDelaySeconds: 10
+    initialDelaySeconds: 20
     # How often (in seconds) to perform the probe
     periodSeconds: 5
     # Minimum consecutive successes for the probe to be considered successful after having failed
