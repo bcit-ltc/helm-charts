@@ -71,7 +71,7 @@ spec:
               echo "[oras] pulling $REF..."
               oras pull "$REF"
 
-              echo "[oras] extracting archive into $ASSET_DIR"
+              echo "[oras] extracting archive into $EXTRACT_DIR"
               mkdir -p "$EXTRACT_DIR"
               tar -xzvf "$WORKING_DIR/assets.tgz" -C "$EXTRACT_DIR"
 
