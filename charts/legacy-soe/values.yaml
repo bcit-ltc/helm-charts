@@ -53,7 +53,7 @@ frontend:
     # -- Frontend image repository
     repository: "bcit-ltc/legacy-soe"
     # -- Frontend image tag
-    tag: "1.0.0"
+    tag: "1.1.0"
   # Extra annotations to attach to the frontend
   # @default -- `{}`
   annotations: {}
@@ -205,7 +205,7 @@ initContainer:
     # -- initContainer image repository
     repository: "bcit-ltc/legacy-soe"
     # -- initContainer image tag
-    tag: "1.0.0"
+    tag: "1.1.0"
   # command to run in the initContainer
   # @default -- `["/bin/sh"]`
   command: []
