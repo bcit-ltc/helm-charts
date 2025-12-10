@@ -287,7 +287,7 @@ assets:
   enabled: true
   # -- Reference to the asset OCI image
   ref: "ghcr.io/bcit-ltc/legacy-ltc-assets"
-  assetDir: "src/multimedia"
+  assetDir: "src"
   pvcName: "legacy-ltc-assets"
   secretName: "gh-private-oci-token"
   githubUser: "github"
