@@ -4,8 +4,17 @@ SPDX-License-Identifier: MPL-2.0
 
 {{- define "apps-common.ingress.render" -}}
 {{- if .Values.ingress.enabled }}
+
 {{- $defaultDomain := "ltc.bcit.ca" -}}
 {{- $domain := default $defaultDomain .Values.ingress.defaultDomain -}}
+
+{{- $defaultTlsSecret := "star-ltc-bcit-ca" -}}
+{{- $tlsVal := .Values.ingress.tlsSecret -}}
+{{- $tlsSecret := ternary $defaultTlsSecret $tlsVal (eq $tlsVal "") -}}
+# ^ If tlsSecret == "" → use library default
+#   If tlsSecret is non-empty → use provided
+#   If tlsSecret is null → handled later (omit TLS stanza)
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -19,6 +28,7 @@ spec:
   {{- with .Values.ingress.ingressClassName }}
   ingressClassName: {{ . | quote }}
   {{- end }}
+
   rules:
     - host: {{ default (printf "%s.%s" .Values.global.name $domain) .Values.ingress.host | quote }}
       http:
@@ -36,11 +46,14 @@ spec:
                 name: {{ include "apps-common.app.name" . }}
                 port:
                   number: {{ .Values.service.port }}
-  {{- with .Values.ingress.tlsSecret }}
+
+  {{/* TLS HANDLING — OMIT IF NULL */}}
+  {{- if not (eq $tlsVal nil) }}
   tls:
-    - secretName: {{ . | quote }}
+    - secretName: {{ $tlsSecret | quote }}
       hosts:
         - {{ default (printf "%s.%s" $.Values.global.name $domain) $.Values.ingress.host | quote }}
   {{- end }}
+
 {{- end }}
 {{- end -}}
