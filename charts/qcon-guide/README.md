@@ -1,7 +1,7 @@
 <!-- markdownlint-disable no-bare-urls no-inline-html -->
 # qcon-guide
 
-![Version: 1.0.4](https://img.shields.io/badge/Version-1.0.4-informational?style=flat-square) ![AppVersion: 1.0.4](https://img.shields.io/badge/AppVersion-1.0.4-informational?style=flat-square)
+![Version: 1.1.4](https://img.shields.io/badge/Version-1.1.4-informational?style=flat-square) ![AppVersion: 1.1.4](https://img.shields.io/badge/AppVersion-1.1.4-informational?style=flat-square)
 
 Information about how to use [Qcon](https://qcon.ltc.bcit.ca).
 
@@ -74,7 +74,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image default pull policy |
 | frontend.image.registry | string | `"ghcr.io"` | Frontend image registry |
 | frontend.image.repository | string | `"bcit-ltc/qcon-guide"` | Frontend image repository |
-| frontend.image.tag | string | `"1.0.4"` | Frontend image tag |
+| frontend.image.tag | string | `"1.1.4"` | Frontend image tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"qcon-guide"` | The name of the frontend container to create. If empty uses "frontend" |
@@ -90,10 +90,10 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | global.progressDeadlineSeconds | int | `600` |  |
 | global.revisionHistoryLimit | int | `3` |  |
 | ingress | object | `{}` | Creates an ingress for external access |
-| ingress.defaultDomain | string | `""` | Default domain for the ingress |
+| ingress.defaultDomain | string | `"ltc.bcit.ca"` | Default domain for the ingress |
 | ingress.extraPaths | list | `[]` | Extra path rules to render verbatim before the default "/". |
 | ingress.pathType | string | `"Prefix"` | Path type for the default route ("/") |
-| ingress.tlsSecret | string | `""` | TLS secret to use. Sets `<spec.tls.hosts>` to `<global.name>.<defaultDomain>` |
+| ingress.tlsSecret | string | `"star-ltc-bcit-ca"` | TLS secret to use. Sets `<spec.tls.hosts>` to `<global.name>.<defaultDomain>` |
 | initContainer.image | object | `{}` |  |
 | processor | object | `{}` | Main "backend" configuration |
 | processor.configEnvs | list | `[]` | Create `ConfigMap` resources that are passed to containers using envFrom |

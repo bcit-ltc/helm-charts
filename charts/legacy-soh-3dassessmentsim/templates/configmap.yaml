@@ -1,0 +1,33 @@
+{{ include "apps-common.render.configmaps" . }}
+
+{{/* 
+  Additional ConfigMaps for the initContainer component, following the same
+  pattern as frontend/processor configMounts. This only renders when entries exist.
+*/}}
+{{- with .Values.initContainer }}
+{{- range $m := ( .configMounts | default list ) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $m.name | quote }}
+data:
+  {{- if hasKey $m "data" }}
+    {{- /* If a 'data' block is provided, render it directly (string or map). */}}
+    {{- if kindIs "string" $m.data }}
+  fetch.sh: |-
+{{ $m.data | nindent 4 }}
+    {{- else }}
+{{ toYaml $m.data | nindent 2 }}
+    {{- end }}
+  {{- else }}
+    {{- /* Otherwise, treat any keys other than name/mountPath/defaultMode as file entries */}}
+    {{- range $k, $v := $m }}
+      {{- if and (ne $k "name") (ne $k "mountPath") (ne $k "defaultMode") }}
+  {{ $k }}: |-
+{{ $v | nindent 4 }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}

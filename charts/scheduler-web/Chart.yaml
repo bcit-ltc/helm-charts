@@ -1,0 +1,18 @@
+apiVersion: v2
+appVersion: 1.2.5
+description: Frontend of the Qcon service. Requires the qcon-api processor engine to work correctly.
+home: https://scheduler-web.ltc.bcit.ca
+icon: https://course-production.ltc.bcit.ca/favicon.ico
+maintainers:
+  - email: ltc_techops@bcit.ca
+    name: BCIT LTC
+    url: https://www.bcit.ca/learning-teaching-centre/
+name: scheduler-web
+sources:
+  - https://github.com/bcit-ltc/
+  - https://github.com/bcit-ltc/scheduler-web
+version: 1.2.5
+dependencies:
+  - name: apps-common
+    version: ">=0.3.4"
+    repository: https://bcit-ltc.github.io/helm-charts

@@ -1,0 +1,18 @@
+apiVersion: v2
+appVersion: 1.2.7
+description: Information about the architecture and makeup of the LTC's server infrastructure.
+home: https://distribution-game.ltc.bcit.ca
+icon: https://course-production.ltc.bcit.ca/favicon.ico
+maintainers:
+  - email: ltc_techops@bcit.ca
+    name: BCIT LTC
+    url: https://www.bcit.ca/learning-teaching-centre/
+name: distribution-game
+sources:
+  - https://github.com/bcit-ltc/
+  - https://github.com/bcit-ltc/distribution-game
+version: 1.2.7
+dependencies:
+  - name: apps-common
+    version: ">=0.3.4"
+    repository: https://bcit-ltc.github.io/helm-charts

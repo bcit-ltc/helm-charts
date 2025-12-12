@@ -1,7 +1,7 @@
 <!-- markdownlint-disable no-bare-urls no-inline-html -->
 # sugar-suite
 
-![Version: 1.1.4](https://img.shields.io/badge/Version-1.1.4-informational?style=flat-square) ![AppVersion: 1.1.4](https://img.shields.io/badge/AppVersion-1.1.4-informational?style=flat-square)
+![Version: 1.1.5](https://img.shields.io/badge/Version-1.1.5-informational?style=flat-square) ![AppVersion: 1.1.5](https://img.shields.io/badge/AppVersion-1.1.5-informational?style=flat-square)
 
 Sugar-Suite is a "Framework Factory" used to produce customized stylesheets designed for building online courses in HTML.
 
@@ -74,7 +74,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image default pull policy |
 | frontend.image.registry | string | `"ghcr.io"` | Frontend image registry |
 | frontend.image.repository | string | `"bcit-ltc/sugar-suite"` | Frontend image repository |
-| frontend.image.tag | string | `"1.1.4"` | Frontend image tag |
+| frontend.image.tag | string | `"1.1.5"` | Frontend image tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"sugar-suite"` | The name of the frontend container to create. If empty uses "frontend" |

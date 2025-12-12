@@ -1,7 +1,7 @@
 <!-- markdownlint-disable no-bare-urls no-inline-html -->
 # qcon-api
 
-![Version: 1.2.6](https://img.shields.io/badge/Version-1.2.6-informational?style=flat-square) ![AppVersion: 1.2.6](https://img.shields.io/badge/AppVersion-1.2.6-informational?style=flat-square)
+![Version: 1.2.7](https://img.shields.io/badge/Version-1.2.7-informational?style=flat-square) ![AppVersion: 1.2.7](https://img.shields.io/badge/AppVersion-1.2.7-informational?style=flat-square)
 
 Backend API for the Qcon application. It provides a websocket endpoint for converting documents from word to SCORM format.
 
@@ -103,7 +103,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | processor.image.pullPolicy | string | `"IfNotPresent"` | Processor image default pull policy |
 | processor.image.registry | string | `"ghcr.io"` | Processor imageregistry |
 | processor.image.repository | string | `"bcit-ltc/qcon-api"` | Processor image repository |
-| processor.image.tag | string | `"1.2.6"` | Processor image tag |
+| processor.image.tag | string | `"1.2.7"` | Processor image tag |
 | processor.port | int | `8000` | Port on which processor is listening |
 | processor.replicas | int | `1` | Number of replicas for the processor |
 | processor.secretMounts | list | `[]` | volumeMounts to be added as secrets |

@@ -1,7 +1,7 @@
 <!-- markdownlint-disable no-bare-urls no-inline-html -->
 # course-production-site
 
-![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square) ![AppVersion: 1.0.2](https://img.shields.io/badge/AppVersion-1.0.2-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![AppVersion: 1.1.0](https://img.shields.io/badge/AppVersion-1.1.0-informational?style=flat-square)
 
 Public landing page to course production services and resources.
 
@@ -74,7 +74,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image default pull policy |
 | frontend.image.registry | string | `"ghcr.io"` | Frontend image registry |
 | frontend.image.repository | string | `"bcit-ltc/course-production-site"` | Frontend image repository |
-| frontend.image.tag | string | `"1.0.2"` | Frontend image tag |
+| frontend.image.tag | string | `"1.1.0"` | Frontend image tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"course-production-site"` | The name of the frontend container to create. If empty uses "frontend" |
@@ -94,6 +94,7 @@ Our registry images are public, but in ["Working with Container Registries"](htt
 | ingress.extraPaths | list | `[]` | Extra path rules to render verbatim before the default "/". |
 | ingress.pathType | string | `"Prefix"` | Path type for the default route ("/") |
 | ingress.tlsSecret | string | `""` | TLS secret to use. Sets `<spec.tls.hosts>` to `<global.name>.<defaultDomain>` |
+| initContainer.image | object | `{}` |  |
 | processor | object | `{}` | Main "backend" configuration |
 | processor.configEnvs | list | `[]` | Create `ConfigMap` resources that are passed to containers using envFrom |
 | processor.configMounts | list | `[]` | volumeMounts to be added as configMaps. Requires matching configs. |

@@ -1,7 +1,7 @@
 <!-- markdownlint-disable no-bare-urls no-inline-html -->
 # legacy-socas
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![AppVersion: 1.0.1](https://img.shields.io/badge/AppVersion-1.0.1-informational?style=flat-square)
+![Version: 1.0.2-rc.20251210212721.01ad845](https://img.shields.io/badge/Version-1.0.2--rc.20251210212721.01ad845-informational?style=flat-square) ![AppVersion: 1.0.2-rc.20251210212721.01ad845](https://img.shields.io/badge/AppVersion-1.0.2--rc.20251210212721.01ad845-informational?style=flat-square)
 
 legacy-socas is a legacy multimedia application.
 
@@ -76,7 +76,7 @@ Most of our registry images are public, however the [GitHub docs](https://docs.g
 | frontend.image.pullPolicy | string | `"IfNotPresent"` | Frontend image default pull policy |
 | frontend.image.registry | string | `"ghcr.io"` | Frontend image registry |
 | frontend.image.repository | string | `"bcit-ltc/legacy-socas"` | Frontend image repository |
-| frontend.image.tag | string | `"1.0.0"` | Frontend image tag |
+| frontend.image.tag | string | `"1.0.2-rc.20251210212721.01ad845"` | Frontend image tag |
 | frontend.includeConfigAnnotation | bool | `false` | Add a checksum annotation to the server pods that is a hash    of the configuration. Can be used to identify configuration changes. |
 | frontend.livenessProbe.enabled | bool | `false` | Enables livenessProbe |
 | frontend.name | string | `"legacy-socas"` | The name of the frontend container to create. If empty uses "frontend" |
@@ -109,7 +109,7 @@ Most of our registry images are public, however the [GitHub docs](https://docs.g
 | initContainer.image.pullPolicy | string | `"IfNotPresent"` | initContainer image default pull policy |
 | initContainer.image.registry | string | `"ghcr.io"` | initContainer imageregistry |
 | initContainer.image.repository | string | `"bcit-ltc/legacy-socas"` | initContainer image repository |
-| initContainer.image.tag | string | `"1.0.0"` | initContainer image tag |
+| initContainer.image.tag | string | `"1.0.2-rc.20251210212721.01ad845"` | initContainer image tag |
 | initContainer.resources.limits | object | `{"cpu":"500m","memory":"512Mi"}` | Resource limits mapped directly to the value of    the resources field for a PodSpec. |
 | initContainer.resources.requests | object | `{"cpu":"100m","memory":"128Mi"}` | Resource requests mapped directly to the value of    the resources field for a PodSpec. |
 | initContainer.secretMounts | list | `[]` | volumeMounts to be added as secrets |

@@ -262,7 +262,7 @@ processor:
 ingress:
   enabled: false
   # -- Default domain for the ingress
-  # @default -- `""`
+  # @default -- `"ltc.bcit.ca"`
   defaultDomain: ""
   # Optional: "nginx", "traefik", etc. If empty, cluster default is used.
   ingressClassName: ""
@@ -272,7 +272,7 @@ ingress:
   annotations: {}
   # -- TLS secret to use.
   # Sets `<spec.tls.hosts>` to `<global.name>.<defaultDomain>`
-  # @default -- `""`
+  # @default -- `"star-ltc-bcit-ca"`
   tlsSecret: ""
   # -- Extra path rules to render verbatim before the default "/".
   extraPaths: []
@@ -285,7 +285,7 @@ ingress:
   #           number: 3000
   # -- Path type for the default route ("/")
   pathType: Prefix
-# Unconfigured options
+# -- Unconfigured options
 # autoscaling:
 #   enabled: false
 #   minReplicas: 2

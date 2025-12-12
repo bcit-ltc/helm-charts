@@ -1,0 +1,4 @@
+{{- /*
+Job to populate the assets PVC from an ORAS registry, implemented in apps-common.
+*/ -}}
+{{ include "apps-common.assets.render" . }}

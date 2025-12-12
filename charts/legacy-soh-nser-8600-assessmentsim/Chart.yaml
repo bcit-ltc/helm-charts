@@ -1,0 +1,18 @@
+apiVersion: v2
+appVersion: 1.1.0
+description: legacy-soh-nser-8600-assessmentsim is a legacy multimedia application.
+home: https://legacy-soh-nser-8600-assessmentsim.ltc.bcit.ca
+icon: https://course-production.ltc.bcit.ca/favicon.ico
+maintainers:
+  - email: ltc_techops@bcit.ca
+    name: BCIT LTC
+    url: https://www.bcit.ca/learning-teaching-centre/
+name: legacy-soh-nser-8600-assessmentsim
+sources:
+  - https://github.com/bcit-ltc/
+  - https://github.com/bcit-ltc/legacy-soh-nser-8600-assessmentsim
+version: 1.1.0
+dependencies:
+  - name: apps-common
+    version: ">=0.3.4"
+    repository: https://bcit-ltc.github.io/helm-charts
