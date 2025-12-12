@@ -4,6 +4,8 @@ SPDX-License-Identifier: MPL-2.0
 
 {{- define "apps-common.ingress.render" -}}
 {{- if .Values.ingress.enabled }}
+{{- $defaultDomain := "ltc.bcit.ca" -}}
+{{- $domain := default $defaultDomain .Values.ingress.defaultDomain -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -18,7 +20,7 @@ spec:
   ingressClassName: {{ . | quote }}
   {{- end }}
   rules:
-    - host: {{ default (printf "%s.%s" .Values.global.name .Values.ingress.defaultDomain) .Values.ingress.host | quote }}
+    - host: {{ default (printf "%s.%s" .Values.global.name $domain) .Values.ingress.host | quote }}
       http:
         paths:
           {{- range $p := (.Values.ingress.extraPaths | default list) }}
@@ -38,7 +40,7 @@ spec:
   tls:
     - secretName: {{ . | quote }}
       hosts:
-        - {{ default (printf "%s.%s" $.Values.global.name $.Values.ingress.defaultDomain) $.Values.ingress.host | quote }}
+        - {{ default (printf "%s.%s" $.Values.global.name $domain) $.Values.ingress.host | quote }}
   {{- end }}
 {{- end }}
 {{- end -}}
