@@ -16,10 +16,7 @@ spec:
 {{ include "apps-common.app.selectorLabels" . | nindent 6 }}
 
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
+    type: Recreate
 
   template:
     metadata:
