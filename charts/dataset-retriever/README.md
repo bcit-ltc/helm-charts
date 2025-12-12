@@ -3,7 +3,7 @@
 
 ![Version: 1.2.7](https://img.shields.io/badge/Version-1.2.7-informational?style=flat-square) ![AppVersion: 1.2.7](https://img.shields.io/badge/AppVersion-1.2.7-informational?style=flat-square)
 
-Information about the architecture and makeup of the LTC's server infrastructure.
+Django application to run periodic backend scripts for fetching learning hub datasets.
 
 **Homepage:** <https://dataset-retriever.ltc.bcit.ca>
 
