@@ -98,6 +98,9 @@ frontend:
       mountPath: /tmp
     - name: shared-data
       mountPath: /usr/share/nginx/html
+    - name: staticfiles
+      mountPath: /usr/share/nginx/html/static
+      readOnly: true
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
   configMounts:
@@ -254,6 +257,8 @@ processor:
   emptyDirMounts:
     - name: shared-data
       mountPath: /code/frontend/build
+    - name: staticfiles
+      mountPath: /code/staticfiles
   # -- Security context for the processor container. Default:<br>
   # &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br>
   # &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br>
