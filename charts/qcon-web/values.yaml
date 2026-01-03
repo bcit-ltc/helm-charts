@@ -96,10 +96,10 @@ frontend:
   emptyDirMounts:
     - name: tmp
       mountPath: /tmp
-    - name: shared-data
-      mountPath: /usr/share/nginx/html
+    # - name: shared-data
+    #   mountPath: /usr/share/nginx/html
     - name: staticfiles
-      mountPath: /usr/share/nginx/html/static
+      mountPath: /usr/share/nginx/html
       readOnly: true
   # -- volumeMounts to be added as configMaps. Requires matching configs.
   # @default -- `[]`
@@ -255,8 +255,8 @@ processor:
   # -- volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod.
   # @default -- `[]`
   emptyDirMounts:
-    - name: shared-data
-      mountPath: /code/frontend/build
+    # - name: shared-data
+    #   mountPath: /code/frontend/build
     - name: staticfiles
       mountPath: /code/staticfiles
   # -- Security context for the processor container. Default:<br>
