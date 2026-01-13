@@ -235,7 +235,7 @@ processor:
     # -- Processor image repository
     repository: "bcit-ltc/qcon-web"
     # -- Processor image tag
-    tag: "1.2.8"
+    tag: "1.2.9"
   # -- Number of replicas for the processor
   replicas: 1
   # -- Port on which processor is listening
@@ -243,15 +243,15 @@ processor:
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars: []
-    # - API_HOST: "qcon-api.ltc.bcit.ca"
-    # - API_PORT: "8000"
+  # - API_HOST: "qcon-api.ltc.bcit.ca"
+  # - API_PORT: "8000"
   # Extra annotations to attach to the processor container
   # @default -- `{}`
   annotations: {}
   # -- Create `ConfigMap` resources that are passed to containers using envFrom
   # @default -- `[]`
   configEnvs:
-  - name: "qcon-web-api-config"
+    - name: "qcon-web-api-config"
   # -- volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod.
   # @default -- `[]`
   emptyDirMounts:
