@@ -1,1 +1,12 @@
 {{ include "apps-common.render.configmaps" . }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "apps-common.app.name" . }}-api-config
+  labels:
+{{ include "apps-common.app.labels" . | nindent 4 }}
+data:
+  API_HOST: "qcon-api.ltc.bcit.ca"
+  API_PORT: "8000"

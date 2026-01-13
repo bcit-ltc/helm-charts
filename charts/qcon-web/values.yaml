@@ -242,16 +242,16 @@ processor:
   port: 8000
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
-  extraEnvVars:
-    - API_HOST: "qcon-api.ltc.bcit.ca"
-    - API_PORT: "8000"
+  extraEnvVars: []
+    # - API_HOST: "qcon-api.ltc.bcit.ca"
+    # - API_PORT: "8000"
   # Extra annotations to attach to the processor container
   # @default -- `{}`
   annotations: {}
   # -- Create `ConfigMap` resources that are passed to containers using envFrom
   # @default -- `[]`
-  configEnvs: []
-  # - name: "special-config"
+  configEnvs:
+  - name: "qcon-web-api-config"
   # -- volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod.
   # @default -- `[]`
   emptyDirMounts:
