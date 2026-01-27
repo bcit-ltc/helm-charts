@@ -8,5 +8,5 @@ metadata:
   labels:
 {{ include "apps-common.app.labels" . | nindent 4 }}
 data:
-  API_HOST: "qcon-api.ltc.bcit.ca"
-  API_PORT: "8000"
+  API_HOST: "qcon-api"
+  API_PORT: "8080"
