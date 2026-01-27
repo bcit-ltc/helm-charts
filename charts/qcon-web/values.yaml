@@ -242,7 +242,7 @@ processor:
   port: 8000
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
-  extraEnvVars: []
+  extraEnvVars:
     - API_HOST: "qcon-api.ltc.bcit.ca"
     - API_PORT: "8000"
   # Extra annotations to attach to the processor container
