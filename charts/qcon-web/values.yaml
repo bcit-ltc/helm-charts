@@ -243,8 +243,8 @@ processor:
   # -- List of extra environment variables that are set literally.
   # @default -- `[]`
   extraEnvVars: []
-  - API_HOST: "qcon-api.ltc.bcit.ca"
-  - API_PORT: "8000"
+    - API_HOST: "qcon-api.ltc.bcit.ca"
+    - API_PORT: "8000"
   # Extra annotations to attach to the processor container
   # @default -- `{}`
   annotations: {}
