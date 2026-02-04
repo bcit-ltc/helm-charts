@@ -1,0 +1,18 @@
+apiVersion: v2
+appVersion: 1.0.0
+description: action-test is a test repo for github action
+home: https://action-test.ltc.bcit.ca
+icon: https://course-production.ltc.bcit.ca/favicon.ico
+maintainers:
+  - email: ltc_techops@bcit.ca
+    name: BCIT LTC
+    url: https://www.bcit.ca/learning-teaching-centre/
+name: action-test
+sources:
+  - https://github.com/bcit-ltc/
+  - https://github.com/bcit-ltc/action-test
+version: 1.0.0
+dependencies:
+  - name: apps-common
+    version: ">=0.3.4"
+    repository: https://bcit-ltc.github.io/helm-charts
