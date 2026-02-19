@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "apps-common.app.name" . }}
+  labels:
+{{ include "apps-common.app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.processor.replicas | default 1 }}
+  selector:
+    matchLabels:
+{{ include "apps-common.app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+{{ include "apps-common.app.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "haproxy-operator.serviceAccountName" . }}
+      containers:
+        - name: manager
+          image: "{{ include "haproxy-operator.image" . }}"
+          imagePullPolicy: {{ include "haproxy-operator.imagePullPolicy" . }}
+          args:
+            - "--mode=k8s"
+            {{- with .Values.watchNamespace }}
+            {{- if ne . "" }}
+            - "--namespace={{ . }}"
+            {{- end }}
+            {{- end }}
+            {{- with .Values.secretName }}
+            {{- if ne . "" }}
+            - "--secret-name={{ . }}"
+            {{- end }}
+            {{- end }}
+            {{- with .Values.secretKey }}
+            {{- if ne . "" }}
+            - "--secret-key={{ . }}"
+            {{- end }}
+            {{- end }}
+            {{- with .Values.dataplane.url }}
+            {{- if ne . "" }}
+            - "--dataplane-url={{ . }}"
+            {{- end }}
+            {{- end }}
+          env:
+            {{- if .Values.mtls.enabled }}
+            - name: DATAPLANE_CA_CERT
+              value: {{ printf "%s/%s" .Values.mtls.mountPath .Values.mtls.caKey | quote }}
+            - name: DATAPLANE_CLIENT_CERT
+              value: {{ printf "%s/%s" .Values.mtls.mountPath .Values.mtls.certKey | quote }}
+            - name: DATAPLANE_CLIENT_KEY
+              value: {{ printf "%s/%s" .Values.mtls.mountPath .Values.mtls.keyKey | quote }}
+            {{- end }}
+          ports:
+            - name: health
+              containerPort: 8081
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: health
+          resources:
+{{- $res := (default dict .Values.processor.resources) -}}
+{{- if not (empty $res) }}
+{{ toYaml $res | nindent 12 }}
+{{- else }}
+{{ toYaml (default dict .Values.resources) | nindent 12 }}
+{{- end }}
+          {{- if .Values.mtls.enabled }}
+          volumeMounts:
+            - name: dataplane-mtls
+              mountPath: {{ .Values.mtls.mountPath | quote }}
+              readOnly: true
+          {{- end }}
+      {{- if .Values.mtls.enabled }}
+      volumes:
+        - name: dataplane-mtls
+          secret:
+            secretName: {{ .Values.mtls.secretName | quote }}
+            items:
+              - key: {{ .Values.mtls.caKey | quote }}
+                path: {{ .Values.mtls.caKey | quote }}
+              - key: {{ .Values.mtls.certKey | quote }}
+                path: {{ .Values.mtls.certKey | quote }}
+              - key: {{ .Values.mtls.keyKey | quote }}
+                path: {{ .Values.mtls.keyKey | quote }}
+      {{- end }}
+      {{- include "apps-common.imagePullSecrets" . | nindent 6 }}

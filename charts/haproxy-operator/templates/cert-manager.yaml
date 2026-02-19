@@ -1,0 +1,43 @@
+{{- if and .Values.mtls.enabled .Values.mtls.certManager.enabled -}}
+{{- $issuerKind := (.Values.mtls.certManager.issuer.kind | default "Issuer") -}}
+---
+apiVersion: cert-manager.io/v1
+kind: {{ $issuerKind }}
+metadata:
+  name: {{ .Values.mtls.certManager.issuer.name | quote }}
+  labels:
+{{ include "apps-common.app.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.mtls.certManager.issuer.selfSigned }}
+  selfSigned: {}
+  {{- else }}
+  ca:
+    secretName: {{ required "mtls.certManager.issuer.caSecretName is required when selfSigned is false" .Values.mtls.certManager.issuer.caSecretName | quote }}
+  {{- end }}
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.mtls.certManager.certificateName | quote }}
+  labels:
+{{ include "apps-common.app.labels" . | nindent 4 }}
+spec:
+  secretName: {{ .Values.mtls.secretName | quote }}
+  {{- with .Values.mtls.certManager.commonName }}
+  commonName: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.mtls.certManager.dnsNames }}
+  dnsNames:
+{{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.mtls.certManager.uris }}
+  uris:
+{{ toYaml . | nindent 4 }}
+  {{- end }}
+  issuerRef:
+    name: {{ .Values.mtls.certManager.issuer.name | quote }}
+    kind: {{ $issuerKind | quote }}
+  usages:
+    - client auth
+{{- end }}

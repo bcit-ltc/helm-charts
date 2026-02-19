@@ -1,0 +1,97 @@
+# SPDX-License-Identifier: MPL-2.0
+
+# Global configuration settings
+global:
+  # -- Authoritative name
+  name: "haproxy-operator"
+  imagePullSecrets: []
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 600
+
+# -- Configuration for the service account
+# @default -- `{}`
+serviceAccount:
+  # -- Enable or disable service account creation.
+  create: true
+  # -- Name of the service account to create. If empty uses global.name
+  name: ""
+  # Extra annotations to attach to the service account
+  annotations: {}
+
+# -- Security context for the pod template
+# @default --
+#   `runAsNonRoot: true`
+#   `runAsGroup: 101`
+#   `runAsUser: 101`
+#   `fsGroup: 101`
+# - Set to `null` to disable
+securityContext:
+  pod: {}
+
+# -- Main operator container configuration (uses apps-common processor schema)
+# @default -- `{}`
+processor:
+  image:
+    # -- Processor image default pull policy
+    pullPolicy: IfNotPresent
+    # -- Processor image registry
+    registry: ""
+    # -- Processor image repository
+    repository: "haproxy-operator"
+    # -- Processor image tag
+    tag: "dev"
+  # -- Number of replicas for the operator
+  replicas: 1
+  # -- Resource requests/limits
+  resources: {}
+
+# Operator configuration
+# -- Namespace to watch. Empty = all namespaces.
+watchNamespace: ""
+# -- Name of the Secret containing HAProxy config (in operator namespace).
+secretName: haproxy-config
+# -- Key name within the HAProxy config Secret.
+secretKey: haproxy.cfg
+
+# Data plane configuration (mTLS preferred; basic auth removed)
+dataplane:
+  # -- Data plane API URL
+  url: ""
+
+# mTLS configuration (cert-manager managed Secret)
+mtls:
+  # -- Enable mounting mTLS certs from a Secret
+  enabled: true
+  # -- Secret name containing the mTLS assets
+  secretName: haproxy-dataplane-mtls
+  # -- Secret key for CA certificate
+  caKey: ca.crt
+  # -- Secret key for client certificate
+  certKey: tls.crt
+  # -- Secret key for client private key
+  keyKey: tls.key
+  # -- Mount path for mTLS assets
+  mountPath: /etc/haproxy-operator/dataplane
+
+  # cert-manager configuration for provisioning the mTLS Secret
+  certManager:
+    # -- Enable cert-manager Certificate/Issuer resources
+    enabled: true
+    # -- Name for the Certificate resource
+    certificateName: haproxy-dataplane-mtls
+    # -- Common Name for the issued certificate
+    commonName: haproxy-dataplane
+    # -- DNS names to include on the certificate (optional)
+    dnsNames: []
+    # -- URI SANs (optional)
+    uris: []
+    # -- Issuer configuration
+    issuer:
+      # -- Issuer name to create/use
+      name: haproxy-dataplane-mtls
+      # -- Issuer kind: Issuer or ClusterIssuer
+      kind: Issuer
+      # -- Use self-signed issuer (true) or CA issuer (false)
+      selfSigned: true
+      # -- If using CA issuer, provide existing CA Secret name
+      caSecretName: ""
