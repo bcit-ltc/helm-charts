@@ -1,0 +1,37 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "apps-common.app.name" . }}-db
+  labels:
+{{ include "apps-common.app.labels" . | nindent 4 }}
+spec:
+  instances: {{ .Values.cnpg.instances }}
+  imageName: {{ .Values.cnpg.imageName }}
+
+  bootstrap:
+    initdb:
+      database: {{ .Values.cnpg.database }}
+      owner: {{ .Values.cnpg.owner }}
+      secret:
+        name: {{ include "apps-common.app.name" . }}-db-bootstrap
+      postInitApplicationSQL:
+        - GRANT ALL ON SCHEMA public TO {{ .Values.cnpg.owner | quote }}
+        - ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON TABLES TO {{ .Values.cnpg.owner | quote }}
+        - ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON SEQUENCES TO {{ .Values.cnpg.owner | quote }}
+      postInitApplicationSQLRefs:
+        configMapRefs:
+          - name: {{ include "apps-common.app.name" . }}-initdb
+            key: init.sql
+          - name: {{ include "apps-common.app.name" . }}-initdb
+            key: seed.sql
+
+  superuserSecret:
+    name: {{ include "apps-common.app.name" . }}-db-superuser-bootstrap
+
+  storage:
+    storageClass: {{ .Values.cnpg.storage.storageClass }}
+    size: {{ .Values.cnpg.storage.size }}
+
+  {{- if .Values.cnpg.enableSuperuserAccess }}
+  enableSuperuserAccess: true
+  {{- end }}

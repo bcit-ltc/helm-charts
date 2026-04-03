@@ -1,0 +1,18 @@
+apiVersion: v2
+appVersion: 1.5.0
+description: Backend API for the Corgi
+home: https://corgi-backend.tlu.bcit.ca
+icon: https://course-production.tlu.bcit.ca/favicon.ico
+maintainers:
+  - email: tlu_techops@bcit.ca
+    name: BCIT TLU
+    url: https://www.bcit.ca/learning-teaching-centre/
+name: corgi-backend
+sources:
+  - https://github.com/bcit-tlu/
+  - https://github.com/bcit-tlu/corgi-backend
+version: 1.5.0
+dependencies:
+  - name: apps-common
+    version: ">=0.3.4"
+    repository: https://bcit-tlu.github.io/helm-charts

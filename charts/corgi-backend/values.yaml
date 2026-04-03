@@ -1,0 +1,138 @@
+# SPDX-License-Identifier: MPL-2.0
+
+# Global configuration settings
+global:
+  # -- Authoritative name
+  name: "corgi-backend"
+  imagePullSecrets: []
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 600
+# -- Configuration for the service account
+# @default -- `{}`
+serviceAccount:
+  # -- Enable or disable service account creation.
+  create: true
+  # -- Name of the service account to create. If empty uses global.name
+  name: ""
+  # Extra annotations to attach to the service account
+  annotations: {}
+# -- Enables a service for the app
+# @default -- `{}`
+service:
+  # -- Enable or disable service components.
+  enabled: true
+  # -- Service type: by default, connect to the app using an internal cluster IP
+  type: ClusterIP
+  # -- Port on which the app is listening
+  port: 8000
+  # -- Target port to which the service should be mapped to
+  targetPort: 8000
+  # Extra annotations to attach to the service
+  annotations: {}
+# -- Security context for the pod template<br>
+# @default --
+#   &nbsp;&nbsp;`runAsNonRoot: true`<br>
+#   &nbsp;&nbsp;`runAsGroup: 101`<br>
+#   &nbsp;&nbsp;`runAsUser: 101`<br>
+#   &nbsp;&nbsp;`fsGroup: 101`<br>
+# - Set to `null` to disable
+securityContext:
+  pod: null
+# -- Main "frontend" configuration
+# @default -- `{}`
+frontend:
+  # -- Enable or disable frontend components.
+  enabled: false
+# -- Main "backend" configuration
+# @default -- `{}`
+processor:
+  # -- Enable or disable processor components.
+  enabled: true
+  image:
+    # -- Processor image default pull policy
+    pullPolicy: IfNotPresent
+    # -- Processor imageregistry
+    registry: "ghcr.io"
+    # -- Processor image repository
+    repository: "bcit-tlu/corgi/backend"
+    # -- Processor image tag
+    tag: "1.0.0"
+  # -- Number of replicas for the processor
+  replicas: 1
+  # -- Port on which processor is listening
+  port: 8000
+  # -- List of extra environment variables that are set literally.
+  # @default -- `[]`
+  extraEnvVars:
+    - SOURCE_IMAGES_DIR: "/data/source_images"
+    - TILES_DIR: "/data/tiles"
+    - GITHUB_REPO: "https://github.com/bcit-tlu/corgi"
+  # Extra annotations to attach to the processor container
+  # @default -- `{}`
+  annotations: {}
+  # -- Create `ConfigMap` resources that are passed to containers using envFrom
+  # @default -- `[]`
+  configEnvs: []
+  # - name: "special-config"
+  # -- volumeMounts for the processor container that also create corresponding emptyDir volumes in the pod.
+  # @default -- `[]`
+  emptyDirMounts: []
+  # - name: shared-data
+  #   mountPath: /var/www/html
+  # -- Security context for the processor container. Default:<br>
+  # &nbsp;&nbsp;`readOnlyRootFilesystem: true`<br>
+  # &nbsp;&nbsp;`allowPrivilegeEscalation: false`<br>
+  # &nbsp;&nbsp;`capabilities:`<br>
+  # &nbsp;&nbsp;&nbsp;&nbsp;`drop`:<br>
+  # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`- ALL`<br>
+  # - Set to `null` to disable
+  securityContext:
+    container: null
+  # -- volumeMounts to be added as configMaps. Requires matching configs.
+  # @default -- `[]`
+  configMounts: []
+  # - name: php-ini
+  #   mountPath: /usr/local/etc/php/conf.d
+  #   data:
+  #     php.ini: |-
+  #       upload_max_filesize=4G
+  #       post_max_size=6G
+  #       memory_limit=8G
+persistence:
+  enabled: true
+  storageClass: longhorn
+  size: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  # -- volumeMounts to be added as secrets
+  # @default -- `[]`
+  secretMounts: []
+# -- Creates an ingress for external access
+# @default -- `{}`
+ingress: {}
+
+# Stable JWT signing secret shared across all Uvicorn workers.
+# Leave blank to auto-generate a random value at install time.
+jwtSecret: ""
+
+# CloudNative-PG database cluster
+cnpg:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:16
+  database: corgi
+  owner: corgi
+  devPassword: password1234
+  enableSuperuserAccess: true
+  storage:
+    storageClass: longhorn
+    size: 10Gi
+
+# Vault Secrets Operator integration
+vault:
+  enabled: false
+  kvMount: secret
+  authRef: vault-auth
+  refreshAfter: 1h
+  dbAppSecretPath: corgi/db-app
+  dbSuperuserSecretPath: corgi/db-superuser
+  githubPatSecretPath: corgi/github-pat
