@@ -1,4 +1,10 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
+# 🧊 This project has been archived. In our new org, [bcit-tlu](https://github.com/bcit-tlu/), charts are located within app repositories.
+
+---
+
+The code remains available for historic purposes.
+
 # Helm Charts
 
 Helm charts for apps and services developed and maintained by BCIT's Learning and Teaching Centre.
